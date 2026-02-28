@@ -259,7 +259,7 @@ Logs client-side analytics events and appends them to local JSONL storage (`.dat
 
 ### GET `/api/activity`
 
-Returns last 100 events sorted by latest first.
+Returns a JSON list of the last 100 events sorted by latest first.
 
 ### GET `/api/verify/[id]`
 

@@ -3,5 +3,5 @@ import { readRecentActivityEvents } from '@/lib/activity-store'
 
 export async function GET() {
   const events = await readRecentActivityEvents(100)
-  return NextResponse.json({ events })
+  return NextResponse.json(events)
 }

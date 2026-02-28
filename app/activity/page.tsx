@@ -14,7 +14,7 @@ export default function ActivityPage() {
   useEffect(() => {
     fetch('/api/activity')
       .then((res) => res.json())
-      .then((data) => setEvents(data.events || []))
+      .then((data) => setEvents(Array.isArray(data) ? data : data.events || []))
       .catch(() => setEvents([]))
   }, [])
 
