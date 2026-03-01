@@ -1,80 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { buildVerifyPayload, mapVerificationResponse } from '@/lib/verification'
+
+const VERIFY_API_URL = process.env.VERIFY_API_URL || 'https://api.authichain.io/api/verify'
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const rawInput = params.id
+
   try {
-    const supabase = await createClient()
-    const truemarkId = params.id
+    const payload = buildVerifyPayload(rawInput)
+    const upstream = await fetch(VERIFY_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      cache: 'no-store',
+    })
+    const data = await upstream.json().catch(() => ({}))
 
-    // Get product by TrueMark ID (public access)
-    const { data: product, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('truemark_id', truemarkId)
-      .single()
-
-    if (error || !product) {
+    if (!upstream.ok) {
       return NextResponse.json(
         {
           success: false,
-          result: 'counterfeit',
-          message: 'Product not found in blockchain registry',
+          message: data?.message || 'Verification request failed',
+          ...mapVerificationResponse(data, rawInput),
         },
-        { status: 200 } // Return 200 even for not found to allow verification page to show result
+        { status: 200 }
       )
     }
 
-    // Simulate TrueMark™ pattern verification
-    const isAuthentic = product.is_registered && product.truemark_data
-
-    // Record the scan
-    const userAgent = request.headers.get('user-agent') || 'Unknown'
-    const ip = request.headers.get('x-forwarded-for') ||
-               request.headers.get('x-real-ip') ||
-               'Unknown'
-
-    await supabase.from('scans').insert({
-      product_id: product.id,
-      scan_result: isAuthentic ? 'authentic' : 'counterfeit',
-      confidence: isAuthentic ? 0.98 : 0.75,
-      ip_address: ip,
-      user_agent: userAgent,
-    })
-
-    if (isAuthentic) {
-      return NextResponse.json({
-        success: true,
-        result: 'authentic',
-        product: {
-          name: product.name,
-          brand: product.brand,
-          category: product.category,
-          description: product.description,
-          truemark_id: product.truemark_id,
-          blockchain_tx_hash: product.blockchain_tx_hash,
-          registered_at: product.created_at,
-          // AI AutoFlow data
-          industry_id: product.industry_id,
-          workflow: product.workflow,
-          story: product.story,
-          features: product.features,
-          authenticity_features: product.authenticity_features,
-          ai_confidence: product.confidence,
-        },
-        confidence: 0.98,
-        message: 'Product verified as authentic',
-      })
-    } else {
-      return NextResponse.json({
-        success: false,
-        result: 'counterfeit',
-        message: 'Product verification failed',
-        confidence: 0.75,
-      })
-    }
+    return NextResponse.json(mapVerificationResponse(data, rawInput), { status: 200 })
   } catch (error) {
     console.error('Verification error:', error)
     return NextResponse.json(

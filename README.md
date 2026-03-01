@@ -99,6 +99,9 @@ cd AuthiChain
 
 ```bash
 npm install
+
+# If Git Bash on Windows has local proxy vars set, unset them first:
+unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy
 ```
 
 ### 3. Set Up Supabase
@@ -120,6 +123,15 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 # OpenAI
 OPENAI_API_KEY=your-openai-api-key
+
+# QRON verification proxy target
+VERIFY_API_URL=https://api.authichain.io/api/verify
+
+# Optional analytics forward target
+ANALYTICS_API_URL=
+
+# Optional local QR fallback (requires public/jsQR.js vendored file)
+NEXT_PUBLIC_ENABLE_QR_FALLBACK=false
 ```
 
 ### 5. Run the Development Server
@@ -163,9 +175,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### 5. Verification Page (`/verify`)
 
 - Public product verification (no auth required)
-- TrueMark™ ID search
+- Live QR scanning (native `BarcodeDetector`)
+- Graceful no-decoder fallback mode when browser QR APIs are unavailable
+- Optional local jsQR fallback when `NEXT_PUBLIC_ENABLE_QR_FALLBACK=true` and `/public/jsQR.js` is provided
+- TrueMark™/QR/token verification proxied through AuthiChain verify API
 - Authenticity results with confidence score
-- Blockchain information display
+- Share Verified flow (Web Share API with clipboard fallback)
+- Live activity log link (`/activity`)
 
 ### 6. Authentication Pages
 
@@ -216,6 +232,38 @@ Register product on blockchain
   "message": "Product successfully registered on blockchain"
 }
 ```
+
+### POST `/api/verify`
+
+Proxy verification endpoint for the QRON demo.
+
+**Request Body:**
+```json
+{
+  "raw": "https://authichain.io/verify/PROD-12345"
+}
+```
+
+**Behavior:**
+- URL input -> `{ "qrCode": raw }`
+- `PROD-*`/identifier input -> `{ "productIdentifier": normalized }`
+- Numeric input -> `{ "tokenId": number }`
+- Fallback -> `{ "qrCode": raw }`
+
+**Response fields consumed by UI:**
+- `authentic`
+- `trust_score`
+- `confidence`
+- `qron_id`
+- `actions`
+
+### POST `/api/event`
+
+Logs client-side analytics events and appends them to local JSONL storage (`.data/activity-events.jsonl`). Optionally forwards to `ANALYTICS_API_URL`.
+
+### GET `/api/activity`
+
+Returns a JSON list of the last 100 events sorted by latest first.
 
 ### GET `/api/verify/[id]`
 
@@ -385,3 +433,24 @@ For support, email support@authichain.com or open an issue on GitHub.
 ---
 
 Made with ❤️ by the AuthiChain Team
+
+
+## Manual Verification Checklist
+
+- [ ] Page loads over HTTPS (`/verify`).
+- [ ] Camera starts successfully from the QR scanner card.
+- [ ] QR detection triggers verification request automatically when BarcodeDetector is supported.
+- [ ] Verification calls AuthiChain verify endpoint through `/api/verify` and renders `authentic`, `trust_score`, `confidence`, `qron_id`, and `actions`.
+- [ ] Share Verified works (native Web Share API when available, clipboard fallback otherwise).
+- [ ] `/api/activity` returns JSON including the latest analytics events.
+
+
+### Optional QR Fallback (No npm install)
+
+To enable fallback scanning without npm installs:
+
+1. Vendor a browser-ready `jsQR` build into `public/jsQR.js`.
+2. Set `NEXT_PUBLIC_ENABLE_QR_FALLBACK=true`.
+3. Restart the app.
+
+If `BarcodeDetector` is unavailable and `jsQR` is missing, the UI will explain that manual entry is still available.

@@ -2,30 +2,44 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useRef, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
+import Script from "next/script"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { Shield, Search, CheckCircle, XCircle, Loader2, ExternalLink } from "lucide-react"
+import { Shield, Search, CheckCircle, XCircle, Loader2, Camera, Share2 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { MicroscopicAnalysis } from "@/components/microscopic-analysis"
-import { ConfidenceScore } from "@/components/confidence-score"
-import { WorkflowTimeline } from "@/components/workflow-timeline"
-import { AIStory } from "@/components/ai-story"
-import { VeChainBadge } from "@/components/vechain-badge"
-import { NFTCertificate } from "@/components/nft-certificate"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
-// Component that handles search params - must be wrapped in Suspense
+type VerifyResult = {
+  authentic: boolean
+  qron_id: string
+  trust_score: number
+  tokenId: number | null
+  confidence: 'High' | 'Medium' | 'Low'
+  actions: string[]
+  message: string
+  verifiedAt: string
+}
+
+declare global {
+  interface Window {
+    BarcodeDetector?: new (options?: { formats: string[] }) => {
+      detect: (source: ImageBitmapSource) => Promise<Array<{ rawValue?: string }>>
+    }
+    jsQR?: (data: Uint8ClampedArray, width: number, height: number) => { data: string } | null
+  }
+}
+
 function SearchParamsHandler({ onIdFromParams }: { onIdFromParams: (id: string) => void }) {
   const searchParams = useSearchParams()
   const idFromParams = searchParams.get("id") || ""
 
-  // Pass the ID to parent on mount/update
   useEffect(() => {
     if (idFromParams) {
       onIdFromParams(idFromParams)
@@ -37,59 +51,219 @@ function SearchParamsHandler({ onIdFromParams }: { onIdFromParams: (id: string) 
 
 function VerifyContent() {
   const { toast } = useToast()
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const scanTimerRef = useRef<number | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
 
-  const [truemarkId, setTruemarkId] = useState("")
+  const [inputValue, setInputValue] = useState("")
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<VerifyResult | null>(null)
+  const [cameraReady, setCameraReady] = useState(false)
+  const [detectorSupported, setDetectorSupported] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const [jsQrAvailable, setJsQrAvailable] = useState(false)
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const fallbackEnabled = process.env.NEXT_PUBLIC_ENABLE_QR_FALLBACK === 'true'
 
-    if (!truemarkId.trim()) {
-      toast({
-        title: "Invalid Input",
-        description: "Please enter a TrueMark™ ID.",
-        variant: "destructive",
-      })
-      return
+  const logEvent = useCallback(async (type: string, details?: Record<string, unknown>) => {
+    await fetch('/api/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, details }),
+    }).catch(() => null)
+  }, [])
+
+  const stopCamera = useCallback(() => {
+    if (scanTimerRef.current) {
+      window.clearInterval(scanTimerRef.current)
+      scanTimerRef.current = null
     }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop())
+      streamRef.current = null
+    }
+    setCameraReady(false)
+  }, [])
+
+  const verifyValue = useCallback(async (raw: string) => {
+    if (!raw.trim()) return
 
     setLoading(true)
     setResult(null)
 
     try {
-      const response = await fetch(`/api/verify/${truemarkId}`)
-
-      if (!response.ok && response.status !== 200) {
-        throw new Error("Verification failed")
-      }
-
+      const response = await fetch('/api/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raw }),
+      })
       const data = await response.json()
       setResult(data)
-    } catch (error) {
-      console.error("Verification error:", error)
+
+      if (data.authentic) {
+        await logEvent('verify_success', { qron_id: data.qron_id, trust_score: data.trust_score })
+      } else {
+        await logEvent('verify_failed', { input: raw, message: data?.message })
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'unknown'
+      await logEvent('verify_error', { message })
       toast({
-        title: "Verification Failed",
-        description: "Please check the TrueMark™ ID and try again.",
-        variant: "destructive",
+        title: 'Verification Failed',
+        description: 'Unable to verify right now. Please try again.',
+        variant: 'destructive',
       })
     } finally {
       setLoading(false)
     }
+  }, [logEvent, toast])
+
+  const handleDetectedValue = useCallback(async (value: string) => {
+    setInputValue(value)
+    await logEvent('scan_detected', { value })
+    stopCamera()
+    await verifyValue(value)
+  }, [logEvent, stopCamera, verifyValue])
+
+  const startCamera = useCallback(async () => {
+    await logEvent('camera_init')
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast({ title: 'Camera Unsupported', description: 'Camera access is not available in this browser.', variant: 'destructive' })
+      await logEvent('camera_failed', { reason: 'media_devices_unavailable' })
+      return
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      streamRef.current = stream
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+      }
+      setCameraReady(true)
+      await logEvent('camera_started')
+    } catch (error: unknown) {
+      const reason = error instanceof Error ? error.message : 'unknown'
+      await logEvent('camera_failed', { reason })
+      toast({ title: 'Camera Error', description: 'Could not start camera.', variant: 'destructive' })
+    }
+  }, [logEvent, toast])
+
+  useEffect(() => {
+    const hasWindow = typeof window !== 'undefined'
+    setDetectorSupported(hasWindow && typeof window.BarcodeDetector !== 'undefined')
+    setJsQrAvailable(hasWindow && typeof window.jsQR === 'function')
+    return () => stopCamera()
+  }, [stopCamera])
+
+  useEffect(() => {
+    if (!cameraReady || !videoRef.current) return
+
+    if (detectorSupported && window.BarcodeDetector) {
+      const detector = new window.BarcodeDetector({ formats: ['qr_code'] })
+      scanTimerRef.current = window.setInterval(async () => {
+        if (!videoRef.current) return
+        try {
+          const detected = await detector.detect(videoRef.current)
+          if (detected?.length && detected[0].rawValue) {
+            await handleDetectedValue(String(detected[0].rawValue))
+          }
+        } catch {
+          // ignore intermittent detector failures
+        }
+      }, 700)
+
+      return () => {
+        if (scanTimerRef.current) {
+          window.clearInterval(scanTimerRef.current)
+          scanTimerRef.current = null
+        }
+      }
+    }
+
+    if (fallbackEnabled && window.jsQR) {
+      scanTimerRef.current = window.setInterval(async () => {
+        if (!videoRef.current || !canvasRef.current) return
+
+        const video = videoRef.current
+        const canvas = canvasRef.current
+        if (!video.videoWidth || !video.videoHeight) return
+
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        const context = canvas.getContext('2d', { willReadFrequently: true })
+        if (!context) return
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height)
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+        const decoded = window.jsQR?.(imageData.data, imageData.width, imageData.height)
+
+        if (decoded?.data) {
+          await handleDetectedValue(decoded.data)
+        }
+      }, 700)
+
+      return () => {
+        if (scanTimerRef.current) {
+          window.clearInterval(scanTimerRef.current)
+          scanTimerRef.current = null
+        }
+      }
+    }
+
+    return undefined
+  }, [cameraReady, detectorSupported, fallbackEnabled, handleDetectedValue])
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await verifyValue(inputValue)
   }
 
-  const handleIdFromParams = (id: string) => {
-    setTruemarkId(id)
+  const handleShare = async () => {
+    if (!result) return
+    await logEvent('share_clicked', { qron_id: result.qron_id })
+
+    const shareText = `QRON ${result.qron_id} verified with trust score ${result.trust_score} at ${result.verifiedAt}. ${window.location.href}`
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'AuthiChain Verification',
+          text: shareText,
+          url: window.location.href,
+        })
+      } else {
+        await navigator.clipboard.writeText(shareText)
+        toast({ title: 'Copied', description: 'Verification details copied to clipboard.' })
+      }
+      await logEvent('share_success', { qron_id: result.qron_id })
+    } catch {
+      toast({ title: 'Share cancelled', description: 'No data was shared.' })
+    }
+  }
+
+  const handleReset = async () => {
+    setResult(null)
+    setInputValue('')
+    setShareOpen(false)
+    stopCamera()
+    await logEvent('reset')
+  }
+
+  const handleOpenShare = async () => {
+    setShareOpen(true)
+    await logEvent('share_prompt_shown', { qron_id: result?.qron_id })
   }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* SearchParams Handler - wrapped in Suspense */}
+      {fallbackEnabled && <Script src="/jsQR.js" strategy="afterInteractive" onLoad={() => setJsQrAvailable(typeof window !== 'undefined' && typeof window.jsQR === 'function')} />}
       <Suspense fallback={null}>
-        <SearchParamsHandler onIdFromParams={handleIdFromParams} />
+        <SearchParamsHandler onIdFromParams={setInputValue} />
       </Suspense>
 
-      {/* Navigation */}
       <nav className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
@@ -100,238 +274,114 @@ function VerifyContent() {
         </div>
       </nav>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-4">
-            Verify Product <span className="gradient-text">Authenticity</span>
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            Enter the TrueMark™ ID to verify if a product is authentic
-          </p>
+      <div className="container mx-auto px-4 py-12 max-w-4xl space-y-8">
+        <div className="text-center">
+          <h1 className="text-5xl font-bold mb-4">Live QRON Verification</h1>
+          <p className="text-xl text-muted-foreground">Scan or enter a QRON / TrueMark identifier to verify authenticity.</p>
         </div>
 
-        {/* Search Form */}
-        <Card className="mb-8">
+        <Card>
           <CardHeader>
-            <CardTitle>Enter TrueMark™ ID</CardTitle>
-            <CardDescription>
-              The TrueMark™ ID can be found on the product packaging or certificate
-            </CardDescription>
+            <CardTitle>QR Scanner</CardTitle>
+            <CardDescription>Uses native BarcodeDetector, with optional local jsQR fallback when configured.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <video ref={videoRef} className="w-full rounded-md bg-muted aspect-video" muted playsInline />
+            <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
+            <div className="flex gap-3">
+              <Button type="button" onClick={startCamera} className="flex-1">
+                <Camera className="mr-2 h-4 w-4" /> Start Camera
+              </Button>
+              <Button type="button" variant="outline" onClick={stopCamera}>Stop</Button>
+            </div>
+            {!detectorSupported && !fallbackEnabled && (
+              <p className="text-sm text-muted-foreground">
+                Your browser does not support BarcodeDetector. Optional fallback decoder is disabled. You can still enter code manually.
+              </p>
+            )}
+            {!detectorSupported && fallbackEnabled && !jsQrAvailable && (
+              <p className="text-sm text-muted-foreground">
+                Fallback mode is enabled, but local `/public/jsQR.js` was not found. Add a vendored jsQR file to enable fallback scanning.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Verify</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleVerify} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="truemark">TrueMark™ ID</Label>
-                <Input
-                  id="truemark"
-                  value={truemarkId}
-                  onChange={(e) => setTruemarkId(e.target.value)}
-                  placeholder="e.g., TM-1234567890-ABC12345"
-                  className="font-mono"
-                />
+                <Label htmlFor="qron-input">QR / Product Identifier / Token ID</Label>
+                <Input id="qron-input" value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="https://... or PROD-12345 or 1" className="font-mono" />
               </div>
-              <Button
-                type="submit"
-                disabled={loading}
-                variant="gradient"
-                size="lg"
-                className="w-full"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Verifying...
-                  </>
-                ) : (
-                  <>
-                    <Search className="mr-2 h-4 w-4" />
-                    Verify Product
-                  </>
-                )}
+              <Button type="submit" disabled={loading} variant="gradient" size="lg" className="w-full">
+                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Verifying...</> : <><Search className="mr-2 h-4 w-4" />Verify Product</>}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        {/* Results */}
         {result && (
-          <Card
-            className={`border-2 ${
-              result.result === "authentic"
-                ? "border-green-500"
-                : "border-red-500"
-            }`}
-          >
+          <Card className={`border-2 ${result.authentic ? 'border-green-500' : 'border-red-500'}`}>
             <CardHeader>
               <div className="flex items-center space-x-4">
-                {result.result === "authentic" ? (
-                  <CheckCircle className="h-12 w-12 text-green-500" />
-                ) : (
-                  <XCircle className="h-12 w-12 text-red-500" />
-                )}
+                {result.authentic ? <CheckCircle className="h-12 w-12 text-green-500" /> : <XCircle className="h-12 w-12 text-red-500" />}
                 <div>
-                  <CardTitle className="text-2xl">
-                    {result.result === "authentic"
-                      ? "Product Verified ✓"
-                      : "Verification Failed ✗"}
-                  </CardTitle>
+                  <CardTitle className="text-2xl">{result.authentic ? 'Product Verified ✓' : 'Verification Failed ✗'}</CardTitle>
                   <CardDescription>{result.message}</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {result.result === "authentic" && result.product && (
-                <>
-                  {/* Product Summary */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Product Name</Label>
-                      <p className="text-lg font-semibold">
-                        {result.product.name}
-                      </p>
-                    </div>
-                    {result.product.brand && (
-                      <div>
-                        <Label>Brand</Label>
-                        <p className="text-lg font-semibold">
-                          {result.product.brand}
-                        </p>
-                      </div>
-                    )}
-                    {result.product.category && (
-                      <div>
-                        <Label>Category</Label>
-                        <p className="text-lg">{result.product.category}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {result.product.description && (
-                    <div className="border-t pt-4">
-                      <Label>Description</Label>
-                      <p className="text-muted-foreground mt-2">
-                        {result.product.description}
-                      </p>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {result.result === "counterfeit" && (
-                <div className="space-y-4 text-center">
-                  <p className="text-muted-foreground">
-                    This product could not be verified in our blockchain registry.
-                    It may be counterfeit or the TrueMark™ ID may be incorrect.
-                  </p>
-                  <div className="p-4 bg-red-500/10 rounded-lg">
-                    <p className="text-sm font-medium text-red-500">
-                      ⚠️ Warning: This product may not be authentic
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      If you believe this is an error, please contact the manufacturer
-                      or seller for verification.
-                    </p>
-                  </div>
-                </div>
-              )}
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><Label>QRON ID</Label><p className="font-mono">{result.qron_id}</p></div>
+                <div><Label>Token ID</Label><p>{result.tokenId ?? 'N/A'}</p></div>
+                <div><Label>Trust Score</Label><p>{result.trust_score}</p></div>
+                <div><Label>Confidence</Label><Badge>{result.confidence}</Badge></div>
+              </div>
+              <div>
+                <Label>Actions</Label>
+                <div className="flex flex-wrap gap-2 mt-2">{result.actions?.map((a: string) => <Badge key={a} variant="secondary">{a}</Badge>)}</div>
+              </div>
+              <div className="flex gap-3">
+                {result.authentic && (
+                  <Button type="button" onClick={handleOpenShare}><Share2 className="mr-2 h-4 w-4" />Share Verified</Button>
+                )}
+                <Button type="button" variant="outline" onClick={handleReset}>Reset</Button>
+              </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Enhanced Features - Only show when authentic */}
-        {result && result.result === "authentic" && result.product && (
-          <div className="space-y-6 mt-8">
-            {/* VeChain Badge */}
-            <VeChainBadge
-              transactionHash={result.product.blockchain_tx_hash}
-              verified={true}
-            />
-
-            {/* Grid layout for feature components */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Confidence Score */}
-              <ConfidenceScore score={result.confidence} />
-
-              {/* Microscopic Analysis */}
-              <MicroscopicAnalysis confidence={result.confidence} />
-            </div>
-
-            {/* Workflow Timeline */}
-            <WorkflowTimeline productName={result.product.name} />
-
-            {/* AI Story */}
-            <AIStory
-              productName={result.product.name}
-              brand={result.product.brand}
-              category={result.product.category}
-            />
-
-            {/* NFT Certificate */}
-            <NFTCertificate
-              productName={result.product.name}
-              truemarkId={result.product.truemark_id}
-              brand={result.product.brand}
-              issuedDate={result.product.registered_at}
-            />
-          </div>
-        )}
-
-        {/* How to Find TrueMark™ ID */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>How to Find Your TrueMark™ ID</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm shrink-0 mt-0.5">
-                  1
-                </div>
-                <div>
-                  <p className="font-medium">Check the product packaging</p>
-                  <p className="text-sm text-muted-foreground">
-                    Look for a TrueMark™ sticker or label on the packaging
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm shrink-0 mt-0.5">
-                  2
-                </div>
-                <div>
-                  <p className="font-medium">Scan the QR code</p>
-                  <p className="text-sm text-muted-foreground">
-                    If available, scan the QR code to automatically fill in the ID
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm shrink-0 mt-0.5">
-                  3
-                </div>
-                <div>
-                  <p className="font-medium">Enter the ID manually</p>
-                  <p className="text-sm text-muted-foreground">
-                    Type the TrueMark™ ID exactly as it appears on the product
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <p className="text-sm text-muted-foreground text-center">
+          <Link href="/activity" className="underline">Live activity log</Link>
+        </p>
       </div>
+
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Verified</DialogTitle>
+            <DialogDescription>Share this verification with your network.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 text-sm">
+            <p><span className="font-medium">QRON ID:</span> {result?.qron_id}</p>
+            <p><span className="font-medium">Trust Score:</span> {result?.trust_score}</p>
+            <p><span className="font-medium">Verified:</span> {result?.verifiedAt}</p>
+          </div>
+          <Button onClick={handleShare}>Share now</Button>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
 
 export default function VerifyPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    }>
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
       <VerifyContent />
     </Suspense>
   )
