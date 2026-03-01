@@ -7,12 +7,21 @@ export type ActivityEvent = {
   details?: Record<string, unknown>
 }
 
-const DATA_DIR = path.join(process.cwd(), '.data')
+// Use /tmp in serverless environments (Vercel/AWS Lambda) where cwd() is read-only.
+// Fall back to cwd()/.data in local development.
+const DATA_DIR = process.env.VERCEL
+  ? '/tmp/authichain-data'
+  : path.join(process.cwd(), '.data')
 const EVENTS_FILE = path.join(DATA_DIR, 'activity-events.jsonl')
 
 export async function writeActivityEvent(event: ActivityEvent) {
-  await mkdir(DATA_DIR, { recursive: true })
-  await appendFile(EVENTS_FILE, `${JSON.stringify(event)}\n`, 'utf8')
+  try {
+    await mkdir(DATA_DIR, { recursive: true })
+    await appendFile(EVENTS_FILE, `${JSON.stringify(event)}\n`, 'utf8')
+  } catch (err) {
+    // Log but do not throw - event logging should never break the request path
+    console.warn('Failed to write activity event:', err)
+  }
 }
 
 export async function readRecentActivityEvents(limit = 100): Promise<ActivityEvent[]> {
@@ -28,9 +37,9 @@ export async function readRecentActivityEvents(limit = 100): Promise<ActivityEve
           return null
         }
       })
-      .filter((item): item is ActivityEvent => Boolean(item))
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, limit)
+      .filter((e): e is ActivityEvent => e !== null)
+      .slice(-limit)
+      .reverse()
   } catch {
     return []
   }
