@@ -129,6 +129,9 @@ VERIFY_API_URL=https://api.authichain.io/api/verify
 
 # Optional analytics forward target
 ANALYTICS_API_URL=
+
+# Optional local QR fallback (requires public/jsQR.js vendored file)
+NEXT_PUBLIC_ENABLE_QR_FALLBACK=false
 ```
 
 ### 5. Run the Development Server
@@ -174,6 +177,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - Public product verification (no auth required)
 - Live QR scanning (native `BarcodeDetector`)
 - Graceful no-decoder fallback mode when browser QR APIs are unavailable
+- Optional local jsQR fallback when `NEXT_PUBLIC_ENABLE_QR_FALLBACK=true` and `/public/jsQR.js` is provided
 - TrueMark™/QR/token verification proxied through AuthiChain verify API
 - Authenticity results with confidence score
 - Share Verified flow (Web Share API with clipboard fallback)
@@ -439,3 +443,14 @@ Made with ❤️ by the AuthiChain Team
 - [ ] Verification calls AuthiChain verify endpoint through `/api/verify` and renders `authentic`, `trust_score`, `confidence`, `qron_id`, and `actions`.
 - [ ] Share Verified works (native Web Share API when available, clipboard fallback otherwise).
 - [ ] `/api/activity` returns JSON including the latest analytics events.
+
+
+### Optional QR Fallback (No npm install)
+
+To enable fallback scanning without npm installs:
+
+1. Vendor a browser-ready `jsQR` build into `public/jsQR.js`.
+2. Set `NEXT_PUBLIC_ENABLE_QR_FALLBACK=true`.
+3. Restart the app.
+
+If `BarcodeDetector` is unavailable and `jsQR` is missing, the UI will explain that manual entry is still available.

@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect, Suspense, useRef, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
+import Script from "next/script"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -15,9 +16,23 @@ import { Shield, Search, CheckCircle, XCircle, Loader2, Camera, Share2 } from "l
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
+type VerifyResult = {
+  authentic: boolean
+  qron_id: string
+  trust_score: number
+  tokenId: number | null
+  confidence: 'High' | 'Medium' | 'Low'
+  actions: string[]
+  message: string
+  verifiedAt: string
+}
+
 declare global {
   interface Window {
-    BarcodeDetector?: any
+    BarcodeDetector?: new (options?: { formats: string[] }) => {
+      detect: (source: ImageBitmapSource) => Promise<Array<{ rawValue?: string }>>
+    }
+    jsQR?: (data: Uint8ClampedArray, width: number, height: number) => { data: string } | null
   }
 }
 
@@ -37,15 +52,19 @@ function SearchParamsHandler({ onIdFromParams }: { onIdFromParams: (id: string) 
 function VerifyContent() {
   const { toast } = useToast()
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const scanTimerRef = useRef<number | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
   const [inputValue, setInputValue] = useState("")
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<VerifyResult | null>(null)
   const [cameraReady, setCameraReady] = useState(false)
   const [detectorSupported, setDetectorSupported] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
+  const [jsQrAvailable, setJsQrAvailable] = useState(false)
+
+  const fallbackEnabled = process.env.NEXT_PUBLIC_ENABLE_QR_FALLBACK === 'true'
 
   const logEvent = useCallback(async (type: string, details?: Record<string, unknown>) => {
     await fetch('/api/event', {
@@ -87,8 +106,9 @@ function VerifyContent() {
       } else {
         await logEvent('verify_failed', { input: raw, message: data?.message })
       }
-    } catch (error: any) {
-      await logEvent('verify_error', { message: error?.message || 'unknown' })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'unknown'
+      await logEvent('verify_error', { message })
       toast({
         title: 'Verification Failed',
         description: 'Unable to verify right now. Please try again.',
@@ -98,6 +118,13 @@ function VerifyContent() {
       setLoading(false)
     }
   }, [logEvent, toast])
+
+  const handleDetectedValue = useCallback(async (value: string) => {
+    setInputValue(value)
+    await logEvent('scan_detected', { value })
+    stopCamera()
+    await verifyValue(value)
+  }, [logEvent, stopCamera, verifyValue])
 
   const startCamera = useCallback(async () => {
     await logEvent('camera_init')
@@ -117,46 +144,77 @@ function VerifyContent() {
       }
       setCameraReady(true)
       await logEvent('camera_started')
-    } catch (error: any) {
-      await logEvent('camera_failed', { reason: error?.message || 'unknown' })
+    } catch (error: unknown) {
+      const reason = error instanceof Error ? error.message : 'unknown'
+      await logEvent('camera_failed', { reason })
       toast({ title: 'Camera Error', description: 'Could not start camera.', variant: 'destructive' })
     }
   }, [logEvent, toast])
 
   useEffect(() => {
-    setDetectorSupported(typeof window !== 'undefined' && typeof window.BarcodeDetector !== 'undefined')
+    const hasWindow = typeof window !== 'undefined'
+    setDetectorSupported(hasWindow && typeof window.BarcodeDetector !== 'undefined')
+    setJsQrAvailable(hasWindow && typeof window.jsQR === 'function')
     return () => stopCamera()
   }, [stopCamera])
 
   useEffect(() => {
-    if (!cameraReady || !videoRef.current || !detectorSupported) return
+    if (!cameraReady || !videoRef.current) return
 
-    const detector = new window.BarcodeDetector({ formats: ['qr_code'] })
-    scanTimerRef.current = window.setInterval(async () => {
-      if (!videoRef.current) return
-      try {
-        const detected = await detector.detect(videoRef.current)
-        if (detected?.length) {
-          const value = String(detected[0].rawValue || '')
-          if (value) {
-            setInputValue(value)
-            await logEvent('scan_detected', { value })
-            stopCamera()
-            void verifyValue(value)
+    if (detectorSupported && window.BarcodeDetector) {
+      const detector = new window.BarcodeDetector({ formats: ['qr_code'] })
+      scanTimerRef.current = window.setInterval(async () => {
+        if (!videoRef.current) return
+        try {
+          const detected = await detector.detect(videoRef.current)
+          if (detected?.length && detected[0].rawValue) {
+            await handleDetectedValue(String(detected[0].rawValue))
           }
+        } catch {
+          // ignore intermittent detector failures
         }
-      } catch {
-        // Ignore intermittent detector errors
-      }
-    }, 700)
+      }, 700)
 
-    return () => {
-      if (scanTimerRef.current) {
-        window.clearInterval(scanTimerRef.current)
-        scanTimerRef.current = null
+      return () => {
+        if (scanTimerRef.current) {
+          window.clearInterval(scanTimerRef.current)
+          scanTimerRef.current = null
+        }
       }
     }
-  }, [cameraReady, detectorSupported, verifyValue, stopCamera, logEvent])
+
+    if (fallbackEnabled && window.jsQR) {
+      scanTimerRef.current = window.setInterval(async () => {
+        if (!videoRef.current || !canvasRef.current) return
+
+        const video = videoRef.current
+        const canvas = canvasRef.current
+        if (!video.videoWidth || !video.videoHeight) return
+
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        const context = canvas.getContext('2d', { willReadFrequently: true })
+        if (!context) return
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height)
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+        const decoded = window.jsQR?.(imageData.data, imageData.width, imageData.height)
+
+        if (decoded?.data) {
+          await handleDetectedValue(decoded.data)
+        }
+      }, 700)
+
+      return () => {
+        if (scanTimerRef.current) {
+          window.clearInterval(scanTimerRef.current)
+          scanTimerRef.current = null
+        }
+      }
+    }
+
+    return undefined
+  }, [cameraReady, detectorSupported, fallbackEnabled, handleDetectedValue])
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -201,6 +259,7 @@ function VerifyContent() {
 
   return (
     <div className="min-h-screen bg-background">
+      {fallbackEnabled && <Script src="/jsQR.js" strategy="afterInteractive" onLoad={() => setJsQrAvailable(typeof window !== 'undefined' && typeof window.jsQR === 'function')} />}
       <Suspense fallback={null}>
         <SearchParamsHandler onIdFromParams={setInputValue} />
       </Suspense>
@@ -224,19 +283,25 @@ function VerifyContent() {
         <Card>
           <CardHeader>
             <CardTitle>QR Scanner</CardTitle>
-            <CardDescription>Uses native BarcodeDetector when available.</CardDescription>
+            <CardDescription>Uses native BarcodeDetector, with optional local jsQR fallback when configured.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <video ref={videoRef} className="w-full rounded-md bg-muted aspect-video" muted playsInline />
+            <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
             <div className="flex gap-3">
               <Button type="button" onClick={startCamera} className="flex-1">
                 <Camera className="mr-2 h-4 w-4" /> Start Camera
               </Button>
               <Button type="button" variant="outline" onClick={stopCamera}>Stop</Button>
             </div>
-            {!detectorSupported && (
+            {!detectorSupported && !fallbackEnabled && (
               <p className="text-sm text-muted-foreground">
-                Your browser does not support BarcodeDetector. Fallback decoder is disabled in this build (no npm-required QR dependency mode). Enter code manually.
+                Your browser does not support BarcodeDetector. Optional fallback decoder is disabled. You can still enter code manually.
+              </p>
+            )}
+            {!detectorSupported && fallbackEnabled && !jsQrAvailable && (
+              <p className="text-sm text-muted-foreground">
+                Fallback mode is enabled, but local `/public/jsQR.js` was not found. Add a vendored jsQR file to enable fallback scanning.
               </p>
             )}
           </CardContent>
