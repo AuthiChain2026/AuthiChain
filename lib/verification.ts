@@ -28,14 +28,30 @@ export function normalizeProductIdentifier(value: string): string {
 export function buildVerifyPayload(rawInput: string): VerifyPayload {
   const raw = rawInput.trim()
 
+  // URL: extract ?id= param first, then fall back to path segment
   if (isLikelyUrl(raw)) {
+    try {
+      const parsed = new URL(raw)
+      const idParam = parsed.searchParams.get('id')
+      if (idParam) {
+        return { productIdentifier: normalizeProductIdentifier(idParam) }
+      }
+    } catch {
+      // fall through
+    }
     return { qrCode: raw }
   }
 
-  if (/PROD-/i.test(raw) || /^[A-Z]{2,}-[A-Z0-9-]+$/i.test(raw)) {
+  // PROD-* or TM-* identifiers (product IDs and TrueMark IDs)
+  if (
+    /^PROD-/i.test(raw) ||
+    /^TM-/i.test(raw) ||
+    /^[A-Z]{2,}-[A-Z0-9-]+$/i.test(raw)
+  ) {
     return { productIdentifier: normalizeProductIdentifier(raw) }
   }
 
+  // Numeric token ID
   if (/^\d+$/.test(raw)) {
     return { tokenId: Number(raw) }
   }
@@ -45,13 +61,16 @@ export function buildVerifyPayload(rawInput: string): VerifyPayload {
 
 function deriveInputIdentifier(input: string): string {
   const trimmed = input.trim()
-
   if (!isLikelyUrl(trimmed)) {
     return normalizeProductIdentifier(trimmed)
   }
-
   try {
     const parsed = new URL(trimmed)
+    // Prefer ?id= query param — this is the canonical QRON QR code format
+    const idParam = parsed.searchParams.get('id')
+    if (idParam) {
+      return normalizeProductIdentifier(idParam)
+    }
     const pathParts = parsed.pathname.split('/').filter(Boolean)
     const lastSegment = pathParts[pathParts.length - 1]
     return normalizeProductIdentifier(lastSegment || trimmed)
@@ -62,41 +81,4 @@ function deriveInputIdentifier(input: string): string {
 
 export type VerificationViewModel = {
   result: 'authentic' | 'counterfeit'
-  authentic: boolean
-  trust_score: number
-  confidence: 'High' | 'Medium' | 'Low'
-  qron_id: string
-  actions: string[]
-  product: VerifyApiProduct | null
-  supplyChain: unknown
-  tokenId: number | null
-  success: boolean
-  message: string
-  verifiedAt: string
-  input: string
-}
-
-export function mapVerificationResponse(data: VerifyApiResponse, input: string): VerificationViewModel {
-  const authentic = data?.success === true && data?.product?.isActive !== false
-  const trustScore = authentic ? 96 : data?.success === true ? 30 : 10
-  const confidence: 'High' | 'Medium' | 'Low' =
-    trustScore >= 80 ? 'High' : trustScore >= 40 ? 'Medium' : 'Low'
-
-  return {
-    result: authentic ? 'authentic' : 'counterfeit',
-    authentic,
-    trust_score: trustScore,
-    confidence,
-    qron_id: data?.product?.productIdentifier || deriveInputIdentifier(input),
-    actions: authentic
-      ? ['launch_ar', 'view_story', 'claim_ownership']
-      : ['retry_scan', 'contact_support'],
-    product: data?.product ?? null,
-    supplyChain: data?.supplyChain ?? null,
-    tokenId: typeof data?.tokenId === 'number' ? data.tokenId : null,
-    success: Boolean(data?.success),
-    message: data?.message || (authentic ? 'Verified' : 'Verification failed'),
-    verifiedAt: new Date().toISOString(),
-    input,
-  }
-}
+  authentic:
