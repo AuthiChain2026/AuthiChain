@@ -29,10 +29,23 @@ export function buildVerifyPayload(rawInput: string): VerifyPayload {
   const raw = rawInput.trim()
 
   if (isLikelyUrl(raw)) {
+    try {
+      const parsed = new URL(raw)
+      const idParam = parsed.searchParams.get('id')
+      if (idParam) {
+        return { productIdentifier: normalizeProductIdentifier(idParam) }
+      }
+    } catch {
+      // fall through
+    }
     return { qrCode: raw }
   }
 
-  if (/PROD-/i.test(raw) || /^[A-Z]{2,}-[A-Z0-9-]+$/i.test(raw)) {
+  if (
+    /^PROD-/i.test(raw) ||
+    /^TM-/i.test(raw) ||
+    /^[A-Z]{2,}-[A-Z0-9-]+$/i.test(raw)
+  ) {
     return { productIdentifier: normalizeProductIdentifier(raw) }
   }
 
@@ -45,13 +58,15 @@ export function buildVerifyPayload(rawInput: string): VerifyPayload {
 
 function deriveInputIdentifier(input: string): string {
   const trimmed = input.trim()
-
   if (!isLikelyUrl(trimmed)) {
     return normalizeProductIdentifier(trimmed)
   }
-
   try {
     const parsed = new URL(trimmed)
+    const idParam = parsed.searchParams.get('id')
+    if (idParam) {
+      return normalizeProductIdentifier(idParam)
+    }
     const pathParts = parsed.pathname.split('/').filter(Boolean)
     const lastSegment = pathParts[pathParts.length - 1]
     return normalizeProductIdentifier(lastSegment || trimmed)

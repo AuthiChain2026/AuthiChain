@@ -4,7 +4,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**.supabase.co',
+        hostname: '*.supabase.co',
       },
     ],
   },
@@ -13,7 +13,7 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
-    typescript: { ignoreBuildErrors: true },
+  typescript: { ignoreBuildErrors: true },
   webpack: (config, { isServer, dev }) => {
     // Optimize webpack cache serialization to prevent large string warnings
     if (config.cache && typeof config.cache === 'object' && config.cache.type === 'filesystem') {

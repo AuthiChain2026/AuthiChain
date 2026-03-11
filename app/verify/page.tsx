@@ -55,6 +55,7 @@ function VerifyContent() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const scanTimerRef = useRef<number | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const scanLockRef = useRef(false)
 
   const [inputValue, setInputValue] = useState("")
   const [loading, setLoading] = useState(false)
@@ -84,6 +85,7 @@ function VerifyContent() {
       streamRef.current = null
     }
     setCameraReady(false)
+    scanLockRef.current = false
   }, [])
 
   const verifyValue = useCallback(async (raw: string) => {
@@ -101,6 +103,10 @@ function VerifyContent() {
       const data = await response.json()
       setResult(data)
 
+      if (!response.ok && !data?.message) {
+        throw new Error('Verification request failed')
+      }
+
       if (data.authentic) {
         await logEvent('verify_success', { qron_id: data.qron_id, trust_score: data.trust_score })
       } else {
@@ -116,6 +122,136 @@ function VerifyContent() {
       })
     } finally {
       setLoading(false)
+      scanLockRef.current = false
+    }
+  }, [logEvent, toast])
+
+  const handleDetectedValue = useCallback(async (value: string) => {
+    if (scanLockRef.current) return
+    scanLockRef.current = true
+
+    setInputValue(value)
+    await logEvent('scan_detected', { value })
+    stopCamera()
+    await verifyValue(value)
+  }, [logEvent, stopCamera, verifyValue])
+
+  const startCamera = useCallback(async () => {
+    await logEvent('camera_init')
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast({ title: 'Camera Unsupported', description: 'Camera access is not available in this browser.', variant: 'destructive' })
+      await logEvent('camera_failed', { reason: 'media_devices_unavailable' })
+      return
+    }
+
+    try {
+      stopCamera()
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      streamRef.current = stream
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+      }
+      setCameraReady(true)
+      await logEvent('camera_started')
+    } catch (error: unknown) {
+      const reason = error instanceof Error ? error.message : 'unknown'
+      await logEvent('camera_failed', { reason })
+      toast({ title: 'Camera Error', description: 'Could not start camera.', variant: 'destructive' })
+    }
+  }, [logEvent, stopCamera, toast])
+
+  useEffect(() => {
+    const hasWindow = typeof window !== 'undefined'
+    setDetectorSupported(hasWindow && typeof window.BarcodeDetector !== 'undefined')
+    setJsQrAvailable(hasWindow && typeof window.jsQR === 'function')
+    return () => stopCamera()
+  }, [stopCamera])
+
+  useEffect(() => {
+    if (!cameraReady || !videoRef.current) return
+
+    if (detectorSupported && window.BarcodeDetector) {
+      const detector = new window.BarcodeDetector({ formats: ['qr_code'] })
+      scanTimerRef.current = window.setInterval(async () => {
+        if (!videoRef.current) return
+        try {
+          const detected = await detector.detect(videoRef.current)
+          if (detected?.length && detected[0].rawValue) {
+            await handleDetectedValue(String(detected[0].rawValue))
+          }
+        } catch {
+          // ignore intermittent detector failures
+        }
+      }, 700)
+
+      return () => {
+        if (scanTimerRef.current) {
+          window.clearInterval(scanTimerRef.current)
+          scanTimerRef.current = null
+        }
+      }
+    }
+
+    if (fallbackEnabled && jsQrAvailable && window.jsQR) {
+      scanTimerRef.current = window.setInterval(async () => {
+        if (!videoRef.current || !canvasRef.current) return
+
+        const video = videoRef.current
+        const canvas = canvasRef.current
+        if (!video.videoWidth || !video.videoHeight) return
+
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        const context = canvas.getContext('2d', { willReadFrequently: true })
+        if (!context) return
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height)
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+        const decoded = window.jsQR?.(imageData.data, imageData.width, imageData.height)
+
+        if (decoded?.data) {
+          await handleDetectedValue(decoded.data)
+        }
+      }, 700)
+
+      return () => {
+        if (scanTimerRef.current) {
+          window.clearInterval(scanTimerRef.current)
+          scanTimerRef.current = null
+        }
+      }
+    }
+
+    return undefined
+  }, [cameraReady, detectorSupported, fallbackEnabled, jsQrAvailable, handleDetectedValue])
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await verifyValue(inputValue)
+  }
+
+  const handleShare = async () => {
+    if (!result) return
+    await logEvent('share_clicked', { qron_id: result.qron_id })
+
+    const shareText = `QRON ${result.qron_id} verified with trust score ${result.trust_score} at ${result.verifiedAt}. ${window.location.href}`
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'AuthiChain Verification',
+          text: shareText,
+          url: window.location.href,
+        })
+      } else {
+        await navigator.clipboard.writeText(shareText)
+        toast({ title: 'Copied', description: 'Verification details copied to clipboard.' })
+      }
+      await logEvent('share_success', { qron_id: result.qron_id })
+    } catch {
+      toast({ title: 'Share cancelled', description: 'No data was shared.' })
     }
   }, [logEvent, toast])
 
@@ -219,29 +355,6 @@ function VerifyContent() {
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault()
     await verifyValue(inputValue)
-  }
-
-  const handleShare = async () => {
-    if (!result) return
-    await logEvent('share_clicked', { qron_id: result.qron_id })
-
-    const shareText = `QRON ${result.qron_id} verified with trust score ${result.trust_score} at ${result.verifiedAt}. ${window.location.href}`
-
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: 'AuthiChain Verification',
-          text: shareText,
-          url: window.location.href,
-        })
-      } else {
-        await navigator.clipboard.writeText(shareText)
-        toast({ title: 'Copied', description: 'Verification details copied to clipboard.' })
-      }
-      await logEvent('share_success', { qron_id: result.qron_id })
-    } catch {
-      toast({ title: 'Share cancelled', description: 'No data was shared.' })
-    }
   }
 
   const handleReset = async () => {

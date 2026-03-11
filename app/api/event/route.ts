@@ -15,9 +15,28 @@ const ALLOWED_EVENTS = new Set([
   'reset',
 ])
 
+
+const MAX_DETAILS_BYTES = 4096
+
+function sanitizeDetails(details: unknown): Record<string, unknown> | undefined {
+  if (!details || typeof details !== 'object' || Array.isArray(details)) {
+    return undefined
+  }
+
+  const serialized = JSON.stringify(details)
+  if (!serialized || serialized.length > MAX_DETAILS_BYTES) {
+    return undefined
+  }
+
+  return details as Record<string, unknown>
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json().catch(() => null)
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
+    }
     const type = String(body?.type || '')
 
     if (!ALLOWED_EVENTS.has(type)) {
@@ -27,7 +46,7 @@ export async function POST(request: NextRequest) {
     const event = {
       type,
       timestamp: new Date().toISOString(),
-      details: body?.details && typeof body.details === 'object' ? body.details : undefined,
+      details: sanitizeDetails(body?.details),
     }
 
     await writeActivityEvent(event)
