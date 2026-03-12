@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -10,7 +9,7 @@ export async function GET(request: Request) {
     const industryFilter = searchParams.get('industry')
     const format = searchParams.get('format') || 'csv'
 
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createClient()
     const {
       data: { user },
       error: authError,
@@ -42,7 +41,6 @@ export async function GET(request: Request) {
     }
 
     if (format === 'csv') {
-      // Generate CSV
       const headers = [
         'Name',
         'Brand',
@@ -57,15 +55,15 @@ export async function GET(request: Request) {
         'Created At',
       ]
 
-      const csvRows = products.map((product: any) => [
+      const csvRows = (products ?? []).map((product) => [
         product.name || '',
         product.brand || '',
         product.category || '',
         (product.industry_id || '').replace('-', ' & '),
-        product.confidence || '',
+        product.confidence ?? '',
         product.workflow ? JSON.stringify(product.workflow) : '',
         product.story || '',
-        product.features || '',
+        product.features ? JSON.stringify(product.features) : '',
         product.truemark_id || '',
         product.is_registered ? 'Yes' : 'No',
         product.created_at || '',
@@ -73,7 +71,7 @@ export async function GET(request: Request) {
 
       const csvContent = [
         headers.join(','),
-        ...csvRows.map((row: any[]) =>
+        ...csvRows.map((row) =>
           row
             .map((cell) =>
               typeof cell === 'string' && cell.includes(',')
