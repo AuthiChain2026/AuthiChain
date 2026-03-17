@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
-})
+export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
+  const stripeKey = process.env.STRIPE_SECRET_KEY
+  if (!stripeKey) {
+    return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
+  }
+
+  const stripe = new Stripe(stripeKey, {
+    apiVersion: '2024-06-20',
+  })
+
   try {
     const formData = await req.formData()
     const priceId = formData.get('priceId') as string
