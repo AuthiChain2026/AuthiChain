@@ -95,7 +95,7 @@ export function mapVerificationResponse(
   data: VerifyApiResponse,
   input: string
 ): VerificationViewModel {
-  const authentic = data.success === true && data?.product?.isActive !== false
+  const authentic = data.success === true && data.product?.isActive !== false
   const trustScore = authentic ? 96 : data?.success === true ? 30 : 10
   const confidence: 'High' | 'Medium' | 'Low' =
     trustScore >= 80 ? 'High' : trustScore >= 40 ? 'Medium' : 'Low'
@@ -105,11 +105,11 @@ export function mapVerificationResponse(
     authentic,
     trust_score: trustScore,
     confidence,
-    qron_id: data?.product?.productIdentifier || deriveInputIdentifier(input),
+    qron_iddata?.product?.productIdentifier?.product?.productIdentifier || deriveInputIdentifier(input),
     actions: authentic
       ? ['launch_ar', 'view_story', 'claim_ownership']
       : ['retry_scan', 'contact_support'],
-    product: data?.product ?? null,
+    product: data.product ?? null,
     supplyChain: data?.supplyChain ?? null,
     tokenId: typeof data?.tokenId === 'number' ? data.tokenId : null,
     success: Boolean(data?.success),
