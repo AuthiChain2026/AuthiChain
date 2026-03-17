@@ -6,32 +6,31 @@
 
 @layer base {
     :root {
-          --background: 0 0% 4%;
-          --foreground: 0 0% 93%;
-          --card: 0 0% 7%;
-          --card-foreground: 0 0% 93%;
-          --popover: 0 0% 7%;
-          --popover-foreground: 0 0% 93%;
-          --primary: 43 80% 47%; /* Gold - matches qron.space */
-      --primary-foreground: 0 0% 5%;
-          --secondary: 0 0% 10%;
-          --secondary-foreground: 0 0% 93%;
-          --muted: 0 0% 10%;
-          --muted-foreground: 0 0% 53%;
-          --accent: 43 80% 47%; /* Gold */
-      --accent-foreground: 0 0% 5%;
-          --destructive: 0 84.2% 60.2%;
-          --destructive-foreground: 0 0% 98%;
-          --border: 0 0% 17%;
-          --input: 0 0% 17%;
-          --ring: 43 80% 47%;
-          --gold: 43 80% 47%;
-          --gold-light: 45 90% 60%;
-          --gold-foreground: 0 0% 5%;
-          --radius: 0.5rem;
+        --background: 0 0% 4%;
+        --foreground: 0 0% 93%;
+        --card: 0 0% 7%;
+        --card-foreground: 0 0% 93%;
+        --popover: 0 0% 7%;
+        --popover-foreground: 0 0% 93%;
+        --primary: 43 80% 47%; /* Gold - matches qron.space */
+    --primary-foreground: 0 0% 5%;
+        --secondary: 0 0% 10%;
+        --secondary-foreground: 0 0% 93%;
+        --muted: 0 0% 10%;
+        --muted-foreground: 0 0% 53%;
+        --accent: 43 80% 47%; /* Gold */
+    --accent-foreground: 0 0% 5%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 0 0% 17%;
+        --input: 0 0% 17%;
+        --ring: 43 80% 47%;
+        --gold: 43 80% 47%;
+        --gold-light: 45 90% 60%;
+        --gold-foreground: 0 0% 5%;
+        --radius: 0.5rem;
     }
-
-  .dark {
+    .dark {
         --background: 0 0% 4%;
         --foreground: 0 0% 93%;
         --card: 0 0% 7%;
@@ -51,105 +50,16 @@
         --border: 0 0% 17%;
         --input: 0 0% 17%;
         --ring: 43 80% 47%;
-  }
+    }
 }
 
 @layer base {
     * {
-          @apply border-border;
+        @apply border-border;
     }
     body {
-          @apply bg-background text-foreground;
-          font-family: 'Geist', 'Geist Fallback', Arial, sans-serif;
-    }
-}
-
-/* Gold gradient utility - matches qron.space */
-.gradient-gold {
-    background: linear-gradient(135deg, #E8C547 0%, #C9A227 50%, #A07D10 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Gold glow */
-.glow-gold {
-    box-shadow: 0 0 20px rgba(201, 162, 39, 0.35);
-}
-
-/* Gold button */
-.btn-gold {
-    background: linear-gradient(135deg, #E8C547, #C9A227);
-    color: #0a0a0a;
-    font-weight: 700;
-    transition@:i moppoarcti tuyr l0(.'2hst,t ptsr:a/n/sffoonrtms .0g.o1osg;l
-  e}a
-p.ibst.nc-ogmo/lcds:sh2o?vfearm i{l
-                                  y = Goepiascti:twyg:h t0@.390;0
-                                  ; 4 0t0r;a5n0s0f;o6r0m0:; 7t0r0a;n8s0l0a&tdeiYs(p-l1apyx=)s;w
-                                  a}p');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-    :root {
-          --background: 0 0% 4%;
-          --foreground: 0 0% 93%;
-          --card: 0 0% 7%;
-          --card-foreground: 0 0% 93%;
-          --popover: 0 0% 7%;
-          --popover-foreground: 0 0% 93%;
-          --primary: 43 80% 47%; /* Gold - matches qron.space */
-      --primary-foreground: 0 0% 5%;
-          --secondary: 0 0% 10%;
-          --secondary-foreground: 0 0% 93%;
-          --muted: 0 0% 10%;
-          --muted-foreground: 0 0% 53%;
-          --accent: 43 80% 47%; /* Gold */
-      --accent-foreground: 0 0% 5%;
-          --destructive: 0 84.2% 60.2%;
-          --destructive-foreground: 0 0% 98%;
-          --border: 0 0% 17%;
-          --input: 0 0% 17%;
-          --ring: 43 80% 47%;
-          --gold: 43 80% 47%;
-          --gold-light: 45 90% 60%;
-          --gold-foreground: 0 0% 5%;
-          --radius: 0.5rem;
-    }
-
-  .dark {
-        --background: 0 0% 4%;
-        --foreground: 0 0% 93%;
-        --card: 0 0% 7%;
-        --card-foreground: 0 0% 93%;
-        --popover: 0 0% 7%;
-        --popover-foreground: 0 0% 93%;
-        --primary: 43 80% 47%;
-        --primary-foreground: 0 0% 5%;
-        --secondary: 0 0% 10%;
-        --secondary-foreground: 0 0% 93%;
-        --muted: 0 0% 10%;
-        --muted-foreground: 0 0% 53%;
-        --accent: 43 80% 47%;
-        --accent-foreground: 0 0% 5%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 17%;
-        --input: 0 0% 17%;
-        --ring: 43 80% 47%;
-  }
-}
-
-@layer base {
-    * {
-          @apply border-border;
-    }
-    body {
-          @apply bg-background text-foreground;
-          font-family: 'Geist', 'Geist Fallback', Arial, sans-serif;
+        @apply bg-background text-foreground;
+        font-family: 'Geist', 'Geist Fallback', Arial, sans-serif;
     }
 }
 
@@ -173,6 +83,7 @@ p.ibst.nc-ogmo/lcds:sh2o?vfearm i{l
     font-weight: 700;
     transition: opacity 0.2s, transform 0.1s;
 }
+
 .btn-gold:hover {
     opacity: 0.9;
     transform: translateY(-1px);
