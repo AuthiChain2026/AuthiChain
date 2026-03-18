@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { ArrowLeft, Shield, CheckCircle, Loader2, Copy, ExternalLink, Sparkles, Clock, Star } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
-import type { Product } from "@/lib/supabase/types"
+import { productResponseSchema, registerProductResponseSchema, type Product } from "@/lib/contracts/products"
 
 interface WorkflowStep {
   id: string
@@ -44,13 +44,8 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         return
       }
 
-      const response = await fetch(`/api/products`)
-      if (!response.ok) throw new Error("Failed to fetch products")
-
-      const { products } = await response.json()
-      const foundProduct = products.find((p: Product) => p.id === params.id)
-
-      if (!foundProduct) {
+      const response = await fetch(`/api/products/${params.id}`)
+      if (response.status === 404) {
         toast({
           title: "Product Not Found",
           variant: "destructive",
@@ -58,8 +53,10 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         router.push("/dashboard")
         return
       }
+      if (!response.ok) throw new Error("Failed to fetch product")
 
-      setProduct(foundProduct)
+      const data = productResponseSchema.parse(await response.json())
+      setProduct(data.product)
     } catch (error) {
       console.error("Fetch error:", error)
       toast({
@@ -85,8 +82,8 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
       if (!response.ok) throw new Error("Registration failed")
 
-      const { product: updatedProduct } = await response.json()
-      setProduct(updatedProduct)
+      const data = registerProductResponseSchema.parse(await response.json())
+      setProduct(data.product)
 
       toast({
         title: "Success!",

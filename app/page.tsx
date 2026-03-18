@@ -1,9 +1,10 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Shield, Scan, Lock, TrendingUp, CheckCircle, Zap, Sparkles, Globe } from "lucide-react"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Shield, Scan, Lock, TrendingUp, CheckCircle, Sparkles, Globe } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Home() {
@@ -29,68 +30,81 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 mb-4">
-            <Sparkles className="h-4 w-4" />
-            <span className="text-sm font-medium">Powered by AI AutoFlow™</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-            Universal Authentication for{" "}
-            <span className="gradient-text">Any Product</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            AI AutoFlow™ automatically classifies products across 10 industries and generates custom authentication workflows. From cannabis to luxury goods, electronics to pharmaceuticals—one platform for everything.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
-              <Button size="lg" variant="gradient" className="w-full sm:w-auto">
-                Start Protecting Now
-              </Button>
-            </Link>
-            <Link href="/verify">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                Verify a Product
-              </Button>
-            </Link>
+      <section className="container mx-auto px-4 py-16 md:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+          {/* Left: Text */}
+          <div className="space-y-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+              <Sparkles className="h-4 w-4" />
+              <span className="text-sm font-medium">Powered by AI AutoFlow™</span>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold leading-tight">
+              Universal Authentication for{" "}
+              <span className="gradient-text">Any Product</span>
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              AI AutoFlow™ automatically classifies products across 10 industries and generates custom authentication workflows. From cannabis to luxury goods, electronics to pharmaceuticals—one platform for everything.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link href="/signup">
+                <Button size="lg" variant="gradient" className="w-full sm:w-auto">
+                  Start Protecting Now
+                </Button>
+              </Link>
+              <Link href="/verify">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                  Verify a Product
+                </Button>
+              </Link>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-4 gap-4 pt-4 border-t">
+              <div>
+                <div className="text-3xl font-bold gradient-text">10</div>
+                <div className="text-xs text-muted-foreground">Industries</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold gradient-text">$14T+</div>
+                <div className="text-xs text-muted-foreground">Market</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold gradient-text">98%</div>
+                <div className="text-xs text-muted-foreground">AI Accuracy</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold gradient-text">&lt;3s</div>
+                <div className="text-xs text-muted-foreground">Time</div>
+              </div>
+            </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pt-12">
-            <div>
-              <div className="text-4xl font-bold gradient-text">10</div>
-              <div className="text-sm text-muted-foreground">Industries</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold gradient-text">$14T+</div>
-              <div className="text-sm text-muted-foreground">Market Coverage</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold gradient-text">98%</div>
-              <div className="text-sm text-muted-foreground">AI Accuracy</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold gradient-text">&lt;3s</div>
-              <div className="text-sm text-muted-foreground">Classification Time</div>
+          {/* Right: Hero Image */}
+          <div className="flex justify-center lg:justify-end">
+            <div className="relative w-full max-w-lg">
+              <Image
+                src="/images/hero-shield.svg"
+                alt="AuthiChain blockchain authentication shield"
+                width={800}
+                height={600}
+                className="w-full h-auto rounded-2xl"
+                priority
+              />
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Industry Icons */}
-          <div className="pt-12 border-t mt-12">
-            <p className="text-sm text-muted-foreground mb-6">Trusted across industries</p>
-            <div className="flex flex-wrap justify-center gap-6 text-4xl">
-              <span title="Cannabis">🌿</span>
-              <span title="Luxury">💎</span>
-              <span title="Electronics">📱</span>
-              <span title="Pharma">💊</span>
-              <span title="Fashion">👔</span>
-              <span title="Automotive">🚗</span>
-              <span title="Food & Beverage">🍷</span>
-              <span title="Art">🎨</span>
-              <span title="Cosmetics">💄</span>
-              <span title="Sports">⚽</span>
-            </div>
-          </div>
+      {/* Industries Banner */}
+      <section className="container mx-auto px-4 pb-16">
+        <div className="max-w-6xl mx-auto overflow-hidden rounded-xl">
+          <Image
+            src="/images/industries-banner.svg"
+            alt="Industries covered: Cannabis, Luxury, Electronics, Pharma, Fashion, Automotive, Food, Art, Cosmetics"
+            width={1000}
+            height={120}
+            className="w-full h-auto"
+          />
         </div>
       </section>
 
@@ -185,44 +199,21 @@ export default function Home() {
 
       {/* How It Works */}
       <section className="container mx-auto px-4 py-20 bg-muted/30 rounded-3xl">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4">How It Works</h2>
           <p className="text-xl text-muted-foreground">
             Three simple steps to protect your products
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-full gradient-primary text-white flex items-center justify-center text-2xl font-bold mx-auto">
-              1
-            </div>
-            <h3 className="text-xl font-bold">Upload Product</h3>
-            <p className="text-muted-foreground">
-              Upload a photo of your product. Our AI instantly classifies and
-              analyzes it
-            </p>
-          </div>
-
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-full gradient-primary text-white flex items-center justify-center text-2xl font-bold mx-auto">
-              2
-            </div>
-            <h3 className="text-xl font-bold">Register on Blockchain</h3>
-            <p className="text-muted-foreground">
-              Get your unique TrueMark™ ID and blockchain transaction hash
-            </p>
-          </div>
-
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-full gradient-primary text-white flex items-center justify-center text-2xl font-bold mx-auto">
-              3
-            </div>
-            <h3 className="text-xl font-bold">Verify Anywhere</h3>
-            <p className="text-muted-foreground">
-              Anyone can verify your product's authenticity using the TrueMark™ ID
-            </p>
-          </div>
+        <div className="max-w-4xl mx-auto">
+          <Image
+            src="/images/how-it-works.svg"
+            alt="How AuthiChain works: Upload Product → Blockchain Register → Verify Anywhere"
+            width={900}
+            height={280}
+            className="w-full h-auto rounded-xl"
+          />
         </div>
       </section>
 
@@ -252,7 +243,12 @@ export default function Home() {
               <Shield className="h-6 w-6 text-primary" />
               <span className="text-lg font-bold gradient-text">AuthiChain</span>
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <Link href="/verify" className="hover:text-foreground transition-colors">Verify Product</Link>
+              <Link href="/demo" className="hover:text-foreground transition-colors">Live Demo</Link>
+              <Link href="/login" className="hover:text-foreground transition-colors">Login</Link>
+            </div>
+            <div className="text-sm text-muted-foreground mt-4 md:mt-0">
               © 2026 AuthiChain. All rights reserved.
             </div>
           </div>

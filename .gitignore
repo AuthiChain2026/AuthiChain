@@ -13,6 +13,7 @@
 # production
 /build
 /dist
+/.open-next
 
 # misc
 .DS_Store

@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
-import type { Product } from "@/lib/supabase/types"
+import { productsResponseSchema, type Product } from "@/lib/contracts/products"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -50,8 +50,8 @@ export default function DashboardPage() {
 
       if (!response.ok) throw new Error("Failed to fetch products")
 
-      const { products } = await response.json()
-      setProducts(products)
+      const data = productsResponseSchema.parse(await response.json())
+      setProducts(data.products)
     } catch (error) {
       console.error("Fetch error:", error)
       toast({

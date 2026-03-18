@@ -9,6 +9,7 @@
 
 1. In your Supabase dashboard, go to the SQL Editor
 2. Run the SQL script from `supabase/schema.sql`
+3. Run the migration from `supabase/migrations/add_ai_autoflow_fields.sql`
 3. This will create:
    - `products` table
    - `scans` table
@@ -57,9 +58,14 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000  # Use your production URL in product
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+DATABASE_URL=your-postgres-connection-string
 
 # OpenAI
 OPENAI_API_KEY=your-openai-api-key
+
+# Verification backend
+# Example: https://qron.space/api/verify
+VERIFY_API_URL=
 ```
 
 **For Production (Vercel):**
@@ -83,6 +89,12 @@ Visit `http://localhost:3000` and test:
 - Product upload
 - Image storage
 - Database queries
+
+Then verify schema sync:
+
+```bash
+npm run check:db
+```
 
 ## Security Notes
 

@@ -5,6 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cloudflare": "opennextjs-cloudflare build",
+    "preview:cloudflare": "opennextjs-cloudflare build && wrangler dev",
+    "deploy:cloudflare": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "check:db": "node ./script/check-database-schema.mjs",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run build && npm run typecheck",
     "start": "next start",
     "lint": "next lint"
   },
@@ -46,6 +52,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.15.1",
     "@types/node": "^22.10.5",
     "@types/pg": "^8.16.0",
     "@types/react": "^18.3.11",
@@ -54,6 +61,7 @@
     "drizzle-kit": "^0.31.8",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "wrangler": "^4.73.0"
   }
 }

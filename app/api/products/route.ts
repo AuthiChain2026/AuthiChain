@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createProductInputSchema, normalizeProductList, normalizeProductRecord } from '@/lib/contracts/products'
+import { isLegacyProductsSchemaError, LEGACY_PRODUCTS_SCHEMA_WARNING } from '@/lib/database/product-schema'
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,7 +31,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ products })
+    return NextResponse.json({ products: normalizeProductList(products ?? []) })
   } catch (error) {
     console.error('Fetch products error:', error)
     return NextResponse.json(
@@ -54,48 +56,68 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    const parsed = createProductInputSchema.safeParse(body)
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || 'Invalid product payload' },
+        { status: 400 }
+      )
+    }
+
     const {
       name,
       description,
       category,
       brand,
       imageUrl,
-      // AI AutoFlow fields
       industryId,
       workflow,
       story,
       features,
       authenticityFeatures,
-      confidence
-    } = body
+      confidence,
+    } = parsed.data
 
-    if (!name) {
-      return NextResponse.json(
-        { error: 'Product name is required' },
-        { status: 400 }
-      )
+    const baseInsert = {
+      user_id: user.id,
+      name,
+      description: description ?? null,
+      category: category ?? null,
+      brand: brand ?? null,
+      image_url: imageUrl ?? null,
+    }
+
+    const fullInsert = {
+      ...baseInsert,
+      industry_id: industryId ?? null,
+      workflow: workflow ?? null,
+      story: story ?? null,
+      features: features ?? null,
+      authenticity_features: authenticityFeatures ?? null,
+      confidence: confidence ?? null,
     }
 
     // Create product with AI AutoFlow data
-    const { data: product, error } = await supabase
+    let { data: product, error } = await supabase
       .from('products')
-      .insert({
-        user_id: user.id,
-        name,
-        description,
-        category,
-        brand,
-        image_url: imageUrl,
-        // AI AutoFlow fields
-        industry_id: industryId,
-        workflow,
-        story,
-        features,
-        authenticity_features: authenticityFeatures,
-        confidence
-      })
+      .insert(fullInsert)
       .select()
       .single()
+
+    let warning: string | undefined
+
+    if (error && isLegacyProductsSchemaError(error)) {
+      const fallbackResult = await supabase
+        .from('products')
+        .insert(baseInsert)
+        .select()
+        .single()
+
+      product = fallbackResult.data
+      error = fallbackResult.error
+      warning = LEGACY_PRODUCTS_SCHEMA_WARNING
+    }
 
     if (error) {
       console.error('Create product error:', error)
@@ -105,7 +127,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ product }, { status: 201 })
+    return NextResponse.json(
+      { product: normalizeProductRecord(product), warning },
+      { status: 201 }
+    )
   } catch (error) {
     console.error('Create product error:', error)
     return NextResponse.json(

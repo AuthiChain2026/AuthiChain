@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 120" fill="none">
+  <defs>
+    <linearGradient id="bannerBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#130d2a;stop-opacity:1"/>
+      <stop offset="50%" style="stop-color:#0d1a0d;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#130d2a;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="pillGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d1054"/>
+      <stop offset="100%" style="stop-color:#1a0840"/>
+    </linearGradient>
+    <linearGradient id="pillGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a2a0a"/>
+      <stop offset="100%" style="stop-color:#061a06"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1000" height="120" fill="url(#bannerBg)" rx="12"/>
+
+  <!-- Fade overlays for scroll effect -->
+  <rect width="80" height="120" fill="url(#bannerBg)" opacity="0.9"/>
+  <rect x="920" width="80" height="120" fill="url(#bannerBg)" opacity="0.9"/>
+
+  <!-- Title -->
+  <text x="500" y="28" text-anchor="middle" fill="#6b7280" font-size="11" font-family="sans-serif" font-weight="500" letter-spacing="3">TRUSTED ACROSS INDUSTRIES</text>
+
+  <!-- Industry pills - row 1 -->
+  <g transform="translate(30, 40)">
+    <!-- Cannabis -->
+    <g transform="translate(0,0)">
+      <rect width="100" height="32" rx="16" fill="url(#pillGrad2)" stroke="#16a34a" stroke-width="1"/>
+      <text x="50" y="21" text-anchor="middle" fill="#4ade80" font-size="13" font-family="sans-serif">🌿 Cannabis</text>
+    </g>
+    <!-- Luxury -->
+    <g transform="translate(114,0)">
+      <rect width="90" height="32" rx="16" fill="url(#pillGrad1)" stroke="#9333ea" stroke-width="1"/>
+      <text x="45" y="21" text-anchor="middle" fill="#c084fc" font-size="13" font-family="sans-serif">💎 Luxury</text>
+    </g>
+    <!-- Electronics -->
+    <g transform="translate(218,0)">
+      <rect width="112" height="32" rx="16" fill="url(#pillGrad1)" stroke="#7c3aed" stroke-width="1"/>
+      <text x="56" y="21" text-anchor="middle" fill="#c084fc" font-size="13" font-family="sans-serif">📱 Electronics</text>
+    </g>
+    <!-- Pharma -->
+    <g transform="translate(344,0)">
+      <rect width="90" height="32" rx="16" fill="url(#pillGrad2)" stroke="#16a34a" stroke-width="1"/>
+      <text x="45" y="21" text-anchor="middle" fill="#4ade80" font-size="13" font-family="sans-serif">💊 Pharma</text>
+    </g>
+    <!-- Fashion -->
+    <g transform="translate(448,0)">
+      <rect width="94" height="32" rx="16" fill="url(#pillGrad1)" stroke="#9333ea" stroke-width="1"/>
+      <text x="47" y="21" text-anchor="middle" fill="#c084fc" font-size="13" font-family="sans-serif">👔 Fashion</text>
+    </g>
+    <!-- Automotive -->
+    <g transform="translate(556,0)">
+      <rect width="114" height="32" rx="16" fill="url(#pillGrad2)" stroke="#15803d" stroke-width="1"/>
+      <text x="57" y="21" text-anchor="middle" fill="#4ade80" font-size="13" font-family="sans-serif">🚗 Automotive</text>
+    </g>
+    <!-- Food -->
+    <g transform="translate(684,0)">
+      <rect width="110" height="32" rx="16" fill="url(#pillGrad1)" stroke="#7c3aed" stroke-width="1"/>
+      <text x="55" y="21" text-anchor="middle" fill="#c084fc" font-size="13" font-family="sans-serif">🍷 Food &amp; Bev</text>
+    </g>
+    <!-- Art -->
+    <g transform="translate(808,0)">
+      <rect width="72" height="32" rx="16" fill="url(#pillGrad2)" stroke="#16a34a" stroke-width="1"/>
+      <text x="36" y="21" text-anchor="middle" fill="#4ade80" font-size="13" font-family="sans-serif">🎨 Art</text>
+    </g>
+    <!-- Cosmetics -->
+    <g transform="translate(894,0)">
+      <rect width="100" height="32" rx="16" fill="url(#pillGrad1)" stroke="#9333ea" stroke-width="1"/>
+      <text x="50" y="21" text-anchor="middle" fill="#c084fc" font-size="13" font-family="sans-serif">💄 Cosmétics</text>
+    </g>
+  </g>
+
+  <!-- Bottom stat line -->
+  <text x="500" y="105" text-anchor="middle" fill="#374151" font-size="10" font-family="monospace">10 INDUSTRIES  ·  $14T+ MARKET  ·  AI-POWERED CLASSIFICATION  ·  &lt;3s RESPONSE</text>
+</svg>

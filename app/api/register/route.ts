@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createHash, randomBytes } from 'crypto'
+import { normalizeProductRecord } from '@/lib/contracts/products'
 
 // Generate TrueMark™ ID and blockchain transaction hash
 function generateTrueMark() {
@@ -103,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      product: updatedProduct,
+      product: normalizeProductRecord(updatedProduct),
       message: 'Product successfully registered on blockchain',
     })
   } catch (error) {

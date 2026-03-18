@@ -120,12 +120,15 @@ Create a `.env.local` file in the root directory:
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+DATABASE_URL=your-postgres-connection-string
 
 # OpenAI
 OPENAI_API_KEY=your-openai-api-key
 
 # QRON verification proxy target
-VERIFY_API_URL=https://api.authichain.io/api/verify
+# Set this to the active backend you control, for example:
+# VERIFY_API_URL=https://qron.space/api/verify
+VERIFY_API_URL=
 
 # Optional analytics forward target
 ANALYTICS_API_URL=
@@ -139,6 +142,17 @@ NEXT_PUBLIC_ENABLE_QR_FALLBACK=false
 ```bash
 npm run dev
 ```
+
+### 6. Validate App/Database Sync
+
+Before deploying, run:
+
+```bash
+npm run validate
+npm run check:db
+```
+
+`npm run check:db` verifies that the live Postgres schema includes the AI AutoFlow columns the frontend and API now depend on.
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
@@ -240,7 +254,7 @@ Proxy verification endpoint for the QRON demo.
 **Request Body:**
 ```json
 {
-  "raw": "https://authichain.io/verify/PROD-12345"
+  "raw": "https://qron.space/verify?id=PROD-12345"
 }
 ```
 

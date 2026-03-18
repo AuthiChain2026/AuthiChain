@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { Upload, ArrowLeft, Loader2, Sparkles, Check, Clock } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { productResponseSchema } from "@/lib/contracts/products"
 
 export default function UploadPage() {
   const router = useRouter()
@@ -161,9 +162,16 @@ export default function UploadPage() {
 
       if (!response.ok) throw new Error("Failed to create product")
 
-      const { product } = await response.json()
+      const data = productResponseSchema.parse(await response.json())
 
       setProgress(100)
+
+      if (data.warning) {
+        toast({
+          title: "Database Migration Needed",
+          description: data.warning,
+        })
+      }
 
       toast({
         title: "Product Created!",
@@ -171,7 +179,7 @@ export default function UploadPage() {
       })
 
       // Redirect to product detail page
-      router.push(`/products/${product.id}`)
+      router.push(`/products/${data.product.id}`)
     } catch (error) {
       console.error("Upload error:", error)
       toast({

@@ -11,6 +11,19 @@ export async function GET(
   const rawInput = params.id
 
   try {
+    const verifyApiUrl = getVerifyApiUrl()
+    if (!verifyApiUrl) {
+      const mapped = mapVerificationResponse({}, rawInput)
+      return NextResponse.json(
+        {
+          ...mapped,
+          success: false,
+          message: getVerifyApiMissingMessage(),
+        },
+        { status: 200 }
+      )
+    }
+
     const payload = buildVerifyPayload(rawInput)
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS)
@@ -30,11 +43,12 @@ export async function GET(
     const data = await upstream.json().catch(() => ({}))
 
     if (!upstream.ok) {
+      const mapped = mapVerificationResponse(data, rawInput)
       return NextResponse.json(
         {
+          ...mapped,
           success: false,
           message: data?.message || 'Verification request failed',
-          ...mapVerificationResponse(data, rawInput),
         },
         { status: 200 }
       )

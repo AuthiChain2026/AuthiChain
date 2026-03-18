@@ -333,3 +333,5 @@ export function AIStoryPlayer({
     </Card>
   );
 }
+
+export default AIStoryPlayer;

@@ -14,6 +14,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Input is required' }, { status: 400 })
     }
 
+    const verifyApiUrl = getVerifyApiUrl()
+    if (!verifyApiUrl) {
+      const mapped = mapVerificationResponse({}, rawInput)
+      return NextResponse.json(
+        {
+          ...mapped,
+          success: false,
+          message: getVerifyApiMissingMessage(),
+        },
+        { status: 200 }
+      )
+    }
+
     const payload = buildVerifyPayload(rawInput)
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS)
@@ -33,8 +46,11 @@ export async function POST(request: NextRequest) {
 
     const data = await upstream.json().catch(() => null)
     if (data === null) {
+      const mapped = mapVerificationResponse({}, rawInput)
       return NextResponse.json(
         {
+          upstreamStatus: upstream.status,
+          ...mapped,
           success: false,
           message: 'Upstream returned non-JSON response',
           ...mapVerificationResponse({}, rawInput),
@@ -44,12 +60,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (!upstream.ok) {
+      const mapped = mapVerificationResponse(data, rawInput)
       return NextResponse.json(
         {
+          upstreamStatus: upstream.status,
+          ...mapped,
           success: false,
           message: data?.message || 'Verification request failed',
-          upstreamStatus: upstream.status,
-          ...mapVerificationResponse(data, rawInput),
         },
         { status: 200 }
       )
@@ -63,6 +80,7 @@ export async function POST(request: NextRequest) {
       : 'Failed to verify product'
     return NextResponse.json(
       {
+        ...mapped,
         success: false,
         message,
         ...mapVerificationResponse({}, rawInput),
