@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp } from "lucide-react"
+import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp, CreditCard, ArrowUpRight } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { productsResponseSchema, type Product } from "@/lib/contracts/products"
 
@@ -22,11 +22,20 @@ export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [subscription, setSubscription] = useState<any>(null)
 
   useEffect(() => {
     checkUser()
     fetchProducts()
+    fetchSubscription()
   }, [])
+
+  const fetchSubscription = async () => {
+    try {
+      const res = await fetch("/api/subscription")
+      if (res.ok) setSubscription(await res.json())
+    } catch {}
+  }
 
   const checkUser = async () => {
     const { data: { user }, error } = await supabase.auth.getUser()
@@ -164,6 +173,64 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Subscription & Quota */}
+        {subscription && (
+          <Card className={`mb-8 ${
+            subscription.subscription.plan === 'free'
+              ? 'border-amber-500/30 bg-amber-500/5'
+              : 'border-emerald-500/30 bg-emerald-500/5'
+          }`}>
+            <CardContent className="py-5">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <CreditCard className={`h-5 w-5 ${subscription.subscription.plan === 'free' ? 'text-amber-400' : 'text-emerald-400'}`} />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold capitalize">{subscription.subscription.plan} Plan</span>
+                      {subscription.subscription.status === 'trialing' && (
+                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">Trial</Badge>
+                      )}
+                      {subscription.subscription.status === 'past_due' && (
+                        <Badge className="bg-red-500/20 text-red-300 border-red-500/30 text-xs">Payment Due</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {subscription.quota.registered} / {subscription.quota.limit === 999999 ? '∞' : subscription.quota.limit} products registered
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quota bar */}
+                <div className="flex-1 max-w-xs">
+                  <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        subscription.quota.limit !== 999999 && subscription.quota.registered / subscription.quota.limit > 0.8
+                          ? 'bg-amber-400'
+                          : 'bg-emerald-500'
+                      }`}
+                      style={{
+                        width: subscription.quota.limit === 999999
+                          ? '10%'
+                          : `${Math.min(100, (subscription.quota.registered / subscription.quota.limit) * 100)}%`
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {(subscription.subscription.plan === 'free' || subscription.subscription.plan === 'starter') && (
+                  <Link href="/pricing">
+                    <Button size="sm" variant="outline" className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 shrink-0">
+                      Upgrade
+                      <ArrowUpRight className="ml-1 h-3 w-3" />
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* AI AutoFlow Analytics */}
         {totalWithIndustry > 0 && (

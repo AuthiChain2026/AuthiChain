@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 
 export type Plan = 'free' | 'starter' | 'pro' | 'enterprise'
-export type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'inactive'
+export type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'inactive'
 
 export interface PlanLimits {
   productLimit: number       // max registered (blockchain) products
@@ -20,14 +20,14 @@ export const PLAN_LIMITS: Record<Plan, PlanLimits> = {
     exportCsv: false,
   },
   starter: {
-    productLimit: 100,
+    productLimit: 500,
     apiAccess: false,
     customQrBranding: false,
     supplyChainTracking: false,
     exportCsv: true,
   },
   pro: {
-    productLimit: 1000,
+    productLimit: Infinity,
     apiAccess: true,
     customQrBranding: true,
     supplyChainTracking: true,
@@ -91,7 +91,7 @@ export async function getUserSubscription(): Promise<UserSubscription> {
  * Returns true if the user's subscription is currently in good standing.
  */
 export function isSubscriptionActive(sub: UserSubscription): boolean {
-  return sub.status === 'active' || sub.plan === 'free'
+  return sub.status === 'active' || sub.status === 'trialing' || sub.plan === 'free'
 }
 
 /**

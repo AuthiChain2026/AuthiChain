@@ -13,7 +13,7 @@ const plans = [
       'Email support',
       'AuthiChain dashboard',
     ],
-    cta: 'Start Authenticating',
+    cta: 'Start Free Trial',
     priceId: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID,
     highlight: false,
   },
@@ -31,7 +31,7 @@ const plans = [
       'Custom QR branding',
       'Analytics dashboard',
     ],
-    cta: 'Go Pro',
+    cta: 'Try Pro Free',
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
     highlight: true,
   },
@@ -71,6 +71,10 @@ export default function PricingPage() {
           AuthiChain blockchain authentication for luxury goods, pharma, and enterprise supply chains.
           No setup fees. Cancel anytime.
         </p>
+        <div className="mt-6 inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-5 py-2 text-emerald-300 text-sm font-medium">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          14-day free trial on all plans — no credit card required to start
+        </div>
       </section>
 
       {/* Plans */}

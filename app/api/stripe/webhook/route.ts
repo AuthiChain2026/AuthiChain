@@ -221,13 +221,14 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       const supabase = createServiceClient();
       const planKey = plan.toLowerCase() as any;
       const productLimit = PLAN_LIMITS[planKey]?.productLimit ?? PLAN_LIMITS.starter.productLimit;
+      const subStatus = subscription.status === 'trialing' ? 'trialing' : 'active';
       await supabase.from('subscriptions').upsert(
         {
           user_id: userId,
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
           plan: planKey,
-          status: 'active',
+          status: subStatus,
           product_limit: productLimit === Infinity ? 999999 : productLimit,
           current_period_end: periodEnd?.toISOString() ?? null,
         },
