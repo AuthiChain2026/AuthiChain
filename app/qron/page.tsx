@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -9,9 +10,9 @@ import { ThemeToggle } from "@/components/theme-toggle"
 
 // ────────────────────────────────────────────────────────────
 // GALLERY DATA
-// Each entry represents a QRON art style. Replace `gradient`
-// placeholders with real image paths as assets are uploaded to
-// /public/images/qron/.
+// Images live in /public/images/qron/. Items with an `image`
+// field render real artwork; items without fall back to a
+// gradient placeholder.
 // ────────────────────────────────────────────────────────────
 
 const galleryItems = [
@@ -21,8 +22,8 @@ const galleryItems = [
     style: "Watercolor Wildlife",
     description:
       "A fierce leopard portrait seamlessly woven into a scannable QR matrix. Gold, purple, and black ink strokes dissolve into data modules — every brushstroke is a verifiable pixel.",
+    image: "/images/qron/guardian.png",
     gradient: "from-amber-600 via-purple-700 to-stone-900",
-    accentColor: "amber",
     tags: ["Wildlife", "Watercolor", "Ed25519 Signed"],
     icon: Eye,
   },
@@ -32,8 +33,8 @@ const galleryItems = [
     style: "3D Architecture",
     description:
       "A tilt-shift miniature cityscape built entirely from QR modules. Towers, domes, and gardens rise from the code — scan it and the city tells its provenance story.",
+    image: "/images/qron/citadel.png",
     gradient: "from-stone-400 via-emerald-600 to-sky-400",
-    accentColor: "emerald",
     tags: ["3D", "Architecture", "Tilt-Shift"],
     icon: Building2,
   },
@@ -43,8 +44,8 @@ const galleryItems = [
     style: "Pop-Art Portrait",
     description:
       "Surrealist pop-art face decomposed into QR geometry. Every color block is a data module; the portrait remains scannable from any angle. Art meets authentication.",
+    image: "/images/qron/persona.png",
     gradient: "from-pink-500 via-cyan-400 to-yellow-400",
-    accentColor: "pink",
     tags: ["Pop-Art", "Portrait", "Colorful"],
     icon: Palette,
   },
@@ -54,8 +55,8 @@ const galleryItems = [
     style: "Cyberpunk Character",
     description:
       "A hooded figure walks through a QR-encoded world. Glowing eyes, modular armor, and scattered data fragments — the code is the character, the character is the code.",
+    image: "/images/qron/sentinel.png",
     gradient: "from-red-600 via-slate-300 to-pink-500",
-    accentColor: "red",
     tags: ["Cyberpunk", "Character", "Futuristic"],
     icon: Zap,
   },
@@ -66,7 +67,6 @@ const galleryItems = [
     description:
       "The AuthiChain shield rendered in gold and steel, QR matrix etched across its face. A blockchain-grade seal of authenticity — scan to verify, impossible to forge.",
     gradient: "from-amber-400 via-amber-600 to-stone-800",
-    accentColor: "amber",
     tags: ["Brand", "Shield", "Gold"],
     icon: Shield,
   },
@@ -77,7 +77,6 @@ const galleryItems = [
     description:
       "Flowers and foliage grow through a living QR code, petals replacing rigid squares. Organic yet perfectly scannable — proof that nature and data can coexist.",
     gradient: "from-green-500 via-lime-400 to-emerald-700",
-    accentColor: "green",
     tags: ["Botanical", "Organic", "AI-Generated"],
     icon: Sparkles,
   },
@@ -193,21 +192,34 @@ export default function QronGalleryPage() {
                 key={item.id}
                 className="group overflow-hidden border-2 border-transparent hover:border-primary/50 transition-all duration-300"
               >
-                {/* Art Preview — gradient placeholder */}
-                <div
-                  className={`relative aspect-square bg-gradient-to-br ${item.gradient} flex items-center justify-center`}
-                >
-                  {/* QR grid overlay */}
-                  <div className="absolute inset-0 opacity-20 pointer-events-none"
-                    style={{
-                      backgroundImage:
-                        "repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(255,255,255,.12) 18px, rgba(255,255,255,.12) 20px), repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(255,255,255,.12) 18px, rgba(255,255,255,.12) 20px)",
-                    }}
-                  />
-                  <Icon className="h-16 w-16 text-white/60 group-hover:scale-110 transition-transform duration-300" />
+                {/* Art Preview — real image or gradient fallback */}
+                <div className="relative aspect-square overflow-hidden">
+                  {item.image ? (
+                    <Image
+                      src={item.image}
+                      alt={`${item.title} — ${item.style} QRON art`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${item.gradient} flex items-center justify-center`}
+                    >
+                      {/* QR grid overlay */}
+                      <div
+                        className="absolute inset-0 opacity-20 pointer-events-none"
+                        style={{
+                          backgroundImage:
+                            "repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(255,255,255,.12) 18px, rgba(255,255,255,.12) 20px), repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(255,255,255,.12) 18px, rgba(255,255,255,.12) 20px)",
+                        }}
+                      />
+                      <Icon className="h-16 w-16 text-white/60 group-hover:scale-110 transition-transform duration-300" />
+                    </div>
+                  )}
 
                   {/* Lock badge */}
-                  <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+                  <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 z-10">
                     <Lock className="h-3 w-3 text-amber-400" />
                     <span className="text-[10px] text-amber-400 font-semibold">
                       SIGNED
