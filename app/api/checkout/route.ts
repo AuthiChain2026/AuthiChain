@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { createClient } from '@/lib/supabase/server'
+import { planFromPriceId } from '@/lib/subscription'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,9 +23,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing priceId' }, { status: 400 })
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://authichain.com'
+    // Attach authenticated user ID so the webhook can link subscription → user
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    const session = await stripe.checkout.sessions.create({
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://authichain.com'
+    const plan = planFromPriceId(priceId)
+
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
@@ -31,7 +38,17 @@ export async function POST(req: NextRequest) {
       cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
       allow_promotion_codes: true,
       billing_address_collection: 'required',
-    })
+      metadata: { plan, ...(user ? { userId: user.id } : {}) },
+      subscription_data: {
+        metadata: { plan, ...(user ? { userId: user.id } : {}) },
+      },
+    }
+
+    if (user?.email) {
+      sessionParams.customer_email = user.email
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams)
 
     return NextResponse.redirect(session.url!, 303)
   } catch (err) {

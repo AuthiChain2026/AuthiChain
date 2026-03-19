@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createHash, randomBytes } from 'crypto'
 import { normalizeProductRecord } from '@/lib/contracts/products'
+import { getUserSubscription, checkProductQuota, isSubscriptionActive } from '@/lib/subscription'
 
 // Generate TrueMark™ ID and blockchain transaction hash
 function generateTrueMark() {
@@ -76,6 +77,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Product already registered' },
         { status: 400 }
+      )
+    }
+
+    // Enforce subscription quota
+    const subscription = await getUserSubscription()
+    if (!isSubscriptionActive(subscription)) {
+      return NextResponse.json(
+        { error: 'Your subscription is inactive. Please update your billing details.' },
+        { status: 403 }
+      )
+    }
+    const quota = await checkProductQuota(user.id, subscription)
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          error: `Product registration limit reached (${quota.registered}/${quota.limit}). Upgrade your plan to register more products.`,
+          quota,
+        },
+        { status: 403 }
       )
     }
 
