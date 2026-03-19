@@ -1,0 +1,123 @@
+{
+  "name": "AuthiChain - Contracts Deployment Pipeline",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": "github-push-webhook",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "label": "GitHub Push Webhook"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": true
+      },
+      "mapper": {
+        "url": "https://api.authichain.io/deploy/hardhat",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer {{1.headers.x-deploy-token}}"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "body": "{\"repo\": \"{{1.body.repository.full_name}}\", \"ref\": \"{{1.body.ref}}\", \"commit\": \"{{1.body.head_commit.id}}\", \"network\": \"polygon\"}"
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0 },
+        "restore": {}
+      }
+    },
+    {
+      "id": 3,
+      "module": "airtable:createRecord",
+      "version": 1,
+      "parameters": {
+        "base": "appAuthiChainContracts",
+        "table": "Deployments"
+      },
+      "mapper": {
+        "fields": {
+          "Contract Name": "{{1.body.head_commit.message}}",
+          "Repository": "{{1.body.repository.full_name}}",
+          "Commit SHA": "{{1.body.head_commit.id}}",
+          "Network": "Polygon",
+          "Deploy Status": "{{2.statusCode}}",
+          "Contract Address": "{{2.data.contractAddress}}",
+          "Transaction Hash": "{{2.data.txHash}}",
+          "Deployed At": "{{now}}",
+          "Gas Used": "{{2.data.gasUsed}}"
+        }
+      },
+      "metadata": {
+        "designer": { "x": 600, "y": 0 },
+        "restore": {
+          "parameters": {
+            "base": { "label": "AuthiChain Contracts" },
+            "table": { "label": "Deployments" }
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "slack:createMessage",
+      "version": 1,
+      "parameters": {
+        "channel": "#deployments"
+      },
+      "mapper": {
+        "text": ":rocket: *Contract Deployed Successfully*\n\n*Repo:* {{1.body.repository.full_name}}\n*Commit:* `{{1.body.head_commit.id}}`\n*Network:* Polygon\n*Contract Address:* `{{2.data.contractAddress}}`\n*Tx Hash:* `{{2.data.txHash}}`\n*Gas Used:* {{2.data.gasUsed}}\n*Deployed At:* {{now}}",
+        "attachments": []
+      },
+      "metadata": {
+        "designer": { "x": 900, "y": 0 },
+        "restore": {
+          "parameters": {
+            "channel": { "label": "#deployments" }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us1.make.com"
+  }
+}

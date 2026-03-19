@@ -1,0 +1,173 @@
+{
+  "name": "AuthiChain - On-Chain Event → Supabase → Neo4j → AI Story → IPFS",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": "alchemy-onchain-event-webhook",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "label": "Alchemy On-Chain Event Webhook"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": true
+      },
+      "mapper": {
+        "url": "{{connection.supabase_url}}/rest/v1/onchain_events",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "apikey",
+            "value": "{{connection.supabase_anon_key}}"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer {{connection.supabase_service_key}}"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "name": "Prefer",
+            "value": "resolution=merge-duplicates"
+          }
+        ],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "body": "{\"event_id\": \"{{1.body.event.id}}\", \"block_number\": {{1.body.event.data.block.number}}, \"transaction_hash\": \"{{1.body.event.transaction.hash}}\", \"contract_address\": \"{{1.body.event.log.address}}\", \"event_name\": \"{{1.body.event.activity[].category}}\", \"from_address\": \"{{1.body.event.activity[].fromAddress}}\", \"to_address\": \"{{1.body.event.activity[].toAddress}}\", \"token_id\": \"{{1.body.event.activity[].erc721TokenId}}\", \"value\": \"{{1.body.event.activity[].value}}\", \"asset\": \"{{1.body.event.activity[].asset}}\", \"network\": \"{{1.body.event.network}}\", \"created_at\": \"{{now}}\"}"
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0 },
+        "restore": {}
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": true
+      },
+      "mapper": {
+        "url": "{{connection.neo4j_bolt_http_url}}/db/data/transaction/commit",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Basic {{connection.neo4j_auth_base64}}"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "body": "{\"statements\": [{\"statement\": \"MERGE (from:Wallet {address: $fromAddress}) MERGE (to:Wallet {address: $toAddress}) MERGE (token:Token {id: $tokenId, contract: $contractAddress}) MERGE (from)-[:TRANSFERRED {txHash: $txHash, value: $value, blockNumber: $blockNumber, timestamp: $timestamp}]->(token)-[:RECEIVED_BY]->(to) RETURN from, to, token\", \"parameters\": {\"fromAddress\": \"{{1.body.event.activity[].fromAddress}}\", \"toAddress\": \"{{1.body.event.activity[].toAddress}}\", \"tokenId\": \"{{1.body.event.activity[].erc721TokenId}}\", \"contractAddress\": \"{{1.body.event.log.address}}\", \"txHash\": \"{{1.body.event.transaction.hash}}\", \"value\": \"{{1.body.event.activity[].value}}\", \"blockNumber\": {{1.body.event.data.block.number}}, \"timestamp\": \"{{now}}\"}}]}"
+      },
+      "metadata": {
+        "designer": { "x": 600, "y": 0 },
+        "restore": {}
+      }
+    },
+    {
+      "id": 4,
+      "module": "openai:CreateCompletion",
+      "version": 1,
+      "parameters": {
+        "model": "gpt-4o"
+      },
+      "mapper": {
+        "model": "gpt-4o",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a blockchain data storyteller. Given on-chain transfer data, write a concise, human-readable narrative (2-3 sentences) describing the authenticity event for brand transparency reporting."
+          },
+          {
+            "role": "user",
+            "content": "On-chain event data:\n- From: {{1.body.event.activity[].fromAddress}}\n- To: {{1.body.event.activity[].toAddress}}\n- Token ID: {{1.body.event.activity[].erc721TokenId}}\n- Contract: {{1.body.event.log.address}}\n- Network: {{1.body.event.network}}\n- Block: {{1.body.event.data.block.number}}\n- Tx Hash: {{1.body.event.transaction.hash}}\n- Asset: {{1.body.event.activity[].asset}}\n\nWrite a brief authenticity story for this transfer event."
+          }
+        ],
+        "max_tokens": 200,
+        "temperature": 0.7
+      },
+      "metadata": {
+        "designer": { "x": 900, "y": 0 },
+        "restore": {
+          "parameters": {
+            "model": { "label": "GPT-4o" }
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": true
+      },
+      "mapper": {
+        "url": "https://api.web3.storage/upload",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer {{connection.web3storage_api_token}}"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "name": "X-NAME",
+            "value": "authichain-event-{{1.body.event.transaction.hash}}.json"
+          }
+        ],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "body": "{\"event\": {\"id\": \"{{1.body.event.id}}\", \"network\": \"{{1.body.event.network}}\", \"block_number\": {{1.body.event.data.block.number}}, \"transaction_hash\": \"{{1.body.event.transaction.hash}}\", \"from\": \"{{1.body.event.activity[].fromAddress}}\", \"to\": \"{{1.body.event.activity[].toAddress}}\", \"token_id\": \"{{1.body.event.activity[].erc721TokenId}}\", \"contract\": \"{{1.body.event.log.address}}\", \"asset\": \"{{1.body.event.activity[].asset}}\", \"value\": \"{{1.body.event.activity[].value}}\"}, \"story\": \"{{4.choices[].message.content}}\", \"neo4j_nodes\": {{3.data.results[].data}}, \"supabase_record\": {{2.statusCode}}, \"archived_at\": \"{{now}}\"}"
+      },
+      "metadata": {
+        "designer": { "x": 1200, "y": 0 },
+        "restore": {}
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": true,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us1.make.com"
+  }
+}
