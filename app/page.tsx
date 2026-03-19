@@ -34,16 +34,16 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
           {/* Left: Text */}
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
               <Sparkles className="h-4 w-4" />
-              <span className="text-sm font-medium">Powered by AI AutoFlow™</span>
+              <span className="text-sm font-medium">AI AutoFlow™ — Instant Product Classification</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-              Universal Authentication for{" "}
-              <span className="gradient-text">Any Product</span>
+              <span className="gradient-text">AI AutoFlow™</span>{" "}
+              Authentication for Any Product
             </h1>
             <p className="text-xl text-muted-foreground">
-              AI AutoFlow™ automatically classifies products across 10 industries and generates custom authentication workflows. From cannabis to luxury goods, electronics to pharmaceuticals—one platform for everything.
+              Automatically classifies products across 10 industries and generates blockchain-backed authentication workflows in under 3 seconds. From cannabis to luxury goods, electronics to pharmaceuticals—one platform for everything.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/signup">
@@ -115,7 +115,7 @@ export default function Home() {
             Why Choose <span className="gradient-text">AuthiChain</span>?
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Industry-leading technology to protect your brand and customers
+            Enterprise-grade blockchain authentication trusted by brands protecting products across 10 industries
           </p>
         </div>
 
@@ -217,6 +217,53 @@ export default function Home() {
         </div>
       </section>
 
+      {/* QRON Ecosystem Callout */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="max-w-5xl mx-auto rounded-2xl border border-amber-500/30 bg-amber-500/5 p-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-semibold uppercase tracking-widest mb-4">
+              AuthiChain Ecosystem
+            </div>
+            <h2 className="text-3xl font-bold mb-3">
+              Create Verified <span className="gradient-text">QRON Art</span>
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              QRON Space generates cryptographically signed QR art via Ed25519 — every scan verifies back to the AuthiChain Protocol. The creative entry point to enterprise authentication.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a href="https://qron.space" target="_blank" rel="noopener noreferrer">
+                <Button variant="gradient" className="w-full sm:w-auto">
+                  Generate a QRON →
+                </Button>
+              </a>
+              <Link href="/verify">
+                <Button variant="outline" className="w-full sm:w-auto">
+                  Verify a QRON
+                </Button>
+              </Link>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl bg-card border p-4 text-center">
+              <div className="text-2xl font-bold gradient-text">Ed25519</div>
+              <div className="text-xs text-muted-foreground mt-1">Cryptographic Signing</div>
+            </div>
+            <div className="rounded-xl bg-card border p-4 text-center">
+              <div className="text-2xl font-bold gradient-text">99.7%</div>
+              <div className="text-xs text-muted-foreground mt-1">Verification Accuracy</div>
+            </div>
+            <div className="rounded-xl bg-card border p-4 text-center">
+              <div className="text-2xl font-bold gradient-text">~25%</div>
+              <div className="text-xs text-muted-foreground mt-1">Scan Lift vs Standard QR</div>
+            </div>
+            <div className="rounded-xl bg-card border p-4 text-center">
+              <div className="text-2xl font-bold gradient-text">Live</div>
+              <div className="text-xs text-muted-foreground mt-1">On-Chain Verification</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-3xl mx-auto space-y-8 p-12 rounded-3xl gradient-primary">
@@ -224,14 +271,20 @@ export default function Home() {
             Ready to Protect Your Products?
           </h2>
           <p className="text-xl text-white/90">
-            Join thousands of brands using AuthiChain to fight counterfeits and
-            build customer trust
+            Brands in luxury, pharma, cannabis, and electronics rely on AuthiChain for blockchain-grade authentication. Start with a free product registration.
           </p>
-          <Link href="/signup">
-            <Button size="lg" variant="secondary" className="font-semibold">
-              Get Started Free
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/signup">
+              <Button size="lg" variant="secondary" className="font-semibold">
+                Get Started Free
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="font-semibold border-white/40 text-white hover:bg-white/10">
+                View Enterprise Plans
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -246,6 +299,8 @@ export default function Home() {
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <Link href="/verify" className="hover:text-foreground transition-colors">Verify Product</Link>
               <Link href="/demo" className="hover:text-foreground transition-colors">Live Demo</Link>
+              <Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+              <a href="https://qron.space" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">QRON Space</a>
               <Link href="/login" className="hover:text-foreground transition-colors">Login</Link>
             </div>
             <div className="text-sm text-muted-foreground mt-4 md:mt-0">
