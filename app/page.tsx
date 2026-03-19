@@ -236,9 +236,9 @@ export default function Home() {
                   Generate a QRON →
                 </Button>
               </a>
-              <Link href="/verify">
+              <Link href="/qron">
                 <Button variant="outline" className="w-full sm:w-auto">
-                  Verify a QRON
+                  View Gallery
                 </Button>
               </Link>
             </div>
@@ -300,7 +300,7 @@ export default function Home() {
               <Link href="/verify" className="hover:text-foreground transition-colors">Verify Product</Link>
               <Link href="/demo" className="hover:text-foreground transition-colors">Live Demo</Link>
               <Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
-              <a href="https://qron.space" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">QRON Space</a>
+              <Link href="/qron" className="hover:text-foreground transition-colors">QRON Gallery</Link>
               <Link href="/login" className="hover:text-foreground transition-colors">Login</Link>
             </div>
             <div className="text-sm text-muted-foreground mt-4 md:mt-0">
