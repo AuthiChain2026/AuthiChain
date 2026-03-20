@@ -76,22 +76,22 @@ export default function DashboardPage() {
   }
 
   // AI AutoFlow Analytics
-  const industryBreakdown = products.reduce((acc: Record<string, number>, product: Product) => {
+  const industryBreakdown: Record<string, number> = products.reduce((acc: Record<string, number>, product: Product) => {
     if (product.industry_id) {
       acc[product.industry_id] = (acc[product.industry_id] || 0) + 1
     }
     return acc
   }, {} as Record<string, number>)
 
-  const totalWithIndustry = Object.values(industryBreakdown).reduce((sum: number, count: number) => sum + count, 0)
+  const totalWithIndustry: number = (Object.values(industryBreakdown) as number[]).reduce((sum: number, count: number) => sum + count, 0)
 
   const avgConfidence = products.filter((p) => p.confidence !== null && p.confidence !== undefined)
     .reduce((sum: number, p: Product) => sum + (p.confidence ?? 0), 0) /
     (products.filter((p) => p.confidence !== null && p.confidence !== undefined).length || 1)
 
-  const topIndustries = Object.entries(industryBreakdown)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3) as [string, number][]
+  const topIndustries: [string, number][] = (Object.entries(industryBreakdown) as [string, number][])
+    .sort(([, a]: [string, number], [, b]: [string, number]) => b - a)
+    .slice(0, 3)
 
   return (
     <div className="min-h-screen bg-background">
@@ -241,9 +241,9 @@ export default function DashboardPage() {
                 <div className="mt-6">
                   <h4 className="text-sm font-semibold mb-3">Industry Distribution</h4>
                   <div className="space-y-2">
-                    {Object.entries(industryBreakdown)
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([industry, count]) => (
+                    {(Object.entries(industryBreakdown) as [string, number][])
+                      .sort(([, a]: [string, number], [, b]: [string, number]) => b - a)
+                      .map(([industry, count]: [string, number]) => (
                         <div key={industry} className="flex items-center gap-3">
                           <div className="flex-1 flex items-center gap-3">
                             <span className="text-sm font-medium capitalize min-w-[120px]">
