@@ -93,5 +93,6 @@ export function tierFromPriceId(env: Env, priceId: string): LicenseTier {
  * Seats for each tier (0 = unlimited).
  */
 export function seatsForTier(tier: LicenseTier): number {
-  return tier === 'enterprise' ? 0 : 0  // both unlimited for now; adjust as needed
+  // 0 = unlimited seats. Pro gets a fixed seat allowance; Enterprise is unrestricted.
+  return tier === 'enterprise' ? 0 : 5
 }

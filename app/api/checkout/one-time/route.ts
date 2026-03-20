@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
         plan: planName,
         type: 'qron_credits',
         credits: String(creditAmount),
+        priceId,
       },
     }
 

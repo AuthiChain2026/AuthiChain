@@ -42,7 +42,10 @@ export async function POST(req: NextRequest) {
       cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
       allow_promotion_codes: true,
       billing_address_collection: 'required',
-      metadata: { plan: planName, planKey: plan },
+      // priceId is included so the license-issuer Cloudflare Worker can determine
+      // the subscription tier from the webhook payload without expanding line_items
+      // (Stripe does not include line_items in webhook payloads by default).
+      metadata: { plan: planName, planKey: plan, priceId },
     }
 
     // Attach authenticated user so webhook can link subscription → user row

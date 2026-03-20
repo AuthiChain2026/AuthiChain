@@ -3,14 +3,24 @@ main = "src/index.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
+# ──────────────────────────────────────────────────────────────────────────────
+# FIRST-TIME SETUP
+#   Run the provisioning script to replace placeholder IDs and apply migrations:
+#     cd workers/license-issuer
+#     bash scripts/provision.sh
+#
+# DEPLOY
+#     wrangler deploy
+# ──────────────────────────────────────────────────────────────────────────────
+
 [[d1_databases]]
 binding = "DATABASE"
 database_name = "authichain-license-db"
-database_id = "YOUR_D1_DATABASE_ID"  # wrangler d1 create authichain-license-db
+database_id = "YOUR_D1_DATABASE_ID"  # replaced by scripts/provision.sh
 
 [[kv_namespaces]]
 binding = "SESSIONS"
-id = "YOUR_KV_NAMESPACE_ID"           # wrangler kv namespace create LICENSE_SESSIONS
+id = "YOUR_KV_NAMESPACE_ID"           # replaced by scripts/provision.sh
 
 # Secrets — set via: wrangler secret put <NAME>
 # STRIPE_SECRET_KEY
