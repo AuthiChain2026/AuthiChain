@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildVerifyPayload, mapVerificationResponse } from '@/lib/verification'
 import { getVerifyApiUrl, getVerifyApiMissingMessage } from '@/lib/verification-config'
+import { recordScanFee } from '@/lib/fee-flows'
 
 const VERIFY_API_URL = process.env.VERIFY_API_URL || 'https://api.authichain.io/api/verify'
 const UPSTREAM_TIMEOUT_MS = 8000
@@ -71,7 +72,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(mapVerificationResponse(data, rawInput))
+    const mapped = mapVerificationResponse(data, rawInput)
+
+    // Record QRON authentication fee (fire-and-forget, does not block response)
+    if (mapped.authentic && mapped.qron_id) {
+      recordScanFee({
+        truemarkId: mapped.qron_id,
+        userAgent: request.headers.get('user-agent'),
+        ipAddress: request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip'),
+      }).catch(() => {})
+    }
+
+    return NextResponse.json(mapped)
   } catch (error) {
     console.error('Verify proxy error:', error)
     const message = error instanceof Error && error.name === 'AbortError'
