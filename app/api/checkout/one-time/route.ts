@@ -23,6 +23,10 @@ export async function POST(req: NextRequest) {
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://authichain.com'
 
+    const price = await stripe.prices.retrieve(priceId, { expand: ['product'] })
+    const product = price.product as Stripe.Product
+    const planName = product?.name || priceId
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -30,6 +34,7 @@ export async function POST(req: NextRequest) {
       success_url: `${baseUrl}/qron?purchase=success`,
       cancel_url: `${baseUrl}/qron?purchase=cancelled`,
       allow_promotion_codes: true,
+      metadata: { plan: planName },
     })
 
     return NextResponse.redirect(session.url!, 303)
