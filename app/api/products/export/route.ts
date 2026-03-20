@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getUserSubscription, PLAN_LIMITS } from '@/lib/subscription'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,15 @@ export async function GET(request: Request) {
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Gate: Starter+ only
+    const subscription = await getUserSubscription()
+    if (!PLAN_LIMITS[subscription.plan].exportCsv) {
+      return NextResponse.json(
+        { error: 'CSV export requires a Starter or higher plan.', upgradeUrl: '/pricing' },
+        { status: 403 }
+      )
     }
 
     // Fetch products with optional industry filter

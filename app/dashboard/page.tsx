@@ -37,6 +37,20 @@ export default function DashboardPage() {
     } catch {}
   }
 
+  const handleManageBilling = async () => {
+    try {
+      const res = await fetch("/api/billing-portal", { method: "POST" })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else if (data.upgradeUrl) {
+        router.push(data.upgradeUrl)
+      }
+    } catch {
+      toast({ title: "Error", description: "Could not open billing portal.", variant: "destructive" })
+    }
+  }
+
   const checkUser = async () => {
     const { data: { user }, error } = await supabase.auth.getUser()
 
@@ -219,14 +233,21 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {(subscription.subscription.plan === 'free' || subscription.subscription.plan === 'starter') && (
-                  <Link href="/pricing">
-                    <Button size="sm" variant="outline" className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 shrink-0">
-                      Upgrade
-                      <ArrowUpRight className="ml-1 h-3 w-3" />
+                <div className="flex items-center gap-2 shrink-0">
+                  {(subscription.subscription.plan === 'free' || subscription.subscription.plan === 'starter') && (
+                    <Link href="/pricing">
+                      <Button size="sm" variant="outline" className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10">
+                        Upgrade
+                        <ArrowUpRight className="ml-1 h-3 w-3" />
+                      </Button>
+                    </Link>
+                  )}
+                  {subscription.subscription.stripeCustomerId && (
+                    <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={handleManageBilling}>
+                      Manage billing
                     </Button>
-                  </Link>
-                )}
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
