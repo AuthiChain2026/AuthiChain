@@ -311,8 +311,15 @@ export default function QronGalleryPage() {
           <h2 className="text-3xl font-bold mb-3">
             Buy More <span className="gradient-text">Generations</span>
           </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
+          <p className="text-muted-foreground max-w-xl mx-auto mb-3">
             Start with 10 free QRONs. Need more? Grab a credit pack — no subscription required.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Use code{' '}
+            <span className="font-mono font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">
+              LAUNCH25
+            </span>{' '}
+            for 25% off.
           </p>
         </div>
 
@@ -322,7 +329,7 @@ export default function QronGalleryPage() {
               name: "Starter Pack",
               credits: "100 QRONs",
               price: "$29",
-              priceId: "price_1TCrKfPUXqpBpzb3G88BPGlg",
+              paymentLink: "https://buy.stripe.com/cNi28t2yD55z0B076AaIM09",
               perUnit: "$0.29 / QRON",
               highlight: false,
               features: ["100 Ed25519-signed QRONs", "All art styles", "On-chain verification", "Never expires"],
@@ -331,7 +338,7 @@ export default function QronGalleryPage() {
               name: "Creator Pack",
               credits: "500 QRONs",
               price: "$99",
-              priceId: "price_1TCrKgPUXqpBpzb3IoVBwxmu",
+              paymentLink: "https://buy.stripe.com/bJebJ32yD41vbfEez2aIM0a",
               perUnit: "$0.20 / QRON",
               highlight: true,
               features: ["500 Ed25519-signed QRONs", "All art styles", "On-chain verification", "Never expires", "Priority generation queue"],
@@ -340,7 +347,7 @@ export default function QronGalleryPage() {
               name: "Studio Pack",
               credits: "2,000 QRONs",
               price: "$299",
-              priceId: "price_1TCrKhPUXqpBpzb3ppIhyP1i",
+              paymentLink: "https://buy.stripe.com/dRm7sNa15fKdfvUfD6aIM0b",
               perUnit: "$0.15 / QRON",
               highlight: false,
               features: ["2,000 Ed25519-signed QRONs", "All art styles", "On-chain verification", "Never expires", "Priority generation queue", "Bulk export (ZIP)"],
@@ -373,19 +380,16 @@ export default function QronGalleryPage() {
                   </li>
                 ))}
               </ul>
-              <form action="/api/checkout/one-time" method="POST">
-                <input type="hidden" name="priceId" value={pack.priceId} />
-                <button
-                  type="submit"
-                  className={`w-full py-2.5 rounded-xl font-semibold text-sm transition ${
-                    pack.highlight
-                      ? "bg-primary hover:opacity-90 text-primary-foreground"
-                      : "bg-muted hover:bg-muted/80 text-foreground"
-                  }`}
-                >
-                  Buy {pack.name}
-                </button>
-              </form>
+              <a
+                href={pack.paymentLink}
+                className={`w-full py-2.5 rounded-xl font-semibold text-sm transition text-center block ${
+                  pack.highlight
+                    ? "bg-primary hover:opacity-90 text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80 text-foreground"
+                }`}
+              >
+                Buy {pack.name}
+              </a>
             </div>
           ))}
         </div>

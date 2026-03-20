@@ -14,7 +14,7 @@ const plans = [
       'AuthiChain dashboard',
     ],
     cta: 'Start Authenticating',
-    priceId: 'price_1Sp06mPUXqpBpzb3wFDAQUnv',
+    paymentLink: 'https://buy.stripe.com/8x24gB5KP55zgzY1MgaIM07',
     highlight: false,
   },
   {
@@ -32,7 +32,7 @@ const plans = [
       'Analytics dashboard',
     ],
     cta: 'Go Pro',
-    priceId: 'price_1TCrKXPUXqpBpzb3bB5S7ONz',
+    paymentLink: 'https://buy.stripe.com/14A3cxgptbtX2J88aEaIM08',
     highlight: true,
   },
   {
@@ -50,7 +50,7 @@ const plans = [
       'Contract pricing',
     ],
     cta: 'Contact Sales',
-    priceId: null,
+    paymentLink: null,
     highlight: false,
   },
 ]
@@ -67,9 +67,16 @@ export default function PricingPage() {
           Protect your brand.<br />
           <span className="text-emerald-400">Verify everything.</span>
         </h1>
-        <p className="text-gray-400 text-lg max-w-xl mx-auto">
+        <p className="text-gray-400 text-lg max-w-xl mx-auto mb-4">
           AuthiChain blockchain authentication for luxury goods, pharma, and enterprise supply chains.
           No setup fees. Cancel anytime.
+        </p>
+        <p className="text-sm text-gray-500">
+          Use code{' '}
+          <span className="font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+            LAUNCH25
+          </span>{' '}
+          at checkout for 25% off your first 3 months.
         </p>
       </section>
 
@@ -103,20 +110,17 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            {plan.priceId ? (
-              <form action="/api/checkout" method="POST">
-                <input type="hidden" name="priceId" value={plan.priceId} />
-                <button
-                  type="submit"
-                  className={`w-full py-3 rounded-xl font-semibold transition ${
-                    plan.highlight
-                      ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
-                      : 'bg-white/10 hover:bg-white/20 text-white'
-                  }`}
-                >
-                  {plan.cta}
-                </button>
-              </form>
+            {plan.paymentLink ? (
+              <a
+                href={plan.paymentLink}
+                className={`w-full py-3 rounded-xl font-semibold transition text-center block ${
+                  plan.highlight
+                    ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
+                    : 'bg-white/10 hover:bg-white/20 text-white'
+                }`}
+              >
+                {plan.cta}
+              </a>
             ) : (
               <Link
                 href="mailto:z@authichain.com?subject=Enterprise%20Inquiry"
