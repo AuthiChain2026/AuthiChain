@@ -163,6 +163,46 @@ async function upsertSubscriptionInSupabase(
 
 // ─── Event handlers ──────────────────────────────────────────────────────────
 
+/**
+ * Handle one-time QRON credit purchases.
+ * Credits are added to the user's qron_credits balance in Supabase.
+ */
+async function handleQronCreditPurchase(session: Stripe.Checkout.Session) {
+  const userId = session.metadata?.userId;
+  const credits = parseInt(session.metadata?.credits ?? '0', 10);
+
+  if (!userId || credits <= 0) {
+    console.log('[qron-credits] Skipping — no userId or credits in metadata');
+    return;
+  }
+
+  try {
+    const supabase = createServiceClient();
+    // Upsert user credit balance (increment atomically via RPC if available, else read-modify-write)
+    const { data: existing } = await supabase
+      .from('qron_credits')
+      .select('balance')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from('qron_credits')
+        .update({ balance: existing.balance + credits, updated_at: new Date().toISOString() })
+        .eq('user_id', userId);
+    } else {
+      await supabase
+        .from('qron_credits')
+        .insert({ user_id: userId, balance: credits, updated_at: new Date().toISOString() });
+    }
+
+    console.log(`[qron-credits] +${credits} credits for user ${userId}`);
+  } catch (err) {
+    console.error('[qron-credits] Failed to update balance:', err);
+    throw err; // re-throw so the event is not marked success
+  }
+}
+
 async function fireWelcomeEmail(email: string, name: string, plan: string) {
   const webhookUrl = process.env.MAKE_WELCOME_WEBHOOK_URL;
   if (!webhookUrl) return;
@@ -415,9 +455,15 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (event.type) {
-      case 'checkout.session.completed':
-        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.metadata?.type === 'qron_credits') {
+          await handleQronCreditPurchase(session);
+        } else {
+          await handleCheckoutSessionCompleted(session);
+        }
         break;
+      }
       case 'invoice.paid':
         await handleInvoicePaid(event.data.object as Stripe.Invoice);
         break;

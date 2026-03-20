@@ -1,7 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
+
+// Map product names → QRON credit amounts
+const CREDIT_MAP: Record<string, number> = {
+  'qron starter': 100,
+  'qron creator': 500,
+  'qron studio': 2000,
+}
+
+function creditsFromProductName(name: string): number {
+  const key = name.toLowerCase()
+  for (const [k, v] of Object.entries(CREDIT_MAP)) {
+    if (key.includes(k)) return v
+  }
+  return 0
+}
 
 export async function POST(req: NextRequest) {
   const stripeKey = process.env.STRIPE_SECRET_KEY
@@ -21,21 +37,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing priceId' }, { status: 400 })
     }
 
+    // Attach authenticated user so webhook can credit their balance
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://authichain.com'
 
     const price = await stripe.prices.retrieve(priceId, { expand: ['product'] })
     const product = price.product as Stripe.Product
     const planName = product?.name || priceId
+    const creditAmount = creditsFromProductName(planName)
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${baseUrl}/qron?purchase=success`,
       cancel_url: `${baseUrl}/qron?purchase=cancelled`,
       allow_promotion_codes: true,
-      metadata: { plan: planName },
-    })
+      metadata: {
+        plan: planName,
+        type: 'qron_credits',
+        credits: String(creditAmount),
+      },
+    }
+
+    if (user) {
+      sessionParams.metadata = { ...sessionParams.metadata, userId: user.id }
+      sessionParams.customer_email = user.email ?? undefined
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams)
 
     return NextResponse.redirect(session.url!, 303)
   } catch (err) {

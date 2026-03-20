@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const product = price.product as Stripe.Product
     const planName = product?.name || priceId
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
@@ -42,8 +42,16 @@ export async function POST(req: NextRequest) {
       cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
       allow_promotion_codes: true,
       billing_address_collection: 'required',
-      metadata: { plan: planName },
-    })
+      metadata: { plan: planName, planKey: plan },
+    }
+
+    // Attach authenticated user so webhook can link subscription → user row
+    if (user) {
+      sessionParams.metadata = { ...sessionParams.metadata, userId: user.id }
+      sessionParams.customer_email = user.email ?? undefined
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams)
 
     return NextResponse.redirect(session.url!, 303)
   } catch (err) {
