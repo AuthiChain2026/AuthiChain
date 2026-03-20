@@ -562,7 +562,65 @@ export default function DemoPage() {
           </div>
         </section>
 
+        {/* ── Final CTA ── */}
+        <section className="text-center space-y-6 pb-8">
+          <div className="inline-block bg-purple-500/20 border border-purple-500/30 rounded-full px-4 py-1 text-purple-300 text-sm font-medium mb-2">
+            Ready to protect your brand?
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold">
+            Authenticate everything.<br />
+            <span className="bg-gradient-to-r from-purple-400 to-green-400 bg-clip-text text-transparent">
+              Start in minutes.
+            </span>
+          </h2>
+          <p className="text-white/50 max-w-xl mx-auto text-lg">
+            Use code <span className="font-mono font-bold text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded">LAUNCH25</span> for 25% off your first 3 months.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
+            <a href="/signup">
+              <Button size="lg" className="bg-gradient-to-r from-purple-500 to-green-500 hover:opacity-90 text-white font-semibold px-8">
+                Start Free — No Credit Card
+              </Button>
+            </a>
+            <a href="/pricing">
+              <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 font-semibold px-8">
+                View Plans →
+              </Button>
+            </a>
+          </div>
+          <p className="text-white/30 text-sm">Starter from $299/mo · Cancel anytime</p>
+        </section>
+
       </div>
+
+      {/* Sticky upgrade bar — appears after classification */}
+      {classification && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-900/95 to-green-900/95 backdrop-blur border-t border-white/10 px-4 py-3">
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-green-400 text-lg">✓</span>
+              <span className="text-white font-medium">
+                <span className="text-green-300">{classification.industry}</span> detected at{" "}
+                <span className="text-purple-300">{(classification.confidence * 100).toFixed(0)}% confidence</span>
+              </span>
+              <span className="text-white/40 hidden sm:inline">—</span>
+              <span className="text-white/60 hidden sm:inline">Protect your full catalog with AuthiChain</span>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <a href="/pricing">
+                <Button size="sm" className="bg-white text-black hover:bg-white/90 font-semibold">
+                  See Plans
+                </Button>
+              </a>
+              <a href="/signup">
+                <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                  Sign Up Free
+                </Button>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

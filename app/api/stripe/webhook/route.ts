@@ -120,6 +120,20 @@ async function upsertRevenueProjection(subscriptionId: string, fields: object) {
 
 // ─── Event handlers ──────────────────────────────────────────────────────────
 
+async function fireWelcomeEmail(email: string, name: string, plan: string) {
+  const webhookUrl = process.env.MAKE_WELCOME_WEBHOOK_URL;
+  if (!webhookUrl) return;
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name, plan }),
+    });
+  } catch (err) {
+    console.error('[make] Welcome webhook failed:', err);
+  }
+}
+
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   const stripe = getStripe();
   const customerId = session.customer as string;
@@ -138,6 +152,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   if (customerEmail) {
     await upsertContact(customerEmail, { 'Name': customerName, 'Status': 'Customer' }, accountId || undefined);
+    await fireWelcomeEmail(customerEmail, customerName, session.metadata?.plan || 'AuthiChain');
   }
 
   await writeInvoice({
