@@ -65,25 +65,25 @@ export async function GET(request: Request) {
         'Created At',
       ]
 
-      const csvRows = (products ?? []).map((product) => [
-        product.name || '',
-        product.brand || '',
-        product.category || '',
-        (product.industry_id || '').replace('-', ' & '),
+      const csvRows = (products ?? []).map((product: Record<string, unknown>) => [
+        String(product.name ?? ''),
+        String(product.brand ?? ''),
+        String(product.category ?? ''),
+        String(product.industry_id ?? '').replace('-', ' & '),
         product.confidence ?? '',
         product.workflow ? JSON.stringify(product.workflow) : '',
-        product.story || '',
+        String(product.story ?? ''),
         product.features ? JSON.stringify(product.features) : '',
-        product.truemark_id || '',
+        String(product.truemark_id ?? ''),
         product.is_registered ? 'Yes' : 'No',
-        product.created_at || '',
+        String(product.created_at ?? ''),
       ])
 
       const csvContent = [
         headers.join(','),
-        ...csvRows.map((row) =>
+        ...csvRows.map((row: unknown[]) =>
           row
-            .map((cell) =>
+            .map((cell: unknown) =>
               typeof cell === 'string' && cell.includes(',')
                 ? `"${cell.replace(/"/g, '""')}"`
                 : cell

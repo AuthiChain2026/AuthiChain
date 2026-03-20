@@ -1,0 +1,153 @@
+{
+  "name": "AuthiChain - Brand Signup → Stripe Provisioning → Welcome Email → Churn Detection",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": "brand-signup-webhook",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "label": "Brand Signup Webhook"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "stripe:createCustomer",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "email": "{{1.body.email}}",
+        "name": "{{1.body.brand_name}}",
+        "description": "AuthiChain brand account - {{1.body.plan}}",
+        "metadata": {
+          "brand_id": "{{1.body.brand_id}}",
+          "plan": "{{1.body.plan}}",
+          "signup_source": "{{1.body.source}}",
+          "industry": "{{1.body.industry}}",
+          "wallet_address": "{{1.body.wallet_address}}"
+        }
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0 },
+        "restore": {}
+      }
+    },
+    {
+      "id": 3,
+      "module": "stripe:createSubscription",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "customer": "{{2.id}}",
+        "items": [
+          {
+            "price": "{{if(1.body.plan == 'starter', connection.stripe_price_starter, if(1.body.plan == 'growth', connection.stripe_price_growth, connection.stripe_price_enterprise))}}"
+          }
+        ],
+        "trial_period_days": "{{if(1.body.plan == 'starter', 14, 0)}}",
+        "metadata": {
+          "brand_id": "{{1.body.brand_id}}",
+          "plan": "{{1.body.plan}}"
+        }
+      },
+      "metadata": {
+        "designer": { "x": 600, "y": 0 },
+        "restore": {}
+      }
+    },
+    {
+      "id": 4,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": true
+      },
+      "mapper": {
+        "url": "https://api.sendgrid.com/v3/mail/send",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer {{connection.sendgrid_api_key}}"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "body": "{\"personalizations\": [{\"to\": [{\"email\": \"{{1.body.email}}\", \"name\": \"{{1.body.brand_name}}\"}], \"dynamic_template_data\": {\"brand_name\": \"{{1.body.brand_name}}\", \"plan\": \"{{1.body.plan}}\", \"customer_id\": \"{{2.id}}\", \"subscription_id\": \"{{3.id}}\", \"dashboard_url\": \"https://app.authichain.io/dashboard?brand={{1.body.brand_id}}\", \"trial_ends\": \"{{3.trial_end}}\", \"support_email\": \"support@authichain.io\"}}], \"from\": {\"email\": \"noreply@authichain.io\", \"name\": \"AuthiChain\"}, \"template_id\": \"{{connection.sendgrid_welcome_template_id}}\"}"
+      },
+      "metadata": {
+        "designer": { "x": 900, "y": 0 },
+        "restore": {}
+      }
+    },
+    {
+      "id": 5,
+      "module": "airtable:createRecord",
+      "version": 1,
+      "parameters": {
+        "base": "appAuthiChainBrands",
+        "table": "Brands"
+      },
+      "mapper": {
+        "fields": {
+          "Brand Name": "{{1.body.brand_name}}",
+          "Email": "{{1.body.email}}",
+          "Plan": "{{1.body.plan}}",
+          "Industry": "{{1.body.industry}}",
+          "Stripe Customer ID": "{{2.id}}",
+          "Stripe Subscription ID": "{{3.id}}",
+          "Subscription Status": "{{3.status}}",
+          "Trial End Date": "{{3.trial_end}}",
+          "Wallet Address": "{{1.body.wallet_address}}",
+          "Signup Source": "{{1.body.source}}",
+          "Signed Up At": "{{now}}",
+          "Welcome Email Sent": true,
+          "Churn Risk Score": 0,
+          "Last Activity": "{{now}}"
+        }
+      },
+      "metadata": {
+        "designer": { "x": 1200, "y": 0 },
+        "restore": {
+          "parameters": {
+            "base": { "label": "AuthiChain Brands" },
+            "table": { "label": "Brands" }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": true,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us1.make.com"
+  }
+}

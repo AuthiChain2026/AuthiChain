@@ -13,8 +13,8 @@ const plans = [
       'Email support',
       'AuthiChain dashboard',
     ],
-    cta: 'Start Free Trial',
-    priceId: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID,
+    cta: 'Start Authenticating',
+    paymentLink: 'https://buy.stripe.com/8x24gB5KP55zgzY1MgaIM07',
     highlight: false,
   },
   {
@@ -31,8 +31,8 @@ const plans = [
       'Custom QR branding',
       'Analytics dashboard',
     ],
-    cta: 'Try Pro Free',
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
+    cta: 'Go Pro',
+    paymentLink: 'https://buy.stripe.com/14A3cxgptbtX2J88aEaIM08',
     highlight: true,
   },
   {
@@ -50,7 +50,7 @@ const plans = [
       'Contract pricing',
     ],
     cta: 'Contact Sales',
-    priceId: null,
+    paymentLink: null,
     highlight: false,
   },
 ]
@@ -67,14 +67,17 @@ export default function PricingPage() {
           Protect your brand.<br />
           <span className="text-emerald-400">Verify everything.</span>
         </h1>
-        <p className="text-gray-400 text-lg max-w-xl mx-auto">
+        <p className="text-gray-400 text-lg max-w-xl mx-auto mb-4">
           AuthiChain blockchain authentication for luxury goods, pharma, and enterprise supply chains.
           No setup fees. Cancel anytime.
         </p>
-        <div className="mt-6 inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-5 py-2 text-emerald-300 text-sm font-medium">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          14-day free trial on all plans — no credit card required to start
-        </div>
+        <p className="text-sm text-gray-500">
+          Use code{' '}
+          <span className="font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+            LAUNCH25
+          </span>{' '}
+          at checkout for 25% off your first 3 months.
+        </p>
       </section>
 
       {/* Plans */}
@@ -107,20 +110,17 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            {plan.priceId ? (
-              <form action="/api/checkout" method="POST">
-                <input type="hidden" name="priceId" value={plan.priceId} />
-                <button
-                  type="submit"
-                  className={`w-full py-3 rounded-xl font-semibold transition ${
-                    plan.highlight
-                      ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
-                      : 'bg-white/10 hover:bg-white/20 text-white'
-                  }`}
-                >
-                  {plan.cta}
-                </button>
-              </form>
+            {plan.paymentLink ? (
+              <a
+                href={plan.paymentLink}
+                className={`w-full py-3 rounded-xl font-semibold transition text-center block ${
+                  plan.highlight
+                    ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
+                    : 'bg-white/10 hover:bg-white/20 text-white'
+                }`}
+              >
+                {plan.cta}
+              </a>
             ) : (
               <Link
                 href="mailto:z@authichain.com?subject=Enterprise%20Inquiry"
