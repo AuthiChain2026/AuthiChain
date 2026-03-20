@@ -28,19 +28,18 @@ export async function POST(req: NextRequest) {
     const planName = product?.name || priceId
 
     const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
+      mode: 'payment',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${baseUrl}/dashboard?checkout=success`,
-      cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
+      success_url: `${baseUrl}/qron?purchase=success`,
+      cancel_url: `${baseUrl}/qron?purchase=cancelled`,
       allow_promotion_codes: true,
-      billing_address_collection: 'required',
       metadata: { plan: planName },
     })
 
     return NextResponse.redirect(session.url!, 303)
   } catch (err) {
-    console.error('[checkout] Stripe error:', err)
+    console.error('[checkout/one-time] Stripe error:', err)
     return NextResponse.json({ error: 'Checkout failed' }, { status: 500 })
   }
 }

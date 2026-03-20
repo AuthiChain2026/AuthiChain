@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildVerifyPayload, mapVerificationResponse } from '@/lib/verification'
+import { getVerifyApiUrl, getVerifyApiMissingMessage } from '@/lib/verification-config'
 
 const VERIFY_API_URL = process.env.VERIFY_API_URL || 'https://api.authichain.io/api/verify'
 const UPSTREAM_TIMEOUT_MS = 8000
@@ -46,14 +47,12 @@ export async function POST(request: NextRequest) {
 
     const data = await upstream.json().catch(() => null)
     if (data === null) {
-      const mapped = mapVerificationResponse({}, rawInput)
       return NextResponse.json(
         {
           upstreamStatus: upstream.status,
-          ...mapped,
+          ...mapVerificationResponse({}, rawInput),
           success: false,
           message: 'Upstream returned non-JSON response',
-          ...mapVerificationResponse({}, rawInput),
         },
         { status: 200 }
       )
@@ -80,10 +79,9 @@ export async function POST(request: NextRequest) {
       : 'Failed to verify product'
     return NextResponse.json(
       {
-        ...mapped,
+        ...mapVerificationResponse({}, rawInput),
         success: false,
         message,
-        ...mapVerificationResponse({}, rawInput),
       },
       { status: 200 }
     )

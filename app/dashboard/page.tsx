@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp } from "lucide-react"
+import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp, Zap, X } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { productsResponseSchema, type Product } from "@/lib/contracts/products"
 
@@ -22,6 +22,7 @@ export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [upgradeDismissed, setUpgradeDismissed] = useState(false)
 
   useEffect(() => {
     checkUser()
@@ -76,22 +77,22 @@ export default function DashboardPage() {
   }
 
   // AI AutoFlow Analytics
-  const industryBreakdown = products.reduce((acc: Record<string, number>, product: Product) => {
+  const industryBreakdown: Record<string, number> = products.reduce((acc: Record<string, number>, product: Product) => {
     if (product.industry_id) {
       acc[product.industry_id] = (acc[product.industry_id] || 0) + 1
     }
     return acc
   }, {} as Record<string, number>)
 
-  const totalWithIndustry = Object.values(industryBreakdown).reduce((sum: number, count: number) => sum + count, 0)
+  const totalWithIndustry: number = (Object.values(industryBreakdown) as number[]).reduce((sum: number, count: number) => sum + count, 0)
 
   const avgConfidence = products.filter((p) => p.confidence !== null && p.confidence !== undefined)
     .reduce((sum: number, p: Product) => sum + (p.confidence ?? 0), 0) /
     (products.filter((p) => p.confidence !== null && p.confidence !== undefined).length || 1)
 
-  const topIndustries = Object.entries(industryBreakdown)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3) as [string, number][]
+  const topIndustries: [string, number][] = (Object.entries(industryBreakdown) as [string, number][])
+    .sort(([, a]: [string, number], [, b]: [string, number]) => b - a)
+    .slice(0, 3)
 
   return (
     <div className="min-h-screen bg-background">
@@ -164,6 +165,39 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Upgrade Banner */}
+        {!loading && !upgradeDismissed && (
+          <div className="relative mb-8 rounded-2xl overflow-hidden">
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Zap className="h-6 w-6 text-white shrink-0" />
+                <div>
+                  <p className="font-semibold text-white text-sm">
+                    Use code <span className="font-mono bg-white/20 px-1.5 py-0.5 rounded">LAUNCH25</span> — 25% off for 3 months
+                  </p>
+                  <p className="text-white/80 text-xs mt-0.5">
+                    Upgrade to Pro for unlimited products, API access, supply chain tracking &amp; more.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link href="/pricing">
+                  <Button size="sm" className="bg-white text-emerald-700 hover:bg-white/90 font-semibold">
+                    Upgrade Now
+                  </Button>
+                </Link>
+                <button
+                  onClick={() => setUpgradeDismissed(true)}
+                  className="text-white/60 hover:text-white transition-colors p-1"
+                  aria-label="Dismiss"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* AI AutoFlow Analytics */}
         {totalWithIndustry > 0 && (
@@ -241,9 +275,9 @@ export default function DashboardPage() {
                 <div className="mt-6">
                   <h4 className="text-sm font-semibold mb-3">Industry Distribution</h4>
                   <div className="space-y-2">
-                    {Object.entries(industryBreakdown)
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([industry, count]) => (
+                    {(Object.entries(industryBreakdown) as [string, number][])
+                      .sort(([, a]: [string, number], [, b]: [string, number]) => b - a)
+                      .map(([industry, count]: [string, number]) => (
                         <div key={industry} className="flex items-center gap-3">
                           <div className="flex-1 flex items-center gap-3">
                             <span className="text-sm font-medium capitalize min-w-[120px]">

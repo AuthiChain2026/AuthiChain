@@ -71,6 +71,19 @@
     background-clip: text;
 }
 
+/* Gradient text — gold to amber, used across all AuthiChain pages */
+.gradient-text {
+    background: linear-gradient(135deg, #E8C547 0%, #C9A227 50%, #A07D10 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Gradient background — used for CTA sections and gradient buttons */
+.gradient-primary {
+    background: linear-gradient(135deg, #C9A227 0%, #A07D10 100%);
+}
+
 /* Gold glow */
 .glow-gold {
     box-shadow: 0 0 20px rgba(201, 162, 39, 0.35);

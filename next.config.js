@@ -13,6 +13,7 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  turbopack: {},
   typescript: { ignoreBuildErrors: true },
   webpack: (config, { isServer, dev }) => {
     // Optimize webpack cache serialization to prevent large string warnings
