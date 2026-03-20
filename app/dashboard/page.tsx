@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp, Zap, X } from "lucide-react"
+import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp, Zap, X, Coins, ArrowUpRight, Lock } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { productsResponseSchema, type Product } from "@/lib/contracts/products"
 
@@ -23,17 +23,38 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const [upgradeDismissed, setUpgradeDismissed] = useState(false)
+  const [subscription, setSubscription] = useState<any>(null)
+  const [brand, setBrand] = useState<any>(null)
+  const [feeFlowSummary, setFeeFlowSummary] = useState<any>(null)
 
   useEffect(() => {
     checkUser()
     fetchProducts()
     fetchSubscription()
+    fetchBrand()
   }, [])
 
   const fetchSubscription = async () => {
     try {
       const res = await fetch("/api/subscription")
       if (res.ok) setSubscription(await res.json())
+    } catch {}
+  }
+
+  const fetchBrand = async () => {
+    try {
+      const [brandRes, flowsRes] = await Promise.all([
+        fetch("/api/brands/me"),
+        fetch("/api/brands/fee-flows"),
+      ])
+      if (brandRes.ok) {
+        const data = await brandRes.json()
+        setBrand(data.brand)
+      }
+      if (flowsRes.ok) {
+        const data = await flowsRes.json()
+        setFeeFlowSummary(data.summary)
+      }
     } catch {}
   }
 
@@ -154,7 +175,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Products</CardTitle>
@@ -186,7 +207,103 @@ export default function DashboardPage() {
               <div className="text-2xl font-bold">{stats.pending}</div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Plan</CardTitle>
+              <Zap className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold capitalize">
+                {subscription?.subscription?.plan ?? 'Free'}
+              </div>
+              {subscription?.subscription?.status === 'trialing' && (
+                <p className="text-xs text-blue-500 mt-1">Trial active</p>
+              )}
+              {subscription?.subscription?.status === 'past_due' && (
+                <p className="text-xs text-red-500 mt-1">Payment past due</p>
+              )}
+            </CardContent>
+          </Card>
         </div>
+
+        {/* QRON Staking Widget */}
+        {brand && (
+          <Card className="mb-8 border-amber-500/30 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20">
+            <CardHeader>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Coins className="h-5 w-5 text-amber-500" />
+                    QRON Staking
+                  </CardTitle>
+                  <CardDescription>Stake QRON tokens to reduce per-scan authentication fees</CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    className={
+                      brand.staking_tier === 'platinum' ? 'bg-purple-500 text-white' :
+                      brand.staking_tier === 'gold'     ? 'bg-yellow-500 text-black' :
+                      brand.staking_tier === 'silver'   ? 'bg-slate-400 text-white'  :
+                      brand.staking_tier === 'bronze'   ? 'bg-orange-500 text-white'  :
+                      'bg-muted text-muted-foreground'
+                    }
+                  >
+                    {brand.staking_tier.charAt(0).toUpperCase() + brand.staking_tier.slice(1)} Tier
+                  </Badge>
+                  <Link href="/qron">
+                    <Button size="sm" variant="outline" className="border-amber-400 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30">
+                      <ArrowUpRight className="h-3 w-3 mr-1" />
+                      Get QRON
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-3 bg-white/60 dark:bg-black/20 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Staked</p>
+                  <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
+                    {Number(brand.qron_staked).toLocaleString()} <span className="text-sm font-normal">QRON</span>
+                  </p>
+                </div>
+                <div className="p-3 bg-white/60 dark:bg-black/20 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Discount</p>
+                  <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                    {(brand.unit_cost_discount * 100).toFixed(0)}%
+                  </p>
+                </div>
+                <div className="p-3 bg-white/60 dark:bg-black/20 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Scans (30d)</p>
+                  <p className="text-xl font-bold">
+                    {feeFlowSummary?.total_scans ?? 0}
+                  </p>
+                </div>
+                <div className="p-3 bg-white/60 dark:bg-black/20 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">QRON Saved (30d)</p>
+                  <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {feeFlowSummary?.total_discounted?.toFixed(2) ?? '0.00'}
+                  </p>
+                </div>
+              </div>
+
+              {brand.staking_locked_until && new Date(brand.staking_locked_until) > new Date() && (
+                <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+                  <Lock className="h-3 w-3" />
+                  Locked until {new Date(brand.staking_locked_until).toLocaleDateString()}
+                </div>
+              )}
+
+              {brand.staking_tier === 'none' && (
+                <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/20 rounded-lg text-sm">
+                  <strong>Stake 1,000+ QRON</strong> to unlock Bronze tier (10% discount on every product scan).
+                  Platinum tier (60% discount) requires 1,000,000 QRON.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Upgrade Banner */}
         {!loading && !upgradeDismissed && (
