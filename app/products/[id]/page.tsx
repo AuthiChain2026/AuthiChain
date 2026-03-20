@@ -476,6 +476,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   )
 }
 
-function Label({ children }: { children: React.ReactNode }) {
+function Label({ children }: { children?: React.ReactNode }) {
   return <p className="text-sm font-medium mb-1">{children}</p>
 }

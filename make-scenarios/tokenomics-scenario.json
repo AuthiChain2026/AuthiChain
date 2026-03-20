@@ -1,0 +1,152 @@
+{
+  "name": "AuthiChain - Tokenomics Fee Distribution & QRON Swap/Burn",
+  "flow": [
+    {
+      "id": 1,
+      "module": "stripe:TriggerEvents",
+      "version": 1,
+      "parameters": {
+        "event": "invoice.paid",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "restore": {
+          "parameters": {
+            "event": { "label": "Invoice Paid" }
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "flow:Router",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "http:ActionSendData",
+              "version": 3,
+              "parameters": {
+                "handleErrors": true
+              },
+              "mapper": {
+                "url": "https://api.authichain.io/fiatswap/convert",
+                "method": "POST",
+                "headers": [
+                  {
+                    "name": "Authorization",
+                    "value": "Bearer {{connection.fiatswap_api_key}}"
+                  },
+                  {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "bodyType": "raw",
+                "contentType": "application/json",
+                "body": "{\"amount\": {{divide(1.data.object.amount_paid, 100)}}, \"currency\": \"{{1.data.object.currency}}\", \"target_token\": \"QRON\", \"action\": \"swap\", \"wallet\": \"{{1.data.object.metadata.brand_wallet}}\"}"
+              },
+              "metadata": {
+                "designer": { "x": 600, "y": -150 },
+                "restore": {}
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "http:ActionSendData",
+              "version": 3,
+              "parameters": {
+                "handleErrors": true
+              },
+              "mapper": {
+                "url": "https://api.authichain.io/fiatswap/burn",
+                "method": "POST",
+                "headers": [
+                  {
+                    "name": "Authorization",
+                    "value": "Bearer {{connection.fiatswap_api_key}}"
+                  },
+                  {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "bodyType": "raw",
+                "contentType": "application/json",
+                "body": "{\"amount\": {{divide(multiply(1.data.object.amount_paid, 0.05), 100)}}, \"currency\": \"{{1.data.object.currency}}\", \"token\": \"QRON\", \"action\": \"burn\"}"
+              },
+              "metadata": {
+                "designer": { "x": 600, "y": 150 },
+                "restore": {}
+              }
+            }
+          ]
+        }
+      ],
+      "metadata": {
+        "designer": { "x": 300, "y": 0 },
+        "restore": {}
+      }
+    },
+    {
+      "id": 5,
+      "module": "airtable:updateRecord",
+      "version": 1,
+      "parameters": {
+        "base": "appAuthiChainTokenomics",
+        "table": "FeeDistributions"
+      },
+      "mapper": {
+        "recordId": "{{1.data.object.metadata.airtable_record_id}}",
+        "fields": {
+          "Invoice ID": "{{1.data.object.id}}",
+          "Customer ID": "{{1.data.object.customer}}",
+          "Amount Paid (USD)": "{{divide(1.data.object.amount_paid, 100)}}",
+          "QRON Swapped": "{{3.data.qron_amount}}",
+          "QRON Burned": "{{4.data.qron_burned}}",
+          "Swap Tx Hash": "{{3.data.txHash}}",
+          "Burn Tx Hash": "{{4.data.txHash}}",
+          "Status": "Completed",
+          "Processed At": "{{now}}"
+        }
+      },
+      "metadata": {
+        "designer": { "x": 900, "y": 0 },
+        "restore": {
+          "parameters": {
+            "base": { "label": "AuthiChain Tokenomics" },
+            "table": { "label": "FeeDistributions" }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": true,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us1.make.com"
+  }
+}

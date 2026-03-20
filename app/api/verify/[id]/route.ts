@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildVerifyPayload, mapVerificationResponse } from '@/lib/verification'
+import { getVerifyApiUrl, getVerifyApiMissingMessage } from '@/lib/verification-config'
 
 const VERIFY_API_URL = process.env.VERIFY_API_URL || 'https://api.authichain.io/api/verify'
 const UPSTREAM_TIMEOUT_MS = 8000
@@ -63,9 +64,9 @@ export async function GET(
 
     return NextResponse.json(
       {
+        ...mapVerificationResponse({}, rawInput),
         success: false,
         message,
-        ...mapVerificationResponse({}, rawInput),
       },
       { status: 200 }
     )
