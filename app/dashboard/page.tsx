@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp, Zap, X, Coins, ArrowUpRight, Lock } from "lucide-react"
+import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp, Zap, X, Coins, ArrowUpRight, Lock, Share2, Copy, Check } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { productsResponseSchema, type Product } from "@/lib/contracts/products"
 
@@ -28,12 +28,15 @@ export default function DashboardPage() {
   const [subscription, setSubscription] = useState<any>(null)
   const [brand, setBrand] = useState<any>(null)
   const [feeFlowSummary, setFeeFlowSummary] = useState<any>(null)
+  const [referral, setReferral] = useState<any>(null)
+  const [referralCopied, setReferralCopied] = useState(false)
 
   useEffect(() => {
     checkUser()
     fetchProducts()
     fetchSubscription()
     fetchBrand()
+    fetchReferral()
 
     // Show success toast after returning from Stripe
     if (!toastedRef.current) {
@@ -73,6 +76,20 @@ export default function DashboardPage() {
         setFeeFlowSummary(data.summary)
       }
     } catch {}
+  }
+
+  const fetchReferral = async () => {
+    try {
+      const res = await fetch("/api/referral/generate")
+      if (res.ok) setReferral(await res.json())
+    } catch {}
+  }
+
+  const handleCopyReferral = async () => {
+    if (!referral?.referral_url) return
+    await navigator.clipboard.writeText(referral.referral_url)
+    setReferralCopied(true)
+    setTimeout(() => setReferralCopied(false), 2000)
   }
 
   const handleManageBilling = async () => {
@@ -365,6 +382,57 @@ export default function DashboardPage() {
                   </Button>
                 )}
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Referral Widget */}
+        {referral && (
+          <Card className="mb-8 border-emerald-500/30 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20">
+            <CardHeader>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Share2 className="h-5 w-5 text-emerald-500" />
+                    Refer &amp; Earn
+                  </CardTitle>
+                  <CardDescription>Invite brands — earn 3 months at 25% off when they subscribe</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex-1 bg-white/70 dark:bg-black/30 border border-emerald-200 dark:border-emerald-800 rounded-lg px-3 py-2 font-mono text-sm truncate select-all">
+                  {referral.referral_url}
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-emerald-400 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 shrink-0"
+                  onClick={handleCopyReferral}
+                >
+                  {referralCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  <span className="ml-1.5">{referralCopied ? 'Copied!' : 'Copy'}</span>
+                </Button>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 bg-white/60 dark:bg-black/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{referral.stats?.total_referred ?? 0}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Invited</p>
+                </div>
+                <div className="p-3 bg-white/60 dark:bg-black/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{referral.stats?.converted ?? 0}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Converted</p>
+                </div>
+                <div className="p-3 bg-white/60 dark:bg-black/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{referral.stats?.rewarded ?? 0}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Rewarded</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Your code: <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">{referral.code}</span>
+                {' · '}You get <span className="font-semibold">LAUNCH25</span> coupon (25% off, 3 months) for each paying referral.
+              </p>
             </CardContent>
           </Card>
         )}

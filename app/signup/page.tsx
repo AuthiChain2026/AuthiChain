@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,6 +16,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function SignupPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { toast } = useToast()
   const supabase = createClient()
 
@@ -23,6 +24,12 @@ export default function SignupPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [refCode, setRefCode] = useState("")
+
+  useEffect(() => {
+    const ref = searchParams.get("ref")
+    if (ref) setRefCode(ref.toUpperCase())
+  }, [])
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,6 +64,15 @@ export default function SignupPage() {
       })
 
       if (error) throw error
+
+      // Apply referral code if present (fire-and-forget, don't block on result)
+      if (refCode && data.user) {
+        fetch("/api/referral/apply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: refCode }),
+        }).catch(() => {})
+      }
 
       toast({
         title: "Account Created!",
@@ -102,6 +118,11 @@ export default function SignupPage() {
             <CardDescription>
               Create your AuthiChain account
             </CardDescription>
+            {refCode && (
+              <div className="mt-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 px-4 py-2.5 text-sm text-emerald-700 dark:text-emerald-300">
+                Referral code <span className="font-mono font-semibold">{refCode}</span> applied — your friend earns a reward when you subscribe!
+              </div>
+            )}
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignup} className="space-y-4">
