@@ -395,6 +395,76 @@ export default function QronGalleryPage() {
         </div>
       </section>
 
+      {/* Brand Staking Section */}
+      <section id="staking" className="container mx-auto px-4 py-16">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-medium mb-6">
+            <Sparkles className="h-4 w-4" />
+            Brand Staking
+          </div>
+          <h2 className="text-3xl font-bold mb-3">
+            Stake QRON. <span className="gradient-text">Reduce Your Costs.</span>
+          </h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Brands that stake QRON tokens receive discounts on the per-scan authentication fee
+            charged every time a product is verified on the AuthiChain Protocol.
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto">
+          {/* Tier table */}
+          <div className="rounded-2xl border overflow-hidden mb-8">
+            <div className="grid grid-cols-4 bg-muted/50 px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              <div>Tier</div>
+              <div className="text-right">QRON Required</div>
+              <div className="text-right">Fee Discount</div>
+              <div className="text-right">Cost / Scan</div>
+            </div>
+            {[
+              { tier: 'None',     color: 'text-muted-foreground', qron: '—',               discount: '0%',   cost: '0.050 QRON' },
+              { tier: 'Bronze',   color: 'text-orange-500',       qron: '1,000+',          discount: '10%',  cost: '0.045 QRON' },
+              { tier: 'Silver',   color: 'text-slate-400',        qron: '10,000+',         discount: '25%',  cost: '0.0375 QRON' },
+              { tier: 'Gold',     color: 'text-yellow-500',       qron: '100,000+',        discount: '40%',  cost: '0.030 QRON' },
+              { tier: 'Platinum', color: 'text-purple-400',       qron: '1,000,000+',      discount: '60%',  cost: '0.020 QRON' },
+            ].map((row, i) => (
+              <div
+                key={row.tier}
+                className={`grid grid-cols-4 px-6 py-4 text-sm ${i % 2 === 0 ? 'bg-background' : 'bg-muted/20'} border-t`}
+              >
+                <div className={`font-semibold ${row.color}`}>{row.tier}</div>
+                <div className="text-right text-muted-foreground">{row.qron}</div>
+                <div className={`text-right font-semibold ${row.tier !== 'None' ? 'text-green-500' : 'text-muted-foreground'}`}>{row.discount}</div>
+                <div className="text-right text-muted-foreground">{row.cost}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Staking CTAs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="rounded-xl border bg-card p-6">
+              <h3 className="font-semibold mb-2">Already have a brand account?</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Go to your dashboard to stake QRON tokens and instantly upgrade your tier.
+                Discounts apply to all future product scans.
+              </p>
+              <Link href="/dashboard">
+                <Button variant="outline" className="w-full">Go to Dashboard</Button>
+              </Link>
+            </div>
+            <div className="rounded-xl border bg-gradient-to-br from-amber-500/10 to-yellow-500/10 border-amber-500/30 p-6">
+              <h3 className="font-semibold mb-2">New to AuthiChain?</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Register your brand, upload products, and start staking QRON to reduce
+                authentication costs as your scan volume grows.
+              </p>
+              <Link href="/register">
+                <Button variant="gradient" className="w-full">Create Brand Account</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-3xl mx-auto space-y-6 p-12 rounded-3xl gradient-primary">

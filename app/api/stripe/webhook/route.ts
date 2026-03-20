@@ -186,6 +186,54 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   const amountTotal = (session.amount_total || 0) / 100;
   const userId = session.metadata?.userId;
 
+  // ── QRON Stake Purchase ─────────────────────────────────────────────────────
+  if (session.metadata?.product === 'qron_stake' && session.metadata?.user_id) {
+    const stakeUserId = session.metadata.user_id;
+    const qronAmount = parseFloat(session.metadata.qron_amount ?? '0');
+
+    if (qronAmount > 0) {
+      try {
+        const supabase = createServiceClient();
+
+        // Get or create brand
+        let { data: brand } = await supabase
+          .from('brands')
+          .select('id, qron_staked')
+          .eq('user_id', stakeUserId)
+          .single();
+
+        if (!brand) {
+          const { data: newBrand } = await supabase
+            .from('brands')
+            .insert({ user_id: stakeUserId, name: session.metadata.user_email ?? stakeUserId, qron_staked: 0 })
+            .select('id, qron_staked')
+            .single();
+          brand = newBrand;
+        }
+
+        if (brand) {
+          const newStaked = parseFloat(((brand.qron_staked ?? 0) + qronAmount).toFixed(6));
+          const lockedUntil = new Date();
+          lockedUntil.setDate(lockedUntil.getDate() + 30);
+
+          await supabase
+            .from('brands')
+            .update({
+              qron_staked: newStaked,
+              staking_locked_until: lockedUntil.toISOString(),
+            })
+            .eq('id', brand.id);
+
+          console.log(`[qron-stake] Credited ${qronAmount} QRON to brand ${brand.id} (user ${stakeUserId})`);
+        }
+      } catch (err) {
+        console.error('[qron-stake] Failed to credit staking balance:', err);
+      }
+    }
+    // Still fall through to log Airtable invoice below
+  }
+  // ────────────────────────────────────────────────────────────────────────────
+
   const accountId = await upsertAccount(customerId, {
     'Name': customerName || customerEmail,
     'Email': customerEmail,

@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect, useRef } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,8 +16,10 @@ import { productsResponseSchema, type Product } from "@/lib/contracts/products"
 
 export default function DashboardPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { toast } = useToast()
   const supabase = createClient()
+  const toastedRef = useRef(false)
 
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -32,6 +34,21 @@ export default function DashboardPage() {
     fetchProducts()
     fetchSubscription()
     fetchBrand()
+
+    // Show success toast after returning from Stripe
+    if (!toastedRef.current) {
+      toastedRef.current = true
+      const qronStake = searchParams.get("qron_stake")
+      if (qronStake === "success") {
+        const tier = searchParams.get("tier")
+        toast({
+          title: "QRON Staked!",
+          description: tier
+            ? `Your ${tier.charAt(0).toUpperCase() + tier.slice(1)} tier stake is now active. Discounts apply to future scans.`
+            : "Your QRON stake is confirmed. Your staking tier has been upgraded.",
+        })
+      }
+    }
   }, [])
 
   const fetchSubscription = async () => {
@@ -69,6 +86,21 @@ export default function DashboardPage() {
       }
     } catch {
       toast({ title: "Error", description: "Could not open billing portal.", variant: "destructive" })
+    }
+  }
+
+  const handleStakeQron = async (tier: string) => {
+    try {
+      const res = await fetch("/api/checkout/qron-stake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      else toast({ title: "Error", description: data.error ?? "Checkout failed.", variant: "destructive" })
+    } catch {
+      toast({ title: "Error", description: "Could not start QRON staking checkout.", variant: "destructive" })
     }
   }
 
@@ -295,12 +327,44 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {brand.staking_tier === 'none' && (
-                <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/20 rounded-lg text-sm">
-                  <strong>Stake 1,000+ QRON</strong> to unlock Bronze tier (10% discount on every product scan).
-                  Platinum tier (60% discount) requires 1,000,000 QRON.
-                </div>
-              )}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {brand.staking_tier === 'none' && (
+                  <Button
+                    size="sm"
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                    onClick={() => handleStakeQron('bronze')}
+                  >
+                    Stake 1K QRON — Bronze (10% off)
+                  </Button>
+                )}
+                {(brand.staking_tier === 'none' || brand.staking_tier === 'bronze') && (
+                  <Button
+                    size="sm"
+                    className="bg-slate-400 hover:bg-slate-500 text-white"
+                    onClick={() => handleStakeQron('silver')}
+                  >
+                    10K QRON — Silver (25% off)
+                  </Button>
+                )}
+                {(brand.staking_tier === 'none' || brand.staking_tier === 'bronze' || brand.staking_tier === 'silver') && (
+                  <Button
+                    size="sm"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                    onClick={() => handleStakeQron('gold')}
+                  >
+                    100K QRON — Gold (40% off)
+                  </Button>
+                )}
+                {brand.staking_tier !== 'platinum' && (
+                  <Button
+                    size="sm"
+                    className="bg-purple-500 hover:bg-purple-600 text-white"
+                    onClick={() => handleStakeQron('platinum')}
+                  >
+                    1M QRON — Platinum (60% off)
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
         )}
