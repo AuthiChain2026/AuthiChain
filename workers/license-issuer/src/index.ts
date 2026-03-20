@@ -18,6 +18,9 @@ export interface Env {
   TELEGRAM_BOT_TOKEN: string
   TELEGRAM_ADMIN_CHAT_ID: string
 
+  // Email delivery fallback (Resend)
+  RESEND_API_KEY: string
+
   // Persistence
   DATABASE: D1Database   // license records
   SESSIONS: KVNamespace  // short-lived delivery tokens

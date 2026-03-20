@@ -2,6 +2,7 @@ import { verifyStripeSignature } from '../utils/crypto'
 import { DB } from '../services/db'
 import { issueLicenseKey, hashKey, tierFromPriceId, seatsForTier } from '../services/license'
 import { notifyAdminNewLicense, deliverKeyViaTelegram } from '../services/telegram'
+import { deliverKeyViaEmail } from '../services/email'
 import type { Env } from '../index'
 
 export async function stripeWebhook(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -90,11 +91,16 @@ async function handleCheckout(env: Env, session: any): Promise<void> {
     expires_at: new Date(oneYear * 1000).toISOString(),
   })
 
-  // Deliver key
+  // Deliver key — Telegram first, email fallback
   const deliveredViaTelegram = await deliverKeyViaTelegram(env, email, tier, key)
   if (deliveredViaTelegram) {
     await DB.markDelivered(env, jti)
+  } else {
+    // Fallback: email via Resend
+    const deliveredViaEmail = await deliverKeyViaEmail(env, email, tier, key)
+    if (deliveredViaEmail) await DB.markDelivered(env, jti)
   }
+
   // Always notify admin
   await notifyAdminNewLicense(env, email, tier, key)
 }

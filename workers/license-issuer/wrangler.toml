@@ -21,6 +21,7 @@ id = "YOUR_KV_NAMESPACE_ID"           # wrangler kv namespace create LICENSE_SES
 # LICENSE_PUBLIC_KEY_PEM
 # TELEGRAM_BOT_TOKEN
 # TELEGRAM_ADMIN_CHAT_ID
+# RESEND_API_KEY                         (from resend.com)
 
 [vars]
 ENVIRONMENT = "production"
