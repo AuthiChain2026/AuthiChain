@@ -17,6 +17,10 @@ id = "YOUR_KV_NAMESPACE_ID"           # replace after: wrangler kv namespace cre
 # TELEGRAM_WEBHOOK_SECRET
 # TELEGRAM_ADMIN_CHAT_ID
 # SITE_URL
+# ADMIN_API_KEY   (must match ADMIN_API_KEY in AuthiChain Next.js env)
+
+[triggers]
+crons = ["0 8 * * *"]   # Daily at 08:00 UTC — revenue digest to admin
 
 [vars]
 ENVIRONMENT = "production"
