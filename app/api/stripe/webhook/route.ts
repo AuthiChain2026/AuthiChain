@@ -178,6 +178,47 @@ async function fireWelcomeEmail(email: string, name: string, plan: string) {
   }
 }
 
+async function rewardReferrer(referredUserId: string, referredCustomerId: string): Promise<void> {
+  try {
+    const supabase = createServiceClient();
+    const stripe = getStripe();
+
+    // Find pending referral for this user
+    const { data: referral } = await supabase
+      .from('referrals')
+      .select('id, referrer_user_id')
+      .eq('referred_user_id', referredUserId)
+      .eq('status', 'pending')
+      .single();
+
+    if (!referral) return;
+
+    // Get referrer's Stripe subscription
+    const { data: referrerSub } = await supabase
+      .from('subscriptions')
+      .select('stripe_subscription_id')
+      .eq('user_id', referral.referrer_user_id)
+      .single();
+
+    if (referrerSub?.stripe_subscription_id) {
+      // Apply LAUNCH25 (25% off, 3 months) to referrer's subscription
+      await stripe.subscriptions.update(referrerSub.stripe_subscription_id, {
+        coupon: 'dmFW0urq', // LAUNCH25
+      });
+    }
+
+    // Mark referral as rewarded
+    await supabase
+      .from('referrals')
+      .update({ status: 'rewarded', converted_at: new Date().toISOString(), rewarded_at: new Date().toISOString(), stripe_coupon_id: 'dmFW0urq' })
+      .eq('id', referral.id);
+
+    console.log(`[referral] Rewarded referrer ${referral.referrer_user_id} for converting ${referredUserId}`);
+  } catch (err) {
+    console.error('[referral] rewardReferrer failed:', err);
+  }
+}
+
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   const stripe = getStripe();
   const customerId = session.customer as string;
@@ -286,6 +327,11 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       'Plan': plan,
       ...(accountId ? { 'Account': [accountId] } : {}),
     });
+
+    // Referral reward: if this user was referred, reward the referrer
+    if (userId) {
+      rewardReferrer(userId, customerId).catch(() => {})
+    }
 
     // Sync to Supabase subscriptions table
     if (userId) {
