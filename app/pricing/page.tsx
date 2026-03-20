@@ -61,6 +61,22 @@ const plans = [
 
 export default function PricingPage() {
   const [foundersDismissed, setFoundersDismissed] = useState(false)
+  const [leadEmail, setLeadEmail] = useState('')
+  const [leadStatus, setLeadStatus] = useState<'idle' | 'submitting' | 'done'>('idle')
+
+  const handleLeadCapture = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!leadEmail) return
+    setLeadStatus('submitting')
+    try {
+      await fetch('/api/leads/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: leadEmail, source: 'pricing_page' }),
+      })
+    } catch {}
+    setLeadStatus('done')
+  }
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -161,6 +177,32 @@ export default function PricingPage() {
             )}
           </div>
         ))}
+      </section>
+
+      {/* Lead capture for non-converting visitors */}
+      <section className="max-w-lg mx-auto px-6 pb-16 text-center">
+        <p className="text-gray-400 text-sm mb-4">Not ready yet? Get a product demo + pricing breakdown in your inbox.</p>
+        {leadStatus === 'done' ? (
+          <p className="text-emerald-400 text-sm font-medium">We'll be in touch shortly.</p>
+        ) : (
+          <form onSubmit={handleLeadCapture} className="flex gap-2">
+            <input
+              type="email"
+              required
+              value={leadEmail}
+              onChange={(e) => setLeadEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500"
+            />
+            <button
+              type="submit"
+              disabled={leadStatus === 'submitting'}
+              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition disabled:opacity-60"
+            >
+              {leadStatus === 'submitting' ? '…' : 'Send Demo'}
+            </button>
+          </form>
+        )}
       </section>
 
       {/* Trust bar */}
