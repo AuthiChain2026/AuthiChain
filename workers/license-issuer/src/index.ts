@@ -26,6 +26,8 @@ export interface Env {
   SESSIONS: KVNamespace  // short-lived delivery tokens
 }
 
+import { sendDailyRevenueSummary } from './services/admin'
+
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext) {
     return router(request, env, ctx, [
@@ -33,5 +35,10 @@ export default {
       ['GET',  '/api/license/verify',         licenseVerify],
       ['POST', '/api/license/revoke',          licenseRevoke],
     ])
+  },
+
+  // Daily cron at 08:05 UTC (offset from telegram bot digest)
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(sendDailyRevenueSummary(env))
   },
 }

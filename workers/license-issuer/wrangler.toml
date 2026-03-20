@@ -23,5 +23,8 @@ id = "YOUR_KV_NAMESPACE_ID"           # wrangler kv namespace create LICENSE_SES
 # TELEGRAM_ADMIN_CHAT_ID
 # RESEND_API_KEY                         (from resend.com)
 
+[triggers]
+crons = ["5 8 * * *"]   # Daily at 08:05 UTC — agent-browser license digest
+
 [vars]
 ENVIRONMENT = "production"
