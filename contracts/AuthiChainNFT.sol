@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 /**
  * @title AuthiChainNFT
@@ -17,11 +16,10 @@ import "@openzeppelin/contracts/utils/Counters.sol";
  *         contract satisfies both interfaces.
  */
 contract AuthiChainNFT is ERC721URIStorage, Ownable {
-    using Counters for Counters.Counter;
-
     // ─── Storage ──────────────────────────────────────────────────────────────
 
-    Counters.Counter private _tokenIdCounter;
+    // Token ID counter — starts at 0, incremented before each mint so first token = 1
+    uint256 private _tokenIdCounter;
 
     // Mapping: truemarkId (bytes32) → tokenId
     mapping(bytes32 => uint256) public truemarkToToken;
@@ -112,8 +110,7 @@ contract AuthiChainNFT is ERC721URIStorage, Ownable {
         bytes32 key = keccak256(bytes(truemarkId));
         if (truemarkToToken[key] != 0) revert TruemarkAlreadyMinted(truemarkId);
 
-        _tokenIdCounter.increment();
-        tokenId = _tokenIdCounter.current();
+        tokenId = ++_tokenIdCounter;
 
         _safeMint(recipient, tokenId);
         _setTokenURI(tokenId, metadataURI);
@@ -145,7 +142,7 @@ contract AuthiChainNFT is ERC721URIStorage, Ownable {
      * @notice Total supply of minted certificates.
      */
     function totalSupply() external view returns (uint256) {
-        return _tokenIdCounter.current();
+        return _tokenIdCounter;
     }
 
     /**
