@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { createClient } from '@/lib/supabase/server'
+import { planFromPriceId } from '@/lib/subscription'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,7 +23,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing priceId' }, { status: 400 })
     }
 
+    // Attach authenticated user ID so the webhook can link subscription → user
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://authichain.com'
+    const plan = planFromPriceId(priceId)
 
     const price = await stripe.prices.retrieve(priceId, { expand: ['product'] })
     const product = price.product as Stripe.Product

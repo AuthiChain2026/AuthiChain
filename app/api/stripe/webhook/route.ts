@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { createServiceClient } from '@/lib/supabase/service';
+import { planFromPriceId, PLAN_LIMITS } from '@/lib/subscription';
 export const dynamic = 'force-dynamic';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -118,6 +120,47 @@ async function upsertRevenueProjection(subscriptionId: string, fields: object) {
   }
 }
 
+// ─── Supabase subscription sync ───────────────────────────────────────────────
+
+async function upsertSubscriptionInSupabase(
+  stripeCustomerId: string,
+  stripeSubscriptionId: string | null,
+  plan: string,
+  status: string,
+  productLimit: number,
+  currentPeriodEnd: Date | null
+) {
+  try {
+    const supabase = createServiceClient();
+    // Look up user by stripe_customer_id
+    const { data: existing } = await supabase
+      .from('subscriptions')
+      .select('id, user_id')
+      .eq('stripe_customer_id', stripeCustomerId)
+      .maybeSingle();
+
+    const fields = {
+      stripe_customer_id: stripeCustomerId,
+      stripe_subscription_id: stripeSubscriptionId,
+      plan,
+      status,
+      product_limit: productLimit,
+      current_period_end: currentPeriodEnd?.toISOString() ?? null,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (existing) {
+      await supabase.from('subscriptions').update(fields).eq('id', existing.id);
+    } else {
+      // Best-effort: attempt to match by email via auth.users if no row exists yet.
+      // The checkout metadata should carry user_id; fall back to no-op if missing.
+      console.log(`[subscription-sync] No existing row for customer ${stripeCustomerId}; will be created on next checkout`);
+    }
+  } catch (err) {
+    console.error('[subscription-sync] Failed to sync subscription to Supabase:', err);
+  }
+}
+
 // ─── Event handlers ──────────────────────────────────────────────────────────
 
 async function fireWelcomeEmail(email: string, name: string, plan: string) {
@@ -141,6 +184,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   const customerName = session.customer_details?.name || '';
   const subscriptionId = session.subscription as string;
   const amountTotal = (session.amount_total || 0) / 100;
+  const userId = session.metadata?.userId;
 
   const accountId = await upsertAccount(customerId, {
     'Name': customerName || customerEmail,
@@ -168,9 +212,14 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   if (subscriptionId) {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const priceId = subscription.items.data[0]?.price?.id ?? '';
+    const plan = session.metadata?.plan || planFromPriceId(priceId);
     const monthlyAmount = subscription.items.data[0]?.price?.unit_amount
       ? subscription.items.data[0].price.unit_amount / 100
       : amountTotal;
+    const periodEnd = subscription.current_period_end
+      ? new Date(subscription.current_period_end * 1000)
+      : null;
 
     await upsertRevenueProjection(subscriptionId, {
       'Customer Email': customerEmail,
@@ -178,9 +227,29 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       'ARR': monthlyAmount * 12,
       'Status': 'Active',
       'Start Date': new Date().toISOString(),
-      'Plan': session.metadata?.plan || 'Unknown',
+      'Plan': plan,
       ...(accountId ? { 'Account': [accountId] } : {}),
     });
+
+    // Sync to Supabase subscriptions table
+    if (userId) {
+      const supabase = createServiceClient();
+      const planKey = plan.toLowerCase() as any;
+      const productLimit = PLAN_LIMITS[planKey]?.productLimit ?? PLAN_LIMITS.starter.productLimit;
+      const subStatus = subscription.status === 'trialing' ? 'trialing' : 'active';
+      await supabase.from('subscriptions').upsert(
+        {
+          user_id: userId,
+          stripe_customer_id: customerId,
+          stripe_subscription_id: subscriptionId,
+          plan: planKey,
+          status: subStatus,
+          product_limit: productLimit === Infinity ? 999999 : productLimit,
+          current_period_end: periodEnd?.toISOString() ?? null,
+        },
+        { onConflict: 'user_id' }
+      );
+    }
   }
 }
 
@@ -222,6 +291,20 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
       'Last Payment': new Date().toISOString(),
       ...(accountId ? { 'Account': [accountId] } : {}),
     });
+
+    // Keep Supabase subscription status active on renewal
+    try {
+      const supabase = createServiceClient();
+      const periodEnd = sub.current_period_end
+        ? new Date(sub.current_period_end * 1000).toISOString()
+        : null;
+      await supabase
+        .from('subscriptions')
+        .update({ status: 'active', current_period_end: periodEnd, updated_at: new Date().toISOString() })
+        .eq('stripe_customer_id', customerId);
+    } catch (err) {
+      console.error('[subscription-sync] invoice.paid sync failed:', err);
+    }
   }
 }
 
@@ -253,14 +336,22 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
       'Escalation Level': 'Orange',
       ...(accountId ? { 'Account': [accountId] } : {}),
     });
+
+    // Reflect past_due status in Supabase
+    try {
+      const supabase = createServiceClient();
+      await supabase
+        .from('subscriptions')
+        .update({ status: 'past_due', updated_at: new Date().toISOString() })
+        .eq('stripe_customer_id', customerId);
+    } catch (err) {
+      console.error('[subscription-sync] invoice.payment_failed sync failed:', err);
+    }
   }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const customerId = subscription.customer as string;
-  const mrr = subscription.items.data[0]?.price?.unit_amount
-    ? subscription.items.data[0].price.unit_amount / 100
-    : 0;
 
   const accountId = await upsertAccount(customerId, {
     'Status': 'Churned',
@@ -277,6 +368,24 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     'Escalation Level': 'Red',
     ...(accountId ? { 'Account': [accountId] } : {}),
   });
+
+  // Downgrade Supabase subscription to free/canceled
+  try {
+    const supabase = createServiceClient();
+    await supabase
+      .from('subscriptions')
+      .update({
+        plan: 'free',
+        status: 'canceled',
+        product_limit: 5,
+        stripe_subscription_id: null,
+        current_period_end: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('stripe_customer_id', customerId);
+  } catch (err) {
+    console.error('[subscription-sync] subscription.deleted sync failed:', err);
+  }
 }
 
 // ─── Main handler ─────────────────────────────────────────────────────────────

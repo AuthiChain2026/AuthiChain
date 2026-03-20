@@ -27,7 +27,29 @@ export default function DashboardPage() {
   useEffect(() => {
     checkUser()
     fetchProducts()
+    fetchSubscription()
   }, [])
+
+  const fetchSubscription = async () => {
+    try {
+      const res = await fetch("/api/subscription")
+      if (res.ok) setSubscription(await res.json())
+    } catch {}
+  }
+
+  const handleManageBilling = async () => {
+    try {
+      const res = await fetch("/api/billing-portal", { method: "POST" })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else if (data.upgradeUrl) {
+        router.push(data.upgradeUrl)
+      }
+    } catch {
+      toast({ title: "Error", description: "Could not open billing portal.", variant: "destructive" })
+    }
+  }
 
   const checkUser = async () => {
     const { data: { user }, error } = await supabase.auth.getUser()
