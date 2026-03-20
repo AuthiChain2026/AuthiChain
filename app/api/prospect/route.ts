@@ -15,6 +15,7 @@ const INDUSTRY_MAP: Record<string, string[]> = {
   pharma: ['pharmaceuticals', 'biotechnology', 'medical devices'],
   supplychain: ['logistics and supply chain', 'warehousing', 'transportation/trucking/railroad'],
   electronics: ['consumer electronics', 'semiconductors', 'electrical/electronic manufacturing'],
+  cannabis: ['cannabis', 'alternative medicine', 'health wellness and fitness', 'retail'],
 }
 
 export async function POST(request: NextRequest) {
