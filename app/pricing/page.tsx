@@ -14,7 +14,7 @@ const plans = [
       'AuthiChain dashboard',
     ],
     cta: 'Start Authenticating',
-    priceId: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID,
+    priceId: 'price_1Sp06mPUXqpBpzb3wFDAQUnv',
     highlight: false,
   },
   {
@@ -32,7 +32,7 @@ const plans = [
       'Analytics dashboard',
     ],
     cta: 'Go Pro',
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
+    priceId: 'price_1TCrKXPUXqpBpzb3bB5S7ONz',
     highlight: true,
   },
   {

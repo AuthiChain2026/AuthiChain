@@ -301,6 +301,96 @@ export default function QronGalleryPage() {
         </div>
       </section>
 
+      {/* QRON Credit Packs */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-medium mb-6">
+            <Zap className="h-4 w-4" />
+            QRON Credit Packs
+          </div>
+          <h2 className="text-3xl font-bold mb-3">
+            Buy More <span className="gradient-text">Generations</span>
+          </h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Start with 10 free QRONs. Need more? Grab a credit pack — no subscription required.
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            {
+              name: "Starter Pack",
+              credits: "100 QRONs",
+              price: "$29",
+              priceId: "price_1TCrKfPUXqpBpzb3G88BPGlg",
+              perUnit: "$0.29 / QRON",
+              highlight: false,
+              features: ["100 Ed25519-signed QRONs", "All art styles", "On-chain verification", "Never expires"],
+            },
+            {
+              name: "Creator Pack",
+              credits: "500 QRONs",
+              price: "$99",
+              priceId: "price_1TCrKgPUXqpBpzb3IoVBwxmu",
+              perUnit: "$0.20 / QRON",
+              highlight: true,
+              features: ["500 Ed25519-signed QRONs", "All art styles", "On-chain verification", "Never expires", "Priority generation queue"],
+            },
+            {
+              name: "Studio Pack",
+              credits: "2,000 QRONs",
+              price: "$299",
+              priceId: "price_1TCrKhPUXqpBpzb3ppIhyP1i",
+              perUnit: "$0.15 / QRON",
+              highlight: false,
+              features: ["2,000 Ed25519-signed QRONs", "All art styles", "On-chain verification", "Never expires", "Priority generation queue", "Bulk export (ZIP)"],
+            },
+          ].map((pack) => (
+            <div
+              key={pack.name}
+              className={`rounded-2xl border p-7 flex flex-col ${
+                pack.highlight
+                  ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
+                  : "border-border bg-card"
+              }`}
+            >
+              {pack.highlight && (
+                <div className="text-xs font-semibold text-primary uppercase tracking-widest mb-3">
+                  Best Value
+                </div>
+              )}
+              <h3 className="text-xl font-bold mb-1">{pack.name}</h3>
+              <div className="flex items-end gap-1 mb-1">
+                <span className="text-3xl font-bold">{pack.price}</span>
+                <span className="text-muted-foreground mb-1 text-sm">one-time</span>
+              </div>
+              <div className="text-xs text-muted-foreground mb-4">{pack.credits} · {pack.perUnit}</div>
+              <ul className="space-y-2 mb-6 flex-1">
+                {pack.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <span className="text-emerald-500 mt-0.5">✓</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <form action="/api/checkout/one-time" method="POST">
+                <input type="hidden" name="priceId" value={pack.priceId} />
+                <button
+                  type="submit"
+                  className={`w-full py-2.5 rounded-xl font-semibold text-sm transition ${
+                    pack.highlight
+                      ? "bg-primary hover:opacity-90 text-primary-foreground"
+                      : "bg-muted hover:bg-muted/80 text-foreground"
+                  }`}
+                >
+                  Buy {pack.name}
+                </button>
+              </form>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-3xl mx-auto space-y-6 p-12 rounded-3xl gradient-primary">
