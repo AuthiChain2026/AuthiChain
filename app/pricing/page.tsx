@@ -1,4 +1,8 @@
+'use client'
 import Link from 'next/link'
+import { useState } from 'react'
+
+const FOUNDERS_COUPON = 'FOUNDERS50'
 
 const plans = [
   {
@@ -56,8 +60,30 @@ const plans = [
 ]
 
 export default function PricingPage() {
+  const [foundersDismissed, setFoundersDismissed] = useState(false)
+
   return (
     <main className="min-h-screen bg-black text-white">
+      {/* FOUNDERS50 banner */}
+      {!foundersDismissed && (
+        <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black">
+          <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between gap-4 text-sm font-medium">
+            <span>
+              🎉 <strong>Founders Offer:</strong> Use{' '}
+              <span className="font-mono bg-black/20 px-1.5 py-0.5 rounded">FOUNDERS50</span>
+              {' '}for 50% off — forever. Limited to the first 50 customers.
+            </span>
+            <button
+              onClick={() => setFoundersDismissed(true)}
+              className="shrink-0 opacity-70 hover:opacity-100 transition text-lg leading-none"
+              aria-label="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hero */}
       <section className="py-20 px-6 text-center">
         <div className="inline-block bg-emerald-500/10 border border-emerald-500/30 rounded-full px-4 py-1 text-emerald-400 text-sm font-medium mb-6">
@@ -69,14 +95,18 @@ export default function PricingPage() {
         </h1>
         <p className="text-gray-400 text-lg max-w-xl mx-auto mb-4">
           AuthiChain blockchain authentication for luxury goods, pharma, and enterprise supply chains.
-          No setup fees. Cancel anytime.
+          14-day free trial. No setup fees. Cancel anytime.
         </p>
         <p className="text-sm text-gray-500">
           Use code{' '}
           <span className="font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
             LAUNCH25
           </span>{' '}
-          at checkout for 25% off your first 3 months.
+          for 25% off your first 3 months, or{' '}
+          <span className="font-mono font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+            FOUNDERS50
+          </span>{' '}
+          for 50% off forever.
         </p>
       </section>
 
@@ -123,7 +153,7 @@ export default function PricingPage() {
               </a>
             ) : (
               <Link
-                href="mailto:z@authichain.com?subject=Enterprise%20Inquiry"
+                href="/enterprise"
                 className="w-full py-3 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white text-center block transition"
               >
                 {plan.cta}

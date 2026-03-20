@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { applyStakingCouponToSubscription } from '@/lib/stripe-billing'
 
 export const dynamic = 'force-dynamic'
 
@@ -70,9 +71,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to update staking' }, { status: 500 })
   }
 
+  // Apply Stripe subscription coupon for the new tier (fire-and-forget)
+  applyStakingCouponToSubscription(user.id, updated.staking_tier).catch(() => {})
+
   return NextResponse.json({
     success: true,
     staked: updated,
-    message: `Staked ${amount} QRON. Tier: ${updated.staking_tier} (${(updated.unit_cost_discount * 100).toFixed(0)}% discount). Locked until ${updated.staking_locked_until?.split('T')[0]}.`,
+    message: `Staked ${amount} QRON. Tier: ${updated.staking_tier} (${(updated.unit_cost_discount * 100).toFixed(0)}% discount on scans). Locked until ${updated.staking_locked_until?.split('T')[0]}.`,
   })
 }

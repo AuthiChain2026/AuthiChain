@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/service';
 import { planFromPriceId, PLAN_LIMITS } from '@/lib/subscription';
+import { applyStakingCouponToSubscription } from '@/lib/stripe-billing';
 export const dynamic = 'force-dynamic';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -216,15 +217,22 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
           const lockedUntil = new Date();
           lockedUntil.setDate(lockedUntil.getDate() + 30);
 
-          await supabase
+          const { data: updatedBrand } = await supabase
             .from('brands')
             .update({
               qron_staked: newStaked,
               staking_locked_until: lockedUntil.toISOString(),
             })
-            .eq('id', brand.id);
+            .eq('id', brand.id)
+            .select('staking_tier')
+            .single();
 
           console.log(`[qron-stake] Credited ${qronAmount} QRON to brand ${brand.id} (user ${stakeUserId})`);
+
+          // Apply Stripe subscription discount for new staking tier
+          if (updatedBrand?.staking_tier) {
+            applyStakingCouponToSubscription(stakeUserId, updatedBrand.staking_tier).catch(() => {});
+          }
         }
       } catch (err) {
         console.error('[qron-stake] Failed to credit staking balance:', err);

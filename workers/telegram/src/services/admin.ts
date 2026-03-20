@@ -72,4 +72,62 @@ export async function sendDailyDigest(env: Env, telegram: Telegram): Promise<voi
   lines.push(``, `<i>${new Date().toUTCString()}</i>`)
 
   await notifyAdmin(env, telegram, lines.join('\n'))
+
+  // Also run trial expiry nudges
+  await sendTrialExpiryNudges(env, telegram)
+}
+
+/**
+ * For each trialing subscription expiring within 3 days, look up whether
+ * the user connected their email via /connect, and send a personal nudge.
+ * Falls back to an admin alert if no Telegram connection is found.
+ */
+export async function sendTrialExpiryNudges(env: Env, telegram: Telegram): Promise<void> {
+  if (!env.ADMIN_API_KEY || !env.SITE_URL) return
+
+  try {
+    const res = await fetch(`${env.SITE_URL}/api/admin/expiring-trials`, {
+      headers: { 'x-admin-api-key': env.ADMIN_API_KEY },
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!res.ok) return
+
+    const { trials } = await res.json() as { trials: Array<{ user_id: string; email: string | null; current_period_end: string; days_left: number }> }
+    if (!trials?.length) return
+
+    for (const trial of trials) {
+      const daysLeft = trial.days_left
+      const expiresOn = new Date(trial.current_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      const nudge = [
+        `⏰ <b>Your AuthiChain trial expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}</b> (${expiresOn})`,
+        ``,
+        `Don't lose access to unlimited products, supply chain tracking, and API access.`,
+        ``,
+        `👉 <a href="${env.SITE_URL}/pricing">Upgrade now</a> — use code <code>LAUNCH25</code> for 25% off for 3 months.`,
+      ].join('\n')
+
+      // Try to find linked Telegram chat ID via KV (tg:<email>)
+      let delivered = false
+      if (trial.email && env.SESSIONS) {
+        const chatId = await env.SESSIONS.get(`tg:${trial.email}`)
+        if (chatId) {
+          try {
+            await telegram.sendMessage(Number(chatId), nudge, { parse_mode: 'HTML' })
+            delivered = true
+          } catch { /* user may have blocked the bot */ }
+        }
+      }
+
+      // If not delivered directly, alert admin to reach out manually
+      if (!delivered) {
+        await notifyAdmin(
+          env,
+          telegram,
+          `⚠️ Trial expiring in ${daysLeft}d — no Telegram: ${trial.email ?? trial.user_id}\nUpgrade URL: ${env.SITE_URL}/pricing`
+        )
+      }
+    }
+  } catch (err) {
+    console.error('[trial-nudge] Failed:', err)
+  }
 }
