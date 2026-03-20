@@ -19,6 +19,12 @@ export default function Home() {
           </div>
           <div className="flex items-center space-x-4">
             <ThemeToggle />
+            <Link href="/demos" className="hidden sm:block text-sm text-muted-foreground hover:text-foreground transition">
+              Demos
+            </Link>
+            <Link href="/pricing" className="hidden sm:block text-sm text-muted-foreground hover:text-foreground transition">
+              Pricing
+            </Link>
             <Link href="/login">
               <Button variant="ghost">Login</Button>
             </Link>
@@ -51,9 +57,9 @@ export default function Home() {
                   Start Protecting Now
                 </Button>
               </Link>
-              <Link href="/verify">
+              <Link href="/demos">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  Verify a Product
+                  See Use Case Demos
                 </Button>
               </Link>
             </div>
