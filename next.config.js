@@ -13,7 +13,6 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
-  turbopack: {},
   typescript: { ignoreBuildErrors: true },
   webpack: (config, { isServer, dev }) => {
     // Optimize webpack cache serialization to prevent large string warnings
@@ -21,6 +20,8 @@ const nextConfig = {
       config.cache = {
         ...config.cache,
         compression: 'gzip',
+        // Bump version to bust stale Vercel build cache entries
+        version: `${config.cache.version || ''}+bust20260321`,
         buildDependencies: config.cache.buildDependencies || {},
       }
 

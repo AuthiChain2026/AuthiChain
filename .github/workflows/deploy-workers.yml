@@ -8,29 +8,33 @@ on:
       - '.github/workflows/deploy-workers.yml'
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Deployment environment'
+      worker:
+        description: 'Which worker to deploy'
         required: true
-        default: 'production'
+        default: 'all'
         type: choice
         options:
-          - production
-          - staging
+          - all
+          - verify-worker
+          - license-issuer
 
 jobs:
+  # ── Verify Worker ──────────────────────────────────────────────────────────
   deploy-verify-worker:
     name: Deploy authichain-verify-worker
     runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'push' ||
+      github.event.inputs.worker == 'all' ||
+      github.event.inputs.worker == 'verify-worker'
     defaults:
       run:
         working-directory: workers/verify-worker
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -42,32 +46,96 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
-      - name: Deploy to Cloudflare Workers (Production)
-        if: github.event_name == 'push' || github.event.inputs.environment == 'production'
+      - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: workers/verify-worker
-          command: deploy --env production
+          command: deploy
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
-      - name: Deploy to Cloudflare Workers (Staging)
-        if: github.event.inputs.environment == 'staging'
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: workers/verify-worker
-          command: deploy --env staging
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-
-      - name: Verify deployment health
+      - name: Health check
         run: |
-          echo "Worker deployed. Checking health endpoint..."
           sleep 5
-          curl -sf https://authichain-verify-worker.authichain2026.workers.dev/health || echo "Health check pending - worker may still be propagating"
+          curl -sf https://authichain-verify-worker.authichain2026.workers.dev/health \
+            || echo "Health check pending — worker may still be propagating"
+
+  # ── License Issuer Worker ──────────────────────────────────────────────────
+  deploy-license-issuer:
+    name: Deploy authichain-license-issuer
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'push' ||
+      github.event.inputs.worker == 'all' ||
+      github.event.inputs.worker == 'license-issuer'
+    defaults:
+      run:
+        working-directory: workers/license-issuer
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: workers/license-issuer/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Deploy worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/license-issuer
+          command: deploy --config wrangler.toml
+
+      # Push all secrets via wrangler secret put
+      # Each secret must be added to GitHub repo secrets first.
+      - name: Set worker secrets
+        working-directory: workers/license-issuer
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set_secret() {
+            local name="$1"
+            local value="$2"
+            if [ -n "$value" ]; then
+              echo "$value" | npx wrangler secret put "$name" --config wrangler.toml
+              echo "  ✅ $name"
+            else
+              echo "  ⚠ $name not set in GitHub secrets — skipping"
+            fi
+          }
+
+          set_secret STRIPE_SECRET_KEY              "${{ secrets.STRIPE_SECRET_KEY }}"
+          set_secret STRIPE_WEBHOOK_SECRET          "${{ secrets.LICENSE_ISSUER_WEBHOOK_SECRET }}"
+          set_secret STRIPE_AGENT_BROWSER_PRO_PRICE_ID        "${{ secrets.STRIPE_PRO_PRICE_ID }}"
+          set_secret STRIPE_AGENT_BROWSER_ENTERPRISE_PRICE_ID "${{ secrets.STRIPE_ENTERPRISE_PRICE_ID }}"
+          set_secret LICENSE_PRIVATE_KEY_PEM        "${{ secrets.LICENSE_PRIVATE_KEY_PEM }}"
+          set_secret LICENSE_PUBLIC_KEY_PEM         "${{ secrets.LICENSE_PUBLIC_KEY_PEM }}"
+          set_secret TELEGRAM_BOT_TOKEN             "${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          set_secret TELEGRAM_ADMIN_CHAT_ID         "${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}"
+
+      - name: Health check
+        run: |
+          sleep 5
+          curl -sf https://authichain-license-issuer.authichain2026.workers.dev/health \
+            || echo "Health check pending — worker may still be propagating"
+
+      - name: Print webhook URL
+        run: |
+          echo ""
+          echo "══════════════════════════════════════════════════════"
+          echo "  Register this URL as a Stripe webhook endpoint:"
+          echo "  https://authichain-license-issuer.authichain2026.workers.dev/api/license/stripe-webhook"
+          echo "  Events: checkout.session.completed, customer.subscription.deleted"
+          echo "══════════════════════════════════════════════════════"
