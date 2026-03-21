@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "rm -rf .next/cache && next build",
     "check:db": "node ./script/check-database-schema.mjs",
     "typecheck": "tsc --noEmit",
     "validate": "npm run build && npm run typecheck",
