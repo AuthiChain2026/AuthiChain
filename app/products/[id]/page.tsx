@@ -14,14 +14,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { productResponseSchema, registerProductResponseSchema, type Product } from "@/lib/contracts/products"
 import { MintNFTButton } from "@/components/MintNFTButton"
 
-interface WorkflowStep {
-  id: string
-  name: string
-  description: string
-  duration: string
-}
-
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
+export default function ProductDetailPage({ params }) {
   const router = useRouter()
   const { toast } = useToast()
   const supabase = createClient()
@@ -121,7 +114,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     }, 200)
   }
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
     toast({
       title: "Copied!",

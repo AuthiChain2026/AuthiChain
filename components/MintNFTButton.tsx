@@ -29,7 +29,7 @@ export function MintNFTButton({ productId, productName, truemarkId, onMinted }: 
   const account = useActiveAccount()
   const { toast } = useToast()
   const [minting, setMinting] = useState(false)
-  const [result, setResult] = useState<{ tokenId: string; txHash: string } | null>(null)
+  const [result, setResult] = useState(null as { tokenId: string; txHash: string } | null)
 
   const handleMint = async () => {
     if (!account?.address) return
