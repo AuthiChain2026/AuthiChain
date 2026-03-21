@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-"check:db": "node ./script/check-database-schema.mjs",
+    "check:db": "node ./script/check-database-schema.mjs",
     "typecheck": "tsc --noEmit",
     "validate": "npm run build && npm run typecheck",
     "start": "next start",
@@ -34,6 +34,7 @@
     "@supabase/supabase-js": "^2.47.10",
     "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.1",
+    "client-only": "^0.0.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",
