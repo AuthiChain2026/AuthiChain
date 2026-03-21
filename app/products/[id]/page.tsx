@@ -26,7 +26,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const { toast } = useToast()
   const supabase = createClient()
 
-  const [product, setProduct] = useState<Product | null>(null)
+  const [product, setProduct] = useState(null as Product | null)
   const [loading, setLoading] = useState(true)
   const [registering, setRegistering] = useState(false)
   const [scanProgress, setScanProgress] = useState(0)
