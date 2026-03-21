@@ -142,11 +142,11 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const workflowSteps: WorkflowStep[] = Array.isArray(product.workflow) ? (product.workflow as any) : []
+  const workflowSteps: Array<WorkflowStep> = Array.isArray(product.workflow) ? (product.workflow as any) : []
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const featureList: string[] = Array.isArray(product.features) ? (product.features as any) : []
+  const featureList: Array<string> = Array.isArray(product.features) ? (product.features as any) : []
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const authenticityList: string[] = Array.isArray(product.authenticity_features) ? (product.authenticity_features as any) : []
+  const authenticityList: Array<string> = Array.isArray(product.authenticity_features) ? (product.authenticity_features as any) : []
 
   return (
     <div className="min-h-screen bg-background">
