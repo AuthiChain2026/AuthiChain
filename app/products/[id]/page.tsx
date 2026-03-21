@@ -358,7 +358,7 @@ export default function ProductDetailPage({ params }) {
             )}
 
             {/* Blockchain Info */}
-            {product.is_registered ? (
+            {product.is_registered && (
               <Card className="border-2 border-green-500/50">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
