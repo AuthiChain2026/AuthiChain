@@ -141,9 +141,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     return null
   }
 
-  const workflowSteps = Array.isArray(product.workflow) ? product.workflow as WorkflowStep[] : []
-  const featureList = Array.isArray(product.features) ? product.features as string[] : []
-  const authenticityList = Array.isArray(product.authenticity_features) ? product.authenticity_features as string[] : []
+  const workflowSteps = Array.isArray(product.workflow) ? (product.workflow as WorkflowStep[]) : []
+  const featureList = Array.isArray(product.features) ? (product.features as string[]) : []
+  const authenticityList = Array.isArray(product.authenticity_features) ? (product.authenticity_features as string[]) : []
 
   return (
     <div className="min-h-screen bg-background">
