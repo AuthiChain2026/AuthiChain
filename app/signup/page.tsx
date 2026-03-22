@@ -63,8 +63,8 @@ export default function SignupPage() {
         description: "Please check your email to confirm your account.",
       })
 
-      // If email confirmation is disabled, redirect to dashboard
-      if (data.user && !data.user.identities?.length) {
+      // If a session was immediately created (email confirmation disabled), go straight to dashboard
+      if (data.session) {
         router.push("/dashboard")
       } else {
         router.push("/login")
