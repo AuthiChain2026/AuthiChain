@@ -15,6 +15,7 @@
     "contract:deploy:mainnet": "npx hardhat run scripts/nft/deploy.ts --network vechain_main"
   },
   "dependencies": {
+    "@fal-ai/client": "^1.8.1",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.4",
     "@radix-ui/react-alert-dialog": "^1.1.7",
