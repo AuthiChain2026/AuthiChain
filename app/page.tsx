@@ -279,7 +279,7 @@ export default function Home() {
                 Start Certification
               </Button>
             </Link>
-            <Link href="/pricing">
+            <Link href="/signup">
               <Button size="lg" variant="outline" className="font-semibold border-white/40 text-white hover:bg-white/10">
                 View Plans
               </Button>
