@@ -46,9 +46,9 @@ export default function Home() {
               Automatically classifies products across 10 industries and generates blockchain-backed authentication workflows in under 3 seconds. From cannabis to luxury goods, electronics to pharmaceuticals—one platform for everything.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/signup">
+              <Link href="/onboarding">
                 <Button size="lg" variant="gradient" className="w-full sm:w-auto">
-                  Start Protecting Now
+                  Start Certification
                 </Button>
               </Link>
               <Link href="/verify">
@@ -274,14 +274,14 @@ export default function Home() {
             Brands in luxury, pharma, cannabis, and electronics rely on AuthiChain for blockchain-grade authentication. Start with a free product registration.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
+            <Link href="/onboarding">
               <Button size="lg" variant="secondary" className="font-semibold">
-                Get Started Free
+                Start Certification
               </Button>
             </Link>
             <Link href="/pricing">
               <Button size="lg" variant="outline" className="font-semibold border-white/40 text-white hover:bg-white/10">
-                View Enterprise Plans
+                View Plans
               </Button>
             </Link>
           </div>

@@ -1,6 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { writeActivityEvent } from '@/lib/activity-store'
 
+// Domains that may POST analytics events from the browser
+const CORS_ORIGINS = new Set([
+  'https://authichain.com',
+  'https://www.authichain.com',
+  'https://authi-chain-delta.vercel.app',
+  'http://localhost:3000',
+])
+
+function corsHeaders(origin: string | null): Record<string, string> {
+  const allowed =
+    origin && CORS_ORIGINS.has(origin) ? origin : 'https://authichain.com'
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin',
+  }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('Origin')
+  return new NextResponse(null, { status: 204, headers: corsHeaders(origin) })
+}
+
 const ALLOWED_EVENTS = new Set([
   'camera_init',
   'camera_started',
@@ -32,15 +57,16 @@ function sanitizeDetails(details: unknown): Record<string, unknown> | undefined 
 }
 
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get('Origin')
   try {
     const body = await request.json().catch(() => null)
     if (!body || typeof body !== 'object') {
-      return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400, headers: corsHeaders(origin) })
     }
     const type = String(body?.type || '')
 
     if (!ALLOWED_EVENTS.has(type)) {
-      return NextResponse.json({ error: 'Unsupported event type' }, { status: 400 })
+      return NextResponse.json({ error: 'Unsupported event type' }, { status: 400, headers: corsHeaders(origin) })
     }
 
     const event = {
@@ -61,9 +87,9 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true }, { headers: corsHeaders(origin) })
   } catch (error) {
     console.error('Event logging failed:', error)
-    return NextResponse.json({ error: 'Failed to log event' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to log event' }, { status: 500, headers: corsHeaders(origin) })
   }
 }
