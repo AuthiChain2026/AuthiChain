@@ -12,9 +12,11 @@
     "lint": "next lint",
     "contract:compile": "npx hardhat compile",
     "contract:deploy:testnet": "npx hardhat run scripts/nft/deploy.ts --network vechain_test",
-    "contract:deploy:mainnet": "npx hardhat run scripts/nft/deploy.ts --network vechain_main"
+    "contract:deploy:mainnet": "npx hardhat run scripts/nft/deploy.ts --network vechain_main",
+    "build:cloudflare": "npx @opennextjs/cloudflare build"
   },
   "dependencies": {
+    "@fal-ai/client": "^1.9.4",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.4",
     "@radix-ui/react-alert-dialog": "^1.1.7",
