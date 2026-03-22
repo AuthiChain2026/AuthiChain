@@ -1,8 +1,6 @@
 "use client"
 
-export const dynamic = 'force-dynamic'
-
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -14,7 +12,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Shield, Loader2 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
@@ -137,5 +135,13 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Check, Zap, Shield, Star, ArrowRight, Lock } from 'lucide-react'
 
@@ -66,7 +66,7 @@ const PLANS = [
   },
 ]
 
-export default function PricingPage() {
+function PricingContent() {
   const [annual, setAnnual] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
   const router = useRouter()
@@ -237,5 +237,13 @@ export default function PricingPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense>
+      <PricingContent />
+    </Suspense>
   )
 }
