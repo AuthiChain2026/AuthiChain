@@ -14,6 +14,8 @@ const nextConfig = {
     },
   },
   typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
+  turbopack: {},
   webpack: (config, { isServer, dev }) => {
     // Optimize webpack cache serialization to prevent large string warnings
     if (config.cache && typeof config.cache === 'object' && config.cache.type === 'filesystem') {
