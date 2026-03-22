@@ -17,7 +17,7 @@ import { productsResponseSchema, type Product } from "@/lib/contracts/products"
 export default function DashboardPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
+  const [supabase] = useState(() => createClient())
 
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
