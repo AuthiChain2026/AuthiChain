@@ -14,7 +14,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Shield, Loader2 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
-function LoginForm() {
+function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
@@ -141,7 +141,7 @@ export default function LoginPage() {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-4">
         <Suspense fallback={<div className="w-full max-w-md h-64 animate-pulse rounded-lg bg-muted" />}>
-          <LoginForm />
+<LoginContent  />
         </Suspense>
       </div>
     </div>
