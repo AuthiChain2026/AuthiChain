@@ -1,5 +1,11 @@
 import Link from 'next/link'
 
+// Live Stripe price IDs — set these in Vercel env vars once you activate live mode.
+// When set, checkout routes through /api/checkout (attaches userId for D1 webhook).
+// When unset, falls back to the hosted Stripe payment links below.
+const PRICE_STARTER = process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER ?? null
+const PRICE_PRO = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO ?? null
+
 const plans = [
   {
     name: 'Starter',
@@ -14,6 +20,7 @@ const plans = [
       'AuthiChain dashboard',
     ],
     cta: 'Start Authenticating',
+    priceId: PRICE_STARTER,
     paymentLink: 'https://buy.stripe.com/8x24gB5KP55zgzY1MgaIM07',
     highlight: false,
   },
@@ -32,6 +39,7 @@ const plans = [
       'Analytics dashboard',
     ],
     cta: 'Go Pro',
+    priceId: PRICE_PRO,
     paymentLink: 'https://buy.stripe.com/14A3cxgptbtX2J88aEaIM08',
     highlight: true,
   },
@@ -50,6 +58,7 @@ const plans = [
       'Contract pricing',
     ],
     cta: 'Contact Sales',
+    priceId: null,
     paymentLink: null,
     highlight: false,
   },
@@ -110,7 +119,23 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            {plan.paymentLink ? (
+            {plan.priceId ? (
+              // Live mode: POST to /api/checkout — attaches userId so D1 webhook links subscription to account
+              <form action="/api/checkout" method="POST">
+                <input type="hidden" name="priceId" value={plan.priceId} />
+                <button
+                  type="submit"
+                  className={`w-full py-3 rounded-xl font-semibold transition text-center block ${
+                    plan.highlight
+                      ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
+                      : 'bg-white/10 hover:bg-white/20 text-white'
+                  }`}
+                >
+                  {plan.cta}
+                </button>
+              </form>
+            ) : plan.paymentLink ? (
+              // Fallback: hosted Stripe payment link (used until live price IDs are set in env)
               <a
                 href={plan.paymentLink}
                 className={`w-full py-3 rounded-xl font-semibold transition text-center block ${
