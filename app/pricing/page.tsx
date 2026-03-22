@@ -1,16 +1,15 @@
-import Link from 'next/link'
+'use client'
 
-// Live Stripe price IDs — set these in Vercel env vars once you activate live mode.
-// When set, checkout routes through /api/checkout (attaches userId for D1 webhook).
-// When unset, falls back to the hosted Stripe payment links below.
-const PRICE_STARTER = process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER ?? null
-const PRICE_PRO = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO ?? null
+import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Check, Zap, Shield, Star, ArrowRight, Lock } from 'lucide-react'
 
-const plans = [
+const PLANS = [
   {
+    key: 'starter',
     name: 'Starter',
-    price: '$299',
-    period: '/mo',
+    monthlyPrice: 299,
+    annualPrice: 239,
     description: 'For brands getting started with product authentication.',
     features: [
       'Up to 500 verified products',
@@ -19,156 +18,224 @@ const plans = [
       'Email support',
       'AuthiChain dashboard',
     ],
-    cta: 'Start Authenticating',
-    priceId: PRICE_STARTER,
-    paymentLink: 'https://buy.stripe.com/8x24gB5KP55zgzY1MgaIM07',
+    priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_MONTHLY || '',
+    priceIdAnnual: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ANNUAL || '',
     highlight: false,
+    badge: null,
+    trial: true,
   },
   {
+    key: 'pro',
     name: 'Pro',
-    price: '$799',
-    period: '/mo',
+    monthlyPrice: 799,
+    annualPrice: 639,
     description: 'For scaling brands with advanced supply chain needs.',
     features: [
       'Unlimited verified products',
       'Apollo lead enrichment',
       'Supply chain tracking',
-      'API access + webhooks',
-      'Priority support',
+      'API access',
       'Custom QR branding',
-      'Analytics dashboard',
+      'Priority support',
     ],
-    cta: 'Go Pro',
-    priceId: PRICE_PRO,
-    paymentLink: 'https://buy.stripe.com/14A3cxgptbtX2J88aEaIM08',
+    priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || '',
+    priceIdAnnual: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL || '',
     highlight: true,
+    badge: 'MOST POPULAR',
+    trial: true,
   },
   {
+    key: 'enterprise',
     name: 'Enterprise',
-    price: 'Custom',
-    period: '',
-    description: 'For luxury houses, pharma, and global supply chains.',
+    monthlyPrice: 0,
+    annualPrice: 0,
+    description: 'Custom pricing for large-scale deployments and enterprise needs.',
     features: [
       'Everything in Pro',
-      'Dedicated onboarding',
+      'Dedicated account manager',
+      'Custom integrations',
       'SLA guarantee',
-      'DSCSA / compliance reports',
-      'Multi-brand management',
-      'White-label option',
-      'Contract pricing',
+      'White-label options',
+      'QRON token rewards program',
     ],
-    cta: 'Contact Sales',
-    priceId: null,
-    paymentLink: null,
+    priceIdMonthly: '',
+    priceIdAnnual: '',
     highlight: false,
+    badge: 'ENTERPRISE',
+    trial: false,
   },
 ]
 
 export default function PricingPage() {
-  return (
-    <main className="min-h-screen bg-black text-white">
-      {/* Hero */}
-      <section className="py-20 px-6 text-center">
-        <div className="inline-block bg-emerald-500/10 border border-emerald-500/30 rounded-full px-4 py-1 text-emerald-400 text-sm font-medium mb-6">
-          Simple, transparent pricing
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          Protect your brand.<br />
-          <span className="text-emerald-400">Verify everything.</span>
-        </h1>
-        <p className="text-gray-400 text-lg max-w-xl mx-auto mb-4">
-          AuthiChain blockchain authentication for luxury goods, pharma, and enterprise supply chains.
-          No setup fees. Cancel anytime.
-        </p>
-        <p className="text-sm text-gray-500">
-          Use code{' '}
-          <span className="font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
-            LAUNCH25
-          </span>{' '}
-          at checkout for 25% off your first 3 months.
-        </p>
-      </section>
+  const [annual, setAnnual] = useState(false)
+  const [loading, setLoading] = useState<string | null>(null)
+  const router = useRouter()
+  const params = useSearchParams()
+  const cancelled = params.get('checkout') === 'cancelled'
 
-      {/* Plans */}
-      <section className="max-w-6xl mx-auto px-6 pb-24 grid grid-cols-1 md:grid-cols-3 gap-8">
-        {plans.map((plan) => (
-          <div
-            key={plan.name}
-            className={`rounded-2xl border p-8 flex flex-col ${
-              plan.highlight
-                ? 'border-emerald-500 bg-emerald-500/5 shadow-lg shadow-emerald-500/10'
-                : 'border-white/10 bg-white/5'
+  async function handleCheckout(plan: typeof PLANS[0]) {
+    if (plan.key === 'enterprise') {
+      router.push('/contact?plan=enterprise')
+      return
+    }
+    const priceId = annual ? plan.priceIdAnnual : plan.priceIdMonthly
+    if (!priceId) {
+      alert('Stripe price not configured yet. Check NEXT_PUBLIC_STRIPE_PRICE_* env vars.')
+      return
+    }
+    setLoading(plan.key)
+    try {
+      // Track lead event
+      await fetch('/api/sales/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'checkout_started', plan: plan.key, interval: annual ? 'annual' : 'monthly' }),
+      }).catch(() => {})
+
+      const form = document.createElement('form')
+      form.method = 'POST'
+      form.action = '/api/checkout'
+      const input = document.createElement('input')
+      input.type = 'hidden'
+      input.name = 'priceId'
+      input.value = priceId
+      form.appendChild(input)
+      document.body.appendChild(form)
+      form.submit()
+    } catch {
+      setLoading(null)
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950 px-4 py-16">
+      <div className="max-w-6xl mx-auto">
+
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/30 rounded-full px-4 py-1.5 text-purple-400 text-sm font-medium mb-6">
+            <Shield className="w-4 h-4" />
+            Trusted by 500+ brands globally
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Authenticate Products.
+            <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent"> Build Trust.</span>
+          </h1>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Start with a 14-day free trial. No credit card required on monthly plans.
+          </p>
+
+          {cancelled && (
+            <div className="mt-4 inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-2 text-yellow-400 text-sm">
+              Checkout was cancelled — your plan is still active. Resume anytime.
+            </div>
+          )}
+        </div>
+
+        {/* Toggle */}
+        <div className="flex items-center justify-center gap-4 mb-12">
+          <span className={`text-sm font-medium ${!annual ? 'text-white' : 'text-gray-400'}`}>Monthly</span>
+          <button
+            onClick={() => setAnnual(!annual)}
+            className={`relative w-14 h-7 rounded-full transition-colors ${
+              annual ? 'bg-purple-600' : 'bg-gray-700'
             }`}
           >
-            {plan.highlight && (
-              <div className="text-xs font-semibold text-emerald-400 uppercase tracking-widest mb-4">
-                Most Popular
-              </div>
-            )}
-            <h2 className="text-2xl font-bold mb-1">{plan.name}</h2>
-            <div className="flex items-end gap-1 mb-2">
-              <span className="text-4xl font-bold">{plan.price}</span>
-              <span className="text-gray-400 mb-1">{plan.period}</span>
-            </div>
-            <p className="text-gray-400 text-sm mb-6">{plan.description}</p>
-            <ul className="space-y-3 mb-8 flex-1">
-              {plan.features.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
-                  <span className="text-emerald-400 mt-0.5">✓</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            {plan.priceId ? (
-              // Live mode: POST to /api/checkout — attaches userId so D1 webhook links subscription to account
-              <form action="/api/checkout" method="POST">
-                <input type="hidden" name="priceId" value={plan.priceId} />
-                <button
-                  type="submit"
-                  className={`w-full py-3 rounded-xl font-semibold transition text-center block ${
-                    plan.highlight
-                      ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
-                      : 'bg-white/10 hover:bg-white/20 text-white'
-                  }`}
-                >
-                  {plan.cta}
-                </button>
-              </form>
-            ) : plan.paymentLink ? (
-              // Fallback: hosted Stripe payment link (used until live price IDs are set in env)
-              <a
-                href={plan.paymentLink}
-                className={`w-full py-3 rounded-xl font-semibold transition text-center block ${
+            <span className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+              annual ? 'translate-x-7' : 'translate-x-0'
+            }`} />
+          </button>
+          <span className={`text-sm font-medium ${annual ? 'text-white' : 'text-gray-400'}`}>
+            Annual
+            <span className="ml-2 bg-green-500/20 text-green-400 text-xs font-bold px-2 py-0.5 rounded-full border border-green-500/30">
+              SAVE 20%
+            </span>
+          </span>
+        </div>
+
+        {/* Plan Cards */}
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
+          {PLANS.map((plan) => {
+            const price = annual ? plan.annualPrice : plan.monthlyPrice
+            const isLoading = loading === plan.key
+            return (
+              <div
+                key={plan.key}
+                className={`relative flex flex-col rounded-2xl p-8 border transition-all ${
                   plan.highlight
-                    ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
-                    : 'bg-white/10 hover:bg-white/20 text-white'
+                    ? 'bg-gradient-to-b from-purple-900/60 to-gray-900 border-purple-500/60 shadow-lg shadow-purple-500/20 scale-[1.02]'
+                    : 'bg-gray-900/60 border-gray-700/60 hover:border-gray-600'
                 }`}
               >
-                {plan.cta}
-              </a>
-            ) : (
-              <Link
-                href="mailto:z@authichain.com?subject=Enterprise%20Inquiry"
-                className="w-full py-3 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white text-center block transition"
-              >
-                {plan.cta}
-              </Link>
-            )}
-          </div>
-        ))}
-      </section>
+                {plan.badge && (
+                  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold px-3 py-1 rounded-full ${
+                    plan.highlight ? 'bg-purple-500 text-white' : 'bg-gray-700 text-gray-300'
+                  }`}>
+                    {plan.badge}
+                  </div>
+                )}
 
-      {/* Trust bar */}
-      <section className="border-t border-white/10 py-12 px-6 text-center">
-        <p className="text-gray-500 text-sm mb-6">Trusted by enterprise brands for blockchain-grade authentication</p>
-        <div className="flex flex-wrap justify-center gap-8 text-gray-600 text-sm font-medium">
-          <span>🔒 Blockchain Verified</span>
-          <span>⚡ Live QR Scanning</span>
-          <span>📋 DSCSA Compliant</span>
-          <span>🌍 Global Supply Chain</span>
-          <span>🛡️ Anti-Counterfeit</span>
+                <div className="flex items-center gap-3 mb-4">
+                  {plan.highlight ? <Star className="w-5 h-5 text-purple-400" /> : <Zap className="w-5 h-5 text-gray-400" />}
+                  <h2 className="text-xl font-bold text-white">{plan.name}</h2>
+                </div>
+
+                <div className="mb-4">
+                  {plan.key === 'enterprise' ? (
+                    <p className="text-3xl font-bold text-white">Custom</p>
+                  ) : (
+                    <div className="flex items-end gap-1">
+                      <span className="text-3xl font-bold text-white">${price}</span>
+                      <span className="text-gray-400 mb-1">/mo{annual ? ' (billed annually)' : ''}</span>
+                    </div>
+                  )}
+                  {plan.trial && !annual && (
+                    <p className="text-xs text-cyan-400 mt-1">14-day free trial included</p>
+                  )}
+                </div>
+
+                <p className="text-gray-400 text-sm mb-6">{plan.description}</p>
+
+                <ul className="space-y-3 mb-8 flex-1">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
+                      <Check className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  onClick={() => handleCheckout(plan)}
+                  disabled={!!loading}
+                  className={`w-full py-3 px-6 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
+                    plan.highlight
+                      ? 'bg-gradient-to-r from-purple-600 to-cyan-600 text-white hover:from-purple-500 hover:to-cyan-500 shadow-lg shadow-purple-500/30'
+                      : 'bg-gray-800 text-white hover:bg-gray-700 border border-gray-600'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {isLoading ? (
+                    <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                  ) : (
+                    <>
+                      {plan.key === 'enterprise' ? 'Contact Sales' : plan.trial && !annual ? 'Start Free Trial' : 'Get Started'}
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </div>
+            )
+          })}
         </div>
-      </section>
+
+        {/* Trust Signals */}
+        <div className="flex flex-wrap justify-center items-center gap-6 text-gray-500 text-sm">
+          <div className="flex items-center gap-2"><Lock className="w-4 h-4" /> SSL encrypted</div>
+          <div className="flex items-center gap-2"><Shield className="w-4 h-4" /> Powered by Stripe</div>
+          <div className="flex items-center gap-2"><Check className="w-4 h-4" /> Cancel anytime</div>
+          <div className="flex items-center gap-2"><Zap className="w-4 h-4" /> 30-day money-back guarantee</div>
+        </div>
+      </div>
     </main>
   )
 }
