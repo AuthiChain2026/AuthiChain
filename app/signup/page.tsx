@@ -17,7 +17,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 export default function SignupPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
+  const [supabase] = useState(() => createClient())
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")

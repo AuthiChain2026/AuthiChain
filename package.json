@@ -12,7 +12,8 @@
     "lint": "next lint",
     "contract:compile": "npx hardhat compile",
     "contract:deploy:testnet": "npx hardhat run scripts/nft/deploy.ts --network vechain_test",
-    "contract:deploy:mainnet": "npx hardhat run scripts/nft/deploy.ts --network vechain_main"
+    "contract:deploy:mainnet": "npx hardhat run scripts/nft/deploy.ts --network vechain_main",
+    "build:cloudflare": "npx @opennextjs/cloudflare build"
   },
   "dependencies": {
     "@fal-ai/client": "^1.9.4",

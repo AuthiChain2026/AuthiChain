@@ -230,3 +230,12 @@ export default function PricingPage() {
     </Suspense>
   )
 }
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-950 animate-pulse" />}>
+      <PricingContent />
+    </Suspense>
+  )
+}
+

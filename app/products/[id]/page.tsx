@@ -17,7 +17,7 @@ import { MintNFTButton } from "@/components/MintNFTButton"
 export default function ProductDetailPage({ params }) {
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
+  const [supabase] = useState(() => createClient())
 
   const [product, setProduct] = useState(null as Product | null)
   const [loading, setLoading] = useState(true)
