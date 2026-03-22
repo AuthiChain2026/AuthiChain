@@ -53,8 +53,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.55.0",
+    "resend": "^3.5.0",
     "stripe": "^17.7.0",
-        "resend": "^3.5.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "thirdweb": "^5.119.1",
@@ -62,7 +62,6 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
-    "@opennextjs/cloudflare": "^1.15.1",
     "@openzeppelin/contracts": "^5.2.0",
     "@types/node": "^22.10.5",
     "@types/pg": "^8.16.0",
