@@ -53,6 +53,31 @@ async function fileToBase64(file: File): Promise<string> {
   });
 }
 
+function downloadStoryTranscript(story: z.infer<typeof StorySchema>) {
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const lines = [
+    story.title,
+    "=".repeat(story.title.length),
+    "",
+    ...story.transcriptSegments.map(
+      (seg) => `[${formatTime(seg.start)}] ${seg.text}`
+    ),
+  ];
+
+  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${story.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ------------------------------------------------------------
 // PERFORMANCE METRICS COUNTER
 // Animates a number from 0 to a target value
@@ -418,7 +443,7 @@ export default function DemoPage() {
             ) : (
               <div>
                 <p className="text-white/60 mb-3">
-                  Drag & drop a product image or{" "}
+                  Drag &amp; drop a product image or{" "}
                   <span className="text-purple-400 underline">browse files</span>
                 </p>
                 <p className="text-white/30 text-sm">
@@ -509,7 +534,7 @@ export default function DemoPage() {
                 startTime: seg.start,
                 endTime: seg.end,
               }))}
-              onDownload={() => alert("Download clicked!")}
+              onDownload={() => downloadStoryTranscript(story)}
             />
           </section>
         )}
@@ -519,7 +544,7 @@ export default function DemoPage() {
           <div className="text-center">
             <h2 className="text-3xl font-bold mb-2">10 Industries, One Platform</h2>
             <p className="text-white/50">
-              AuthiChain's AI AutoFlow™ automatically adapts authentication workflows for every
+              AuthiChain&apos;s AI AutoFlow™ automatically adapts authentication workflows for every
               major product category.
             </p>
           </div>
@@ -545,11 +570,11 @@ export default function DemoPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <Card className="p-4 bg-white/5 border-white/10">
               <p className="text-2xl font-bold text-green-400">$8.5T</p>
-              <p className="text-xs text-white/40 mt-1">Largest: Food & Beverage</p>
+              <p className="text-xs text-white/40 mt-1">Largest: Food &amp; Beverage</p>
             </Card>
             <Card className="p-4 bg-white/5 border-white/10">
               <p className="text-2xl font-bold text-blue-400">$1.7T</p>
-              <p className="text-xs text-white/40 mt-1">Fashion & Apparel</p>
+              <p className="text-xs text-white/40 mt-1">Fashion &amp; Apparel</p>
             </Card>
             <Card className="p-4 bg-white/5 border-white/10">
               <p className="text-2xl font-bold text-purple-400">$1.5T</p>
