@@ -1,6 +1,13 @@
 import type { Env } from '../index'
 
-export type LicenseTier = 'pro' | 'enterprise'
+export type LicenseTier =
+  | 'starter'      // QRON Starter — 5k seals/mo
+  | 'growth'       // QRON Growth (25k seals) / AuthiChain Growth Plan (500 QR seals)
+  | 'creator'      // AuthiChain Creator — 50 NFTs/mo
+  | 'pro'          // AuthiChain Pro (250 NFTs) / QRON Scale (15k seals + AR)
+  | 'enterprise'   // AuthiChain Enterprise / QRON Enterprise / Enterprise Auth License
+  | 'agency'       // AuthiChain Agency — 25 client accounts, white-label
+  | 'one_time'     // Intelligence reports & one-time service packages
 export type LicenseStatus = 'active' | 'revoked' | 'expired'
 
 export interface LicenseRecord {

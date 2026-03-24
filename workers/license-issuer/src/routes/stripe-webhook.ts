@@ -1,6 +1,6 @@
 import { verifyStripeSignature } from '../utils/crypto'
 import { DB } from '../services/db'
-import { issueLicenseKey, hashKey, tierFromPriceId, seatsForTier } from '../services/license'
+import { issueLicenseKey, hashKey, tierFromProduct, seatsForTier } from '../services/license'
 import { notifyAdminNewLicense, deliverKeyViaTelegram } from '../services/telegram'
 import type { Env } from '../index'
 
@@ -52,16 +52,16 @@ async function handleEvent(env: Env, event: any): Promise<void> {
 }
 
 async function handleCheckout(env: Env, session: any): Promise<void> {
-  const priceId: string = session.line_items?.data?.[0]?.price?.id
-    ?? session.metadata?.priceId
-    ?? ''
+  const lineItem = session.line_items?.data?.[0]
+  const priceId: string = lineItem?.price?.id ?? session.metadata?.priceId ?? ''
+  const productId: string = lineItem?.price?.product ?? session.metadata?.productId ?? ''
   const email: string = session.customer_details?.email ?? session.customer_email ?? ''
   const customerId: string = session.customer ?? ''
   const subscriptionId: string = session.subscription ?? ''
 
   if (!email || !customerId) return
 
-  const tier = tierFromPriceId(env, priceId)
+  const tier = tierFromProduct(env, productId, priceId)
   const seats = seatsForTier(tier)
   const jti = crypto.randomUUID()
   const now = Math.floor(Date.now() / 1000)

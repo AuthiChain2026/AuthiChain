@@ -15,6 +15,7 @@
 
 import type { Env } from '../index'
 import type { LicenseTier } from './db'
+import { PRODUCT_BY_ID, SEATS_BY_TIER } from '../config/products'
 
 export interface LicensePayload {
   sub: string        // email
@@ -82,17 +83,31 @@ export async function hashKey(key: string): Promise<string> {
 }
 
 /**
- * Determine tier from a Stripe price ID.
+ * Resolve tier from a Stripe product ID (preferred) or price ID (legacy).
+ *
+ * Resolution order:
+ *   1. Static product-ID map (products.ts) — covers all current catalog items
+ *   2. STRIPE_AGENT_BROWSER_ENTERPRISE_PRICE_ID env var — legacy fallback
+ *   3. Default to 'pro'
  */
-export function tierFromPriceId(env: Env, priceId: string): LicenseTier {
-  if (priceId === env.STRIPE_AGENT_BROWSER_ENTERPRISE_PRICE_ID) return 'enterprise'
+export function tierFromProduct(env: Env, productId: string, priceId?: string): LicenseTier {
+  const config = PRODUCT_BY_ID[productId]
+  if (config) return config.tier
+
+  // Legacy: single price-ID env var used before the full catalog was defined
+  if (priceId && priceId === env.STRIPE_AGENT_BROWSER_ENTERPRISE_PRICE_ID) return 'enterprise'
+
   return 'pro'
+}
+
+/** @deprecated Use tierFromProduct — kept for backwards compatibility */
+export function tierFromPriceId(env: Env, priceId: string): LicenseTier {
+  return tierFromProduct(env, '', priceId)
 }
 
 /**
  * Seats for each tier (0 = unlimited).
  */
 export function seatsForTier(tier: LicenseTier): number {
-  // 0 = unlimited seats. Pro gets a fixed seat allowance; Enterprise is unrestricted.
-  return tier === 'enterprise' ? 0 : 5
+  return SEATS_BY_TIER[tier] ?? 1
 }
