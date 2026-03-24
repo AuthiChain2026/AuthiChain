@@ -152,9 +152,9 @@ async function upsertSubscriptionInSupabase(
     if (existing) {
       await supabase.from('subscriptions').update(fields).eq('id', existing.id);
     } else {
-      // Best-effort: attempt to match by email via auth.users if no row exists yet.
-      // The checkout metadata should carry user_id; fall back to no-op if missing.
-      console.log(`[subscription-sync] No existing row for customer ${stripeCustomerId}; will be created on next checkout`);
+      // No row exists yet — this can happen for manually created Stripe subscriptions
+      // that bypassed the normal checkout flow. The row will be created on next checkout.
+      console.warn(`[subscription-sync] No existing row for customer ${stripeCustomerId} — subscription not synced. Row will be created on next checkout.`);
     }
   } catch (err) {
     console.error('[subscription-sync] Failed to sync subscription to Supabase:', err);
@@ -291,6 +291,44 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       );
     }
   }
+}
+
+async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+  const customerId = subscription.customer as string;
+  const priceId = subscription.items.data[0]?.price?.id ?? '';
+  const plan = planFromPriceId(priceId);
+  const planKey = plan.toLowerCase();
+  const limits = PLAN_LIMITS[planKey as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.starter;
+  const productLimit = limits.productLimit === Infinity ? 999999 : limits.productLimit;
+  const periodEnd = subscription.current_period_end
+    ? new Date(subscription.current_period_end * 1000)
+    : null;
+  const status = (['trialing', 'active', 'past_due', 'canceled', 'unpaid'] as const).includes(
+    subscription.status as any
+  )
+    ? subscription.status
+    : 'active';
+
+  // Sync plan/status change to Supabase
+  await upsertSubscriptionInSupabase(
+    customerId,
+    subscription.id,
+    planKey,
+    status,
+    productLimit,
+    periodEnd
+  );
+
+  // Sync plan change to Airtable revenue projections
+  const monthlyAmount = subscription.items.data[0]?.price?.unit_amount
+    ? subscription.items.data[0].price.unit_amount / 100
+    : 0;
+  await upsertRevenueProjection(subscription.id, {
+    'Status': subscription.status === 'active' ? 'Active' : subscription.status,
+    'MRR': monthlyAmount,
+    'ARR': monthlyAmount * 12,
+    'Plan': planKey,
+  });
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
@@ -464,6 +502,9 @@ export async function POST(req: NextRequest) {
         }
         break;
       }
+      case 'customer.subscription.updated':
+        await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+        break;
       case 'invoice.paid':
         await handleInvoicePaid(event.data.object as Stripe.Invoice);
         break;
