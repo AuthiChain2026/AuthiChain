@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Check, Zap, Shield, Star, ArrowRight, Lock } from 'lucide-react'
+import { Check, Zap, Shield, Star, ArrowRight, Lock, AlertCircle } from 'lucide-react'
 
 const PLANS = [
   {
@@ -69,11 +69,13 @@ const PLANS = [
 function PricingContent() {
   const [annual, setAnnual] = useState(false)
   const [loading, setLoading] = useState(null)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const router = useRouter()
   const params = useSearchParams()
   const cancelled = params.get('checkout') === 'cancelled'
 
   async function handleCheckout(plan: typeof PLANS[0]) {
+    setCheckoutError(null)
     if (plan.key === 'enterprise') {
       router.push('/contact?plan=enterprise')
       return
@@ -81,7 +83,7 @@ function PricingContent() {
 
     const priceId = annual ? plan.priceIdAnnual : plan.priceIdMonthly
     if (!priceId) {
-      alert('Stripe price not configured yet. Check NEXT_PUBLIC_STRIPE_PRICE_* env vars.')
+      setCheckoutError('Checkout is not yet configured for this plan. Please contact support or try again later.')
       return
     }
 
@@ -128,6 +130,13 @@ function PricingContent() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-900/20 border border-yellow-600 rounded-lg text-sm">
             <ArrowRight className="h-4 w-4" />
             Checkout was cancelled — your plan is still active. Resume anytime.
+          </div>
+        )}
+
+        {checkoutError && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-900/20 border border-red-600 rounded-lg text-sm text-red-300 mt-3">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            {checkoutError}
           </div>
         )}
 
@@ -230,4 +239,3 @@ export default function PricingPage() {
     </Suspense>
   )
 }
-
