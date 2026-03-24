@@ -17,7 +17,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 export default function SignupPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
+  const [supabase] = useState(() => createClient())
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -63,8 +63,8 @@ export default function SignupPage() {
         description: "Please check your email to confirm your account.",
       })
 
-      // If email confirmation is disabled, redirect to dashboard
-      if (data.user && !data.user.identities?.length) {
+      // If a session was immediately created (email confirmation disabled), go straight to dashboard
+      if (data.session) {
         router.push("/dashboard")
       } else {
         router.push("/login")

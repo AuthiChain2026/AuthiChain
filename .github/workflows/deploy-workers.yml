@@ -30,22 +30,15 @@ jobs:
     defaults:
       run:
         working-directory: workers/verify-worker
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: workers/verify-worker/package-lock.json
-
       - name: Install dependencies
         run: npm install
-
       - name: Type check
         run: npx tsc --noEmit
-
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
@@ -56,13 +49,11 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-
       - name: Health check
         run: |
           sleep 5
           curl -sf https://authichain-verify-worker.authichain2026.workers.dev/health \
             || echo "Health check pending — worker may still be propagating"
-
   # ── License Issuer Worker ──────────────────────────────────────────────────
   deploy-license-issuer:
     name: Deploy authichain-license-issuer
@@ -74,22 +65,15 @@ jobs:
     defaults:
       run:
         working-directory: workers/license-issuer
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: workers/license-issuer/package-lock.json
-
       - name: Install dependencies
-        run: npm ci
-
+        run: npm install
       - name: Type check
         run: npx tsc --noEmit
-
       - name: Deploy worker
         uses: cloudflare/wrangler-action@v3
         with:
@@ -97,7 +81,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: workers/license-issuer
           command: deploy --config wrangler.toml
-
       # Push all secrets via wrangler secret put
       # Each secret must be added to GitHub repo secrets first.
       - name: Set worker secrets
@@ -110,32 +93,29 @@ jobs:
             local value="$2"
             if [ -n "$value" ]; then
               echo "$value" | npx wrangler secret put "$name" --config wrangler.toml
-              echo "  ✅ $name"
+              echo " ✅ $name"
             else
-              echo "  ⚠ $name not set in GitHub secrets — skipping"
+              echo " ⚠ $name not set in GitHub secrets — skipping"
             fi
           }
-
-          set_secret STRIPE_SECRET_KEY              "${{ secrets.STRIPE_SECRET_KEY }}"
-          set_secret STRIPE_WEBHOOK_SECRET          "${{ secrets.LICENSE_ISSUER_WEBHOOK_SECRET }}"
-          set_secret STRIPE_AGENT_BROWSER_PRO_PRICE_ID        "${{ secrets.STRIPE_PRO_PRICE_ID }}"
+          set_secret STRIPE_SECRET_KEY "${{ secrets.STRIPE_SECRET_KEY }}"
+          set_secret STRIPE_WEBHOOK_SECRET "${{ secrets.LICENSE_ISSUER_WEBHOOK_SECRET }}"
+          set_secret STRIPE_AGENT_BROWSER_PRO_PRICE_ID "${{ secrets.STRIPE_PRO_PRICE_ID }}"
           set_secret STRIPE_AGENT_BROWSER_ENTERPRISE_PRICE_ID "${{ secrets.STRIPE_ENTERPRISE_PRICE_ID }}"
-          set_secret LICENSE_PRIVATE_KEY_PEM        "${{ secrets.LICENSE_PRIVATE_KEY_PEM }}"
-          set_secret LICENSE_PUBLIC_KEY_PEM         "${{ secrets.LICENSE_PUBLIC_KEY_PEM }}"
-          set_secret TELEGRAM_BOT_TOKEN             "${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          set_secret TELEGRAM_ADMIN_CHAT_ID         "${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}"
-
+          set_secret LICENSE_PRIVATE_KEY_PEM "${{ secrets.LICENSE_PRIVATE_KEY_PEM }}"
+          set_secret LICENSE_PUBLIC_KEY_PEM "${{ secrets.LICENSE_PUBLIC_KEY_PEM }}"
+          set_secret TELEGRAM_BOT_TOKEN "${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          set_secret TELEGRAM_ADMIN_CHAT_ID "${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}"
       - name: Health check
         run: |
           sleep 5
           curl -sf https://authichain-license-issuer.authichain2026.workers.dev/health \
             || echo "Health check pending — worker may still be propagating"
-
       - name: Print webhook URL
         run: |
           echo ""
           echo "══════════════════════════════════════════════════════"
-          echo "  Register this URL as a Stripe webhook endpoint:"
-          echo "  https://authichain-license-issuer.authichain2026.workers.dev/api/license/stripe-webhook"
-          echo "  Events: checkout.session.completed, customer.subscription.deleted"
+          echo " Register this URL as a Stripe webhook endpoint:"
+          echo " https://authichain-license-issuer.authichain2026.workers.dev/api/license/stripe-webhook"
+          echo " Events: checkout.session.completed, customer.subscription.deleted"
           echo "══════════════════════════════════════════════════════"
