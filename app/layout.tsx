@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/next"
 import { AuthiChainThirdwebProvider } from "@/components/ThirdwebProvider"
 
 export const metadata: Metadata = {
