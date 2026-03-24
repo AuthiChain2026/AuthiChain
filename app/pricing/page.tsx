@@ -225,14 +225,6 @@ function PricingContent() {
 
 export default function PricingPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Zap className="h-8 w-8 animate-spin" /></div>}>
-      <PricingContent />
-    </Suspense>
-  )
-}
-
-export default function PricingPage() {
-  return (
     <Suspense fallback={<div className="min-h-screen bg-gray-950 animate-pulse" />}>
       <PricingContent />
     </Suspense>
