@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  CheckCircle, Building2, Package, QrCode, ShieldCheck, ChevronRight, Sparkles, Clock
+  CheckCircle, Building2, Package, QrCode, ShieldCheck, ChevronRight, Sparkles, Clock, AlertCircle
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -246,6 +246,7 @@ export default function OnboardingPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [data, setData] = useState<OnboardingData>({
     brandName: '',
     industry: '',
@@ -276,24 +277,24 @@ export default function OnboardingPage() {
 
   const handleSubmit = async () => {
     setSubmitting(true)
+    setSubmitError(null)
     try {
-      // Save brand + first product via API, then redirect to checkout
-      await fetch('/api/onboarding', {
+      const res = await fetch('/api/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
+      if (!res.ok) throw new Error(`Server error (${res.status})`)
       // Redirect to pricing/checkout with selected plan pre-filled
       router.push(`/pricing?plan=${data.plan}&from=onboarding`)
-    } catch {
-      router.push(`/pricing?plan=${data.plan}`)
+    } catch (err) {
+      setSubmitError('Something went wrong saving your setup. Please try again.')
     } finally {
       setSubmitting(false)
     }
   }
 
   const CurrentStep = [StepBrand, StepProduct, StepGoals, StepPlan][step]
-  const progress = ((step + 1) / STEPS.length) * 100
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -341,6 +342,13 @@ export default function OnboardingPage() {
 
           <CardContent>
             <CurrentStep data={data} onChange={patch} />
+
+            {submitError && (
+              <div className="mt-4 flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                {submitError}
+              </div>
+            )}
 
             <div className="mt-6 flex items-center justify-between gap-3">
               {step > 0 ? (
