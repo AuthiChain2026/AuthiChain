@@ -23,6 +23,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const [upgradeDismissed, setUpgradeDismissed] = useState(false)
+  const [subscription, setSubscription] = useState<any>(null)
 
   useEffect(() => {
     checkUser()
@@ -116,6 +117,8 @@ export default function DashboardPage() {
     .sort(([, a]: [string, number], [, b]: [string, number]) => b - a)
     .slice(0, 3)
 
+  const isFreePlan = !subscription || !subscription?.subscription?.plan || subscription?.subscription?.plan === 'free'
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -189,7 +192,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Upgrade Banner */}
-        {!loading && !upgradeDismissed && (
+        {!loading && !upgradeDismissed && isFreePlan && (
           <div className="relative mb-8 rounded-2xl overflow-hidden">
             <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
