@@ -1,65 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
-import { createServiceClient } from '@/lib/supabase/service'
-
-export const dynamic = 'force-dynamic'
-
-export async function GET(_req: NextRequest) {
-  const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const service = createServiceClient()
-  const { data: brand, error } = await service
-    .from('brands')
-    .select('id, name, domain, logo_url, industry, staking_tier, qron_staked, staking_locked_until, unit_cost_discount, base_unit_cost, is_verified, is_active, created_at')
-    .eq('user_id', user.id)
-    .single()
-
-  if (error && error.code !== 'PGRST116') {
-    return NextResponse.json({ error: 'Failed to fetch brand' }, { status: 500 })
-  }
-
-  return NextResponse.json({ brand: brand ?? null })
-}
-
-export async function PUT(req: NextRequest) {
-  const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const body = await req.json().catch(() => ({}))
-  const allowed = ['name', 'domain', 'logo_url', 'industry']
-  const updates: Record<string, string> = {}
-  for (const key of allowed) {
-    if (body[key] !== undefined) updates[key] = body[key]
-  }
-
-  if (Object.keys(updates).length === 0) {
-    return NextResponse.json({ error: 'No updatable fields provided' }, { status: 400 })
-  }
-
-  const service = createServiceClient()
-
-  // Upsert brand (create if doesn't exist)
-  const { data: brand, error } = await service
-    .from('brands')
-    .upsert(
-      { user_id: user.id, ...updates },
-      { onConflict: 'user_id', ignoreDuplicates: false }
-    )
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: 'Failed to update brand' }, { status: 500 })
-  }
-
-  return NextResponse.json({ brand })
-}
+import { createClient } from '@/lib/supabase/server'
+const E = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/authichain-brands`
+const K = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+async function sess() { const s = await createClient(); const { data: { session } } = await s.auth.getSession(); return session; }
+export async function GET() { const s = await sess(); if (!s) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); const res = await fetch(`${E}/me`, { headers: { Authorization: `Bearer ${s.access_token}`, apikey: K } }); return NextResponse.json(await res.json(), { status: res.status }) }
+export async function PUT(r: NextRequest) { const s = await sess(); if (!s) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); const b = await r.json().catch(() => ({})); const res = await fetch(`${E}/me`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${s.access_token}`, apikey: K }, body: JSON.stringify(b) }); return NextResponse.json(await res.json(), { status: res.status }) }
