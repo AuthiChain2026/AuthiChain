@@ -21,8 +21,7 @@ export async function setupWebhook(request: Request, env: Env): Promise<Response
   await telegram.call('setMyCommands', {
     commands: [
       { command: 'start', description: 'Welcome & getting started' },
-      { command: 'verify', description: 'Verify a product — /verify <TrueMark ID>' },
-      { command: 'connect', description: 'Link your email for license key delivery' },
+      { command: 'verify', description: 'Verify a product (usage: /verify <TrueMark ID>)' },
       { command: 'help', description: 'Show available commands' },
       { command: 'status', description: 'Check bot status' },
     ],

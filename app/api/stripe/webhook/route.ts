@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/service';
 import { planFromPriceId, PLAN_LIMITS } from '@/lib/subscription';
-import { applyStakingCouponToSubscription } from '@/lib/stripe-billing';
 export const dynamic = 'force-dynamic';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -153,9 +152,9 @@ async function upsertSubscriptionInSupabase(
     if (existing) {
       await supabase.from('subscriptions').update(fields).eq('id', existing.id);
     } else {
-      // Best-effort: attempt to match by email via auth.users if no row exists yet.
-      // The checkout metadata should carry user_id; fall back to no-op if missing.
-      console.log(`[subscription-sync] No existing row for customer ${stripeCustomerId}; will be created on next checkout`);
+      // No row exists yet — this can happen for manually created Stripe subscriptions
+      // that bypassed the normal checkout flow. The row will be created on next checkout.
+      console.warn(`[subscription-sync] No existing row for customer ${stripeCustomerId} — subscription not synced. Row will be created on next checkout.`);
     }
   } catch (err) {
     console.error('[subscription-sync] Failed to sync subscription to Supabase:', err);
@@ -163,6 +162,46 @@ async function upsertSubscriptionInSupabase(
 }
 
 // ─── Event handlers ──────────────────────────────────────────────────────────
+
+/**
+ * Handle one-time QRON credit purchases.
+ * Credits are added to the user's qron_credits balance in Supabase.
+ */
+async function handleQronCreditPurchase(session: Stripe.Checkout.Session) {
+  const userId = session.metadata?.userId;
+  const credits = parseInt(session.metadata?.credits ?? '0', 10);
+
+  if (!userId || credits <= 0) {
+    console.log('[qron-credits] Skipping — no userId or credits in metadata');
+    return;
+  }
+
+  try {
+    const supabase = createServiceClient();
+    // Upsert user credit balance (increment atomically via RPC if available, else read-modify-write)
+    const { data: existing } = await supabase
+      .from('qron_credits')
+      .select('balance')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from('qron_credits')
+        .update({ balance: existing.balance + credits, updated_at: new Date().toISOString() })
+        .eq('user_id', userId);
+    } else {
+      await supabase
+        .from('qron_credits')
+        .insert({ user_id: userId, balance: credits, updated_at: new Date().toISOString() });
+    }
+
+    console.log(`[qron-credits] +${credits} credits for user ${userId}`);
+  } catch (err) {
+    console.error('[qron-credits] Failed to update balance:', err);
+    throw err; // re-throw so the event is not marked success
+  }
+}
 
 async function fireWelcomeEmail(email: string, name: string, plan: string) {
   const webhookUrl = process.env.MAKE_WELCOME_WEBHOOK_URL;
@@ -228,61 +267,6 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   const amountTotal = (session.amount_total || 0) / 100;
   const userId = session.metadata?.userId;
 
-  // ── QRON Stake Purchase ─────────────────────────────────────────────────────
-  if (session.metadata?.product === 'qron_stake' && session.metadata?.user_id) {
-    const stakeUserId = session.metadata.user_id;
-    const qronAmount = parseFloat(session.metadata.qron_amount ?? '0');
-
-    if (qronAmount > 0) {
-      try {
-        const supabase = createServiceClient();
-
-        // Get or create brand
-        let { data: brand } = await supabase
-          .from('brands')
-          .select('id, qron_staked')
-          .eq('user_id', stakeUserId)
-          .single();
-
-        if (!brand) {
-          const { data: newBrand } = await supabase
-            .from('brands')
-            .insert({ user_id: stakeUserId, name: session.metadata.user_email ?? stakeUserId, qron_staked: 0 })
-            .select('id, qron_staked')
-            .single();
-          brand = newBrand;
-        }
-
-        if (brand) {
-          const newStaked = parseFloat(((brand.qron_staked ?? 0) + qronAmount).toFixed(6));
-          const lockedUntil = new Date();
-          lockedUntil.setDate(lockedUntil.getDate() + 30);
-
-          const { data: updatedBrand } = await supabase
-            .from('brands')
-            .update({
-              qron_staked: newStaked,
-              staking_locked_until: lockedUntil.toISOString(),
-            })
-            .eq('id', brand.id)
-            .select('staking_tier')
-            .single();
-
-          console.log(`[qron-stake] Credited ${qronAmount} QRON to brand ${brand.id} (user ${stakeUserId})`);
-
-          // Apply Stripe subscription discount for new staking tier
-          if (updatedBrand?.staking_tier) {
-            applyStakingCouponToSubscription(stakeUserId, updatedBrand.staking_tier).catch(() => {});
-          }
-        }
-      } catch (err) {
-        console.error('[qron-stake] Failed to credit staking balance:', err);
-      }
-    }
-    // Still fall through to log Airtable invoice below
-  }
-  // ────────────────────────────────────────────────────────────────────────────
-
   const accountId = await upsertAccount(customerId, {
     'Name': customerName || customerEmail,
     'Email': customerEmail,
@@ -328,11 +312,6 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       ...(accountId ? { 'Account': [accountId] } : {}),
     });
 
-    // Referral reward: if this user was referred, reward the referrer
-    if (userId) {
-      rewardReferrer(userId, customerId).catch(() => {})
-    }
-
     // Sync to Supabase subscriptions table
     if (userId) {
       const supabase = createServiceClient();
@@ -353,6 +332,44 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       );
     }
   }
+}
+
+async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+  const customerId = subscription.customer as string;
+  const priceId = subscription.items.data[0]?.price?.id ?? '';
+  const plan = planFromPriceId(priceId);
+  const planKey = plan.toLowerCase();
+  const limits = PLAN_LIMITS[planKey as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.starter;
+  const productLimit = limits.productLimit === Infinity ? 999999 : limits.productLimit;
+  const periodEnd = subscription.current_period_end
+    ? new Date(subscription.current_period_end * 1000)
+    : null;
+  const status = (['trialing', 'active', 'past_due', 'canceled', 'unpaid'] as const).includes(
+    subscription.status as any
+  )
+    ? subscription.status
+    : 'active';
+
+  // Sync plan/status change to Supabase
+  await upsertSubscriptionInSupabase(
+    customerId,
+    subscription.id,
+    planKey,
+    status,
+    productLimit,
+    periodEnd
+  );
+
+  // Sync plan change to Airtable revenue projections
+  const monthlyAmount = subscription.items.data[0]?.price?.unit_amount
+    ? subscription.items.data[0].price.unit_amount / 100
+    : 0;
+  await upsertRevenueProjection(subscription.id, {
+    'Status': subscription.status === 'active' ? 'Active' : subscription.status,
+    'MRR': monthlyAmount,
+    'ARR': monthlyAmount * 12,
+    'Plan': planKey,
+  });
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
@@ -517,8 +534,17 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (event.type) {
-      case 'checkout.session.completed':
-        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.metadata?.type === 'qron_credits') {
+          await handleQronCreditPurchase(session);
+        } else {
+          await handleCheckoutSessionCompleted(session);
+        }
+        break;
+      }
+      case 'customer.subscription.updated':
+        await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
         break;
       case 'invoice.paid':
         await handleInvoicePaid(event.data.object as Stripe.Invoice);

@@ -2,7 +2,8 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/next"
+import { AuthiChainThirdwebProvider } from "@/components/ThirdwebProvider"
 
 export const metadata: Metadata = {
   title: "AuthiChain - Blockchain Product Authentication",
@@ -23,9 +24,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster />
-          <Analytics />
+          <AuthiChainThirdwebProvider>
+            {children}
+            <Toaster />
+            <Analytics />
+          </AuthiChainThirdwebProvider>
         </ThemeProvider>
       </body>
     </html>

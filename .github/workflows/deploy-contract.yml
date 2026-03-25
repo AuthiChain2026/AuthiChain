@@ -1,0 +1,77 @@
+name: Deploy AuthiChainNFT Contract
+
+# Manual trigger only — deploying an NFT contract costs gas and is irreversible.
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Target network'
+        required: true
+        default: 'vechain_test'
+        type: choice
+        options:
+          - vechain_test
+          - vechain_main
+      grant_minter:
+        description: 'Grant minter role to MINTER_ADDRESS after deploy?'
+        required: true
+        default: 'true'
+        type: boolean
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.network }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps --ignore-scripts
+
+      - name: Compile contract
+        run: npm run contract:compile
+        env:
+          SKIP_ENV_VALIDATION: true
+
+      - name: Deploy contract
+        id: deploy
+        run: |
+          NETWORK="${{ github.event.inputs.network }}"
+          if [ "$NETWORK" = "vechain_main" ]; then
+            npm run contract:deploy:mainnet 2>&1 | tee deploy.log
+          else
+            npm run contract:deploy:testnet 2>&1 | tee deploy.log
+          fi
+
+          # Extract deployed address from output
+          ADDRESS=$(grep -oE 'AUTHICHAIN_NFT_CONTRACT_ADDRESS=0x[0-9a-fA-F]{40}' deploy.log | head -1 | cut -d= -f2)
+          echo "contract_address=$ADDRESS" >> "$GITHUB_OUTPUT"
+          echo ""
+          echo "══════════════════════════════════════════════"
+          echo "  Deployed to: $ADDRESS"
+          echo "  Network    : $NETWORK"
+          echo ""
+          echo "  Add to Vercel env vars:"
+          echo "    AUTHICHAIN_NFT_CONTRACT_ADDRESS=$ADDRESS"
+          echo "══════════════════════════════════════════════"
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          MINTER_ADDRESS: ${{ secrets.MINTER_ADDRESS }}
+          NFT_RPC_URL: ${{ github.event.inputs.network == 'vechain_main' && 'https://mainnet.veblocks.net' || 'https://testnet.veblocks.net' }}
+
+      - name: Summary
+        run: |
+          echo "### AuthiChainNFT Deployed 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| | |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Network** | \`${{ github.event.inputs.network }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Contract address** | \`${{ steps.deploy.outputs.contract_address }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Set \`AUTHICHAIN_NFT_CONTRACT_ADDRESS=${{ steps.deploy.outputs.contract_address }}\` in Vercel." >> $GITHUB_STEP_SUMMARY

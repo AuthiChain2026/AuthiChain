@@ -19,7 +19,7 @@ import { productResponseSchema } from "@/lib/contracts/products"
 export default function UploadPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
+  const [supabase] = useState(() => createClient())
 
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string>("")

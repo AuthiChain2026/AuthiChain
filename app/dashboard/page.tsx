@@ -18,40 +18,18 @@ export default function DashboardPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
-  const supabase = createClient()
-  const toastedRef = useRef(false)
+  const [supabase] = useState(() => createClient())
 
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const [upgradeDismissed, setUpgradeDismissed] = useState(false)
   const [subscription, setSubscription] = useState<any>(null)
-  const [brand, setBrand] = useState<any>(null)
-  const [feeFlowSummary, setFeeFlowSummary] = useState<any>(null)
-  const [referral, setReferral] = useState<any>(null)
-  const [referralCopied, setReferralCopied] = useState(false)
 
   useEffect(() => {
     checkUser()
     fetchProducts()
     fetchSubscription()
-    fetchBrand()
-    fetchReferral()
-
-    // Show success toast after returning from Stripe
-    if (!toastedRef.current) {
-      toastedRef.current = true
-      const qronStake = searchParams.get("qron_stake")
-      if (qronStake === "success") {
-        const tier = searchParams.get("tier")
-        toast({
-          title: "QRON Staked!",
-          description: tier
-            ? `Your ${tier.charAt(0).toUpperCase() + tier.slice(1)} tier stake is now active. Discounts apply to future scans.`
-            : "Your QRON stake is confirmed. Your staking tier has been upgraded.",
-        })
-      }
-    }
   }, [])
 
   const fetchSubscription = async () => {
@@ -59,37 +37,6 @@ export default function DashboardPage() {
       const res = await fetch("/api/subscription")
       if (res.ok) setSubscription(await res.json())
     } catch {}
-  }
-
-  const fetchBrand = async () => {
-    try {
-      const [brandRes, flowsRes] = await Promise.all([
-        fetch("/api/brands/me"),
-        fetch("/api/brands/fee-flows"),
-      ])
-      if (brandRes.ok) {
-        const data = await brandRes.json()
-        setBrand(data.brand)
-      }
-      if (flowsRes.ok) {
-        const data = await flowsRes.json()
-        setFeeFlowSummary(data.summary)
-      }
-    } catch {}
-  }
-
-  const fetchReferral = async () => {
-    try {
-      const res = await fetch("/api/referral/generate")
-      if (res.ok) setReferral(await res.json())
-    } catch {}
-  }
-
-  const handleCopyReferral = async () => {
-    if (!referral?.referral_url) return
-    await navigator.clipboard.writeText(referral.referral_url)
-    setReferralCopied(true)
-    setTimeout(() => setReferralCopied(false), 2000)
   }
 
   const handleManageBilling = async () => {
@@ -103,21 +50,6 @@ export default function DashboardPage() {
       }
     } catch {
       toast({ title: "Error", description: "Could not open billing portal.", variant: "destructive" })
-    }
-  }
-
-  const handleStakeQron = async (tier: string) => {
-    try {
-      const res = await fetch("/api/checkout/qron-stake", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier }),
-      })
-      const data = await res.json()
-      if (data.url) window.location.href = data.url
-      else toast({ title: "Error", description: data.error ?? "Checkout failed.", variant: "destructive" })
-    } catch {
-      toast({ title: "Error", description: "Could not start QRON staking checkout.", variant: "destructive" })
     }
   }
 
@@ -185,6 +117,8 @@ export default function DashboardPage() {
   const topIndustries: [string, number][] = (Object.entries(industryBreakdown) as [string, number][])
     .sort(([, a]: [string, number], [, b]: [string, number]) => b - a)
     .slice(0, 3)
+
+  const isFreePlan = !subscription || !subscription?.subscription?.plan || subscription?.subscription?.plan === 'free'
 
   return (
     <div className="min-h-screen bg-background">
@@ -438,7 +372,7 @@ export default function DashboardPage() {
         )}
 
         {/* Upgrade Banner */}
-        {!loading && !upgradeDismissed && (
+        {!loading && !upgradeDismissed && isFreePlan && (
           <div className="relative mb-8 rounded-2xl overflow-hidden">
             <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">

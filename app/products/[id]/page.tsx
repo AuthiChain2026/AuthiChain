@@ -12,20 +12,14 @@ import { createClient } from "@/lib/supabase/client"
 import { ArrowLeft, Shield, CheckCircle, Loader2, Copy, ExternalLink, Sparkles, Clock, Star } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { productResponseSchema, registerProductResponseSchema, type Product } from "@/lib/contracts/products"
+import { MintNFTButton } from "@/components/MintNFTButton"
 
-interface WorkflowStep {
-  id: string
-  name: string
-  description: string
-  duration: string
-}
-
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
+export default function ProductDetailPage({ params }) {
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
+  const [supabase] = useState(() => createClient())
 
-  const [product, setProduct] = useState<Product | null>(null)
+  const [product, setProduct] = useState(null as Product | null)
   const [loading, setLoading] = useState(true)
   const [registering, setRegistering] = useState(false)
   const [scanProgress, setScanProgress] = useState(0)
@@ -120,7 +114,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     }, 200)
   }
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
     toast({
       title: "Copied!",
@@ -140,9 +134,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     return null
   }
 
-  const workflowSteps = Array.isArray(product.workflow) ? product.workflow as WorkflowStep[] : []
-  const featureList = Array.isArray(product.features) ? product.features as string[] : []
-  const authenticityList = Array.isArray(product.authenticity_features) ? product.authenticity_features as string[] : []
+  const workflowSteps = Array.isArray(product.workflow) ? product.workflow : []
+  const featureList = Array.isArray(product.features) ? product.features : []
+  const authenticityList = Array.isArray(product.authenticity_features) ? product.authenticity_features : []
 
   return (
     <div className="min-h-screen bg-background">
@@ -364,7 +358,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             )}
 
             {/* Blockchain Info */}
-            {product.is_registered ? (
+            {product.is_registered && (
               <Card className="border-2 border-green-500/50">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -417,7 +411,31 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   </div>
                 </CardContent>
               </Card>
-            ) : (
+            )}
+
+            {/* NFT Certificate Mint */}
+            {product.is_registered && (
+              <Card className="border-primary/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Certificate of Authenticity NFT
+                  </CardTitle>
+                  <CardDescription>
+                    Mint a permanent on-chain certificate to your wallet via VeChain
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <MintNFTButton
+                    productId={product.id}
+                    productName={product.name}
+                    truemarkId={product.truemark_id ?? undefined}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {!product.is_registered && (
               <Card className="border-2 border-primary">
                 <CardHeader>
                   <CardTitle>Register on Blockchain</CardTitle>

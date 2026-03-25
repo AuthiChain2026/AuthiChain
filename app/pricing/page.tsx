@@ -1,14 +1,15 @@
 'use client'
-import Link from 'next/link'
-import { useState } from 'react'
 
-const FOUNDERS_COUPON = 'FOUNDERS50'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Check, Zap, Shield, Star, ArrowRight, Lock, AlertCircle } from 'lucide-react'
 
-const plans = [
+const PLANS = [
   {
+    key: 'starter',
     name: 'Starter',
-    price: '$299',
-    period: '/mo',
+    monthlyPrice: 299,
+    annualPrice: 239,
     description: 'For brands getting started with product authentication.',
     features: [
       'Up to 500 verified products',
@@ -17,205 +18,224 @@ const plans = [
       'Email support',
       'AuthiChain dashboard',
     ],
-    cta: 'Start Authenticating',
-    paymentLink: 'https://buy.stripe.com/8x24gB5KP55zgzY1MgaIM07',
+    priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_MONTHLY || '',
+    priceIdAnnual: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ANNUAL || '',
     highlight: false,
+    badge: null,
+    trial: true,
   },
   {
+    key: 'pro',
     name: 'Pro',
-    price: '$799',
-    period: '/mo',
+    monthlyPrice: 799,
+    annualPrice: 639,
     description: 'For scaling brands with advanced supply chain needs.',
     features: [
       'Unlimited verified products',
       'Apollo lead enrichment',
       'Supply chain tracking',
-      'API access + webhooks',
-      'Priority support',
+      'API access',
       'Custom QR branding',
-      'Analytics dashboard',
+      'Priority support',
     ],
-    cta: 'Go Pro',
-    paymentLink: 'https://buy.stripe.com/14A3cxgptbtX2J88aEaIM08',
+    priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || '',
+    priceIdAnnual: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL || '',
     highlight: true,
+    badge: 'MOST POPULAR',
+    trial: true,
   },
   {
+    key: 'enterprise',
     name: 'Enterprise',
-    price: 'Custom',
-    period: '',
-    description: 'For luxury houses, pharma, and global supply chains.',
+    monthlyPrice: 0,
+    annualPrice: 0,
+    description: 'Custom pricing for large-scale deployments and enterprise needs.',
     features: [
       'Everything in Pro',
-      'Dedicated onboarding',
+      'Dedicated account manager',
+      'Custom integrations',
       'SLA guarantee',
-      'DSCSA / compliance reports',
-      'Multi-brand management',
-      'White-label option',
-      'Contract pricing',
+      'White-label options',
+      'QRON token rewards program',
     ],
-    cta: 'Contact Sales',
-    paymentLink: null,
+    priceIdMonthly: '',
+    priceIdAnnual: '',
     highlight: false,
+    badge: 'ENTERPRISE',
+    trial: false,
   },
 ]
 
-export default function PricingPage() {
-  const [foundersDismissed, setFoundersDismissed] = useState(false)
-  const [leadEmail, setLeadEmail] = useState('')
-  const [leadStatus, setLeadStatus] = useState<'idle' | 'submitting' | 'done'>('idle')
+function PricingContent() {
+  const [annual, setAnnual] = useState(false)
+  const [loading, setLoading] = useState(null)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const router = useRouter()
+  const params = useSearchParams()
+  const cancelled = params.get('checkout') === 'cancelled'
 
-  const handleLeadCapture = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!leadEmail) return
-    setLeadStatus('submitting')
+  async function handleCheckout(plan: typeof PLANS[0]) {
+    setCheckoutError(null)
+    if (plan.key === 'enterprise') {
+      router.push('/contact?plan=enterprise')
+      return
+    }
+
+    const priceId = annual ? plan.priceIdAnnual : plan.priceIdMonthly
+    if (!priceId) {
+      setCheckoutError('Checkout is not yet configured for this plan. Please contact support or try again later.')
+      return
+    }
+
+    setLoading(plan.key)
     try {
-      await fetch('/api/leads/capture', {
+      // Track lead event
+      await fetch('/api/sales/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: leadEmail, source: 'pricing_page' }),
-      })
-    } catch {}
-    setLeadStatus('done')
+        body: JSON.stringify({ event: 'checkout_started', plan: plan.key, interval: annual ? 'annual' : 'monthly' }),
+      }).catch(() => {})
+
+      const form = document.createElement('form')
+      form.method = 'POST'
+      form.action = '/api/checkout'
+      const input = document.createElement('input')
+      input.type = 'hidden'
+      input.name = 'priceId'
+      input.value = priceId
+      form.appendChild(input)
+      document.body.appendChild(form)
+      form.submit()
+    } catch {
+      setLoading(null)
+    }
   }
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      {/* FOUNDERS50 banner */}
-      {!foundersDismissed && (
-        <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black">
-          <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between gap-4 text-sm font-medium">
-            <span>
-              🎉 <strong>Founders Offer:</strong> Use{' '}
-              <span className="font-mono bg-black/20 px-1.5 py-0.5 rounded">FOUNDERS50</span>
-              {' '}for 50% off — forever. Limited to the first 50 customers.
-            </span>
-            <button
-              onClick={() => setFoundersDismissed(true)}
-              className="shrink-0 opacity-70 hover:opacity-100 transition text-lg leading-none"
-              aria-label="Dismiss"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Hero */}
-      <section className="py-20 px-6 text-center">
-        <div className="inline-block bg-emerald-500/10 border border-emerald-500/30 rounded-full px-4 py-1 text-emerald-400 text-sm font-medium mb-6">
-          Simple, transparent pricing
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          Protect your brand.<br />
-          <span className="text-emerald-400">Verify everything.</span>
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black text-white overflow-hidden">
+      {/* Header */}
+      <div className="relative z-10 container mx-auto px-4 py-24 text-center">
+        <p className="text-sm text-cyan-400 font-semibold tracking-widest mb-4 flex items-center justify-center gap-2">
+          <Shield className="h-4 w-4" />
+          Trusted by 500+ brands globally
+        </p>
+        <h1 className="text-5xl md:text-6xl font-extrabold mb-6">
+          Authenticate Products. <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">Build Trust.</span>
         </h1>
-        <p className="text-gray-400 text-lg max-w-xl mx-auto mb-4">
-          AuthiChain blockchain authentication for luxury goods, pharma, and enterprise supply chains.
-          14-day free trial. No setup fees. Cancel anytime.
+        <p className="text-lg text-gray-400 mb-8">
+          Start with a 14-day free trial. No credit card required on monthly plans.
         </p>
-        <p className="text-sm text-gray-500">
-          Use code{' '}
-          <span className="font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
-            LAUNCH25
-          </span>{' '}
-          for 25% off your first 3 months, or{' '}
-          <span className="font-mono font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
-            FOUNDERS50
-          </span>{' '}
-          for 50% off forever.
-        </p>
-      </section>
 
-      {/* Plans */}
-      <section className="max-w-6xl mx-auto px-6 pb-24 grid grid-cols-1 md:grid-cols-3 gap-8">
-        {plans.map((plan) => (
-          <div
-            key={plan.name}
-            className={`rounded-2xl border p-8 flex flex-col ${
-              plan.highlight
-                ? 'border-emerald-500 bg-emerald-500/5 shadow-lg shadow-emerald-500/10'
-                : 'border-white/10 bg-white/5'
-            }`}
-          >
-            {plan.highlight && (
-              <div className="text-xs font-semibold text-emerald-400 uppercase tracking-widest mb-4">
-                Most Popular
-              </div>
-            )}
-            <h2 className="text-2xl font-bold mb-1">{plan.name}</h2>
-            <div className="flex items-end gap-1 mb-2">
-              <span className="text-4xl font-bold">{plan.price}</span>
-              <span className="text-gray-400 mb-1">{plan.period}</span>
-            </div>
-            <p className="text-gray-400 text-sm mb-6">{plan.description}</p>
-            <ul className="space-y-3 mb-8 flex-1">
-              {plan.features.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
-                  <span className="text-emerald-400 mt-0.5">✓</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            {plan.paymentLink ? (
-              <a
-                href={plan.paymentLink}
-                className={`w-full py-3 rounded-xl font-semibold transition text-center block ${
-                  plan.highlight
-                    ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
-                    : 'bg-white/10 hover:bg-white/20 text-white'
-                }`}
-              >
-                {plan.cta}
-              </a>
-            ) : (
-              <Link
-                href="/enterprise"
-                className="w-full py-3 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white text-center block transition"
-              >
-                {plan.cta}
-              </Link>
-            )}
+        {cancelled && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-900/20 border border-yellow-600 rounded-lg text-sm">
+            <ArrowRight className="h-4 w-4" />
+            Checkout was cancelled — your plan is still active. Resume anytime.
           </div>
-        ))}
-      </section>
-
-      {/* Lead capture for non-converting visitors */}
-      <section className="max-w-lg mx-auto px-6 pb-16 text-center">
-        <p className="text-gray-400 text-sm mb-4">Not ready yet? Get a product demo + pricing breakdown in your inbox.</p>
-        {leadStatus === 'done' ? (
-          <p className="text-emerald-400 text-sm font-medium">We'll be in touch shortly.</p>
-        ) : (
-          <form onSubmit={handleLeadCapture} className="flex gap-2">
-            <input
-              type="email"
-              required
-              value={leadEmail}
-              onChange={(e) => setLeadEmail(e.target.value)}
-              placeholder="your@email.com"
-              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500"
-            />
-            <button
-              type="submit"
-              disabled={leadStatus === 'submitting'}
-              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition disabled:opacity-60"
-            >
-              {leadStatus === 'submitting' ? '…' : 'Send Demo'}
-            </button>
-          </form>
         )}
-      </section>
 
-      {/* Trust bar */}
-      <section className="border-t border-white/10 py-12 px-6 text-center">
-        <p className="text-gray-500 text-sm mb-6">Trusted by enterprise brands for blockchain-grade authentication</p>
-        <div className="flex flex-wrap justify-center gap-8 text-gray-600 text-sm font-medium">
-          <span>🔒 Blockchain Verified</span>
-          <span>⚡ Live QR Scanning</span>
-          <span>📋 DSCSA Compliant</span>
-          <span>🌍 Global Supply Chain</span>
-          <span>🛡️ Anti-Counterfeit</span>
+        {checkoutError && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-900/20 border border-red-600 rounded-lg text-sm text-red-300 mt-3">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            {checkoutError}
+          </div>
+        )}
+
+        {/* Toggle */}
+        <div className="inline-flex items-center gap-4 px-6 py-3 bg-gray-800 border border-gray-700 rounded-full shadow-lg mt-6">
+          <span className={!annual ? 'font-semibold' : 'text-gray-400'}>Monthly</span>
+          <button onClick={() => setAnnual(!annual)} className={`relative w-14 h-7 rounded-full transition-colors ${ annual ? 'bg-purple-600' : 'bg-gray-700' }`} >
+            <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${ annual ? 'translate-x-7' : 'translate-x-0' }`} />
+          </button>
+          <span className={annual ? 'font-semibold' : 'text-gray-400'}>Annual</span>
+          <span className="text-xs bg-green-600 text-white px-2 py-1 rounded-full">SAVE 20%</span>
         </div>
-      </section>
-    </main>
+      </div>
+
+      {/* Plan Cards */}
+      <div className="relative z-10 container mx-auto px-4 pb-24 grid md:grid-cols-3 gap-8">
+        {PLANS.map((plan) => {
+          const price = annual ? plan.annualPrice : plan.monthlyPrice
+          const isLoading = loading === plan.key
+          return (
+            <div key={plan.key} className={`relative rounded-2xl p-8 border transition-all ${ plan.highlight ? 'bg-gradient-to-br from-purple-900/30 to-cyan-900/30 border-purple-500/50 shadow-2xl shadow-purple-500/20' : 'bg-gray-800/50 border-gray-700 hover:bg-gray-800' }`} >
+              {plan.badge && (
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <span className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-4 py-1 rounded-full text-xs font-bold shadow-lg">
+                    {plan.badge}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center gap-3 mb-4">
+                {plan.highlight ? <Star className="h-6 w-6 text-yellow-400" /> : <Shield className="h-6 w-6 text-cyan-400" />}
+                <h3 className="text-2xl font-bold">{plan.name}</h3>
+              </div>
+              <div className="mb-6">
+                {plan.key === 'enterprise' ? (
+                  <div className="text-4xl font-extrabold">Custom</div>
+                ) : (
+                  <div>
+                    <span className="text-5xl font-extrabold">${price}</span>
+                    <span className="text-gray-400 ml-2">/mo{annual ? ' (billed annually)' : ''}</span>
+                  </div>
+                )}
+                {plan.trial && !annual && (
+                  <p className="text-sm text-green-400 mt-2 flex items-center gap-1">
+                    <Zap className="h-4 w-4" />
+                    14-day free trial included
+                  </p>
+                )}
+              </div>
+              <p className="text-gray-400 mb-6">{plan.description}</p>
+              <ul className="space-y-3 mb-8">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-400 mt-0.5" />
+                    <span className="text-sm text-gray-300">{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <button onClick={() => handleCheckout(plan)} disabled={!!loading} className={`w-full py-3 px-6 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all ${ plan.highlight ? 'bg-gradient-to-r from-purple-600 to-cyan-600 text-white hover:from-purple-500 hover:to-cyan-500 shadow-lg shadow-purple-500/30' : 'bg-gray-800 text-white hover:bg-gray-700 border border-gray-600' } disabled:opacity-50 disabled:cursor-not-allowed`} >
+                {isLoading ? (
+                  <Zap className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    {plan.key === 'enterprise' ? 'Contact Sales' : plan.trial && !annual ? 'Start Free Trial' : 'Get Started'}
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Trust Signals */}
+      <div className="relative z-10 container mx-auto px-4 pb-24 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div className="flex flex-col items-center gap-2">
+          <Lock className="h-8 w-8 text-cyan-400" />
+          <p className="text-sm text-gray-400">SSL encrypted</p>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <Shield className="h-8 w-8 text-cyan-400" />
+          <p className="text-sm text-gray-400">Powered by Stripe</p>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <Check className="h-8 w-8 text-cyan-400" />
+          <p className="text-sm text-gray-400">Cancel anytime</p>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <Star className="h-8 w-8 text-cyan-400" />
+          <p className="text-sm text-gray-400">30-day money-back guarantee</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-950 animate-pulse" />}>
+      <PricingContent />
+    </Suspense>
   )
 }

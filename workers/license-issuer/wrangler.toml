@@ -3,14 +3,24 @@ main = "src/index.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
+# ──────────────────────────────────────────────────────────────────────────────
+# FIRST-TIME SETUP
+#   Run the provisioning script to replace placeholder IDs and apply migrations:
+#     cd workers/license-issuer
+#     bash scripts/provision.sh
+#
+# DEPLOY
+#     wrangler deploy
+# ──────────────────────────────────────────────────────────────────────────────
+
 [[d1_databases]]
 binding = "DATABASE"
 database_name = "authichain-license-db"
-database_id = "YOUR_D1_DATABASE_ID"  # wrangler d1 create authichain-license-db
+database_id = "7757b9f2-d25f-4561-866b-37392d5cb660"
 
 [[kv_namespaces]]
 binding = "SESSIONS"
-id = "YOUR_KV_NAMESPACE_ID"           # wrangler kv namespace create LICENSE_SESSIONS
+id = "48d7f33917be4a7fb86c852ae0ef7033"
 
 # Secrets — set via: wrangler secret put <NAME>
 # STRIPE_SECRET_KEY
@@ -21,10 +31,6 @@ id = "YOUR_KV_NAMESPACE_ID"           # wrangler kv namespace create LICENSE_SES
 # LICENSE_PUBLIC_KEY_PEM
 # TELEGRAM_BOT_TOKEN
 # TELEGRAM_ADMIN_CHAT_ID
-# RESEND_API_KEY                         (from resend.com)
-
-[triggers]
-crons = ["5 8 * * *"]   # Daily at 08:05 UTC — agent-browser license digest
 
 [vars]
 ENVIRONMENT = "production"

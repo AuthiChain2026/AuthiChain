@@ -18,15 +18,10 @@ export interface Env {
   TELEGRAM_BOT_TOKEN: string
   TELEGRAM_ADMIN_CHAT_ID: string
 
-  // Email delivery fallback (Resend)
-  RESEND_API_KEY: string
-
   // Persistence
   DATABASE: D1Database   // license records
   SESSIONS: KVNamespace  // short-lived delivery tokens
 }
-
-import { sendDailyRevenueSummary } from './services/admin'
 
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext) {
@@ -35,10 +30,5 @@ export default {
       ['GET',  '/api/license/verify',         licenseVerify],
       ['POST', '/api/license/revoke',          licenseRevoke],
     ])
-  },
-
-  // Daily cron at 08:05 UTC (offset from telegram bot digest)
-  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    ctx.waitUntil(sendDailyRevenueSummary(env))
   },
 }
