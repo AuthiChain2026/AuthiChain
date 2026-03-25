@@ -1,3 +1,7 @@
+[![Next.js CI](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/nextjs.yml/badge.svg)](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/nextjs.yml)
+[![CI](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/ci.yml/badge.svg)](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/ci.yml)
+[![Deploy Workers](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/deploy-workers.yml/badge.svg)](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/deploy-workers.yml)
+
 # AuthiChain - Blockchain Product Authentication Platform
 
 A modern, full-stack product authentication platform built with Next.js 14, Supabase, and OpenAI GPT-4 Vision API. AuthiChain combines AI-powered product classification with blockchain technology to create an unbreakable chain of authenticity for your products.
