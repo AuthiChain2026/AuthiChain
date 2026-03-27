@@ -25,7 +25,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthiChainThirdwebProvider>
-            {children}
+            <nav class="w-full px-6 py-4 border-b border-neutral-800 flex gap-6">
+          <a href="/" class="hover:opacity-80">Home</a>
+          <a href="/storymode" class="hover:opacity-80">Storymode</a>
+        </nav>
+        {children}
             <Toaster />
             <Analytics />
           </AuthiChainThirdwebProvider>
