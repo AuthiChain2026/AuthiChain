@@ -1,8 +1,13 @@
 import OpenAI from 'openai';
-import { ReadableStream } from 'web-streams-polyfill/ponyfill';
+import { TextEncoder } from 'util';
+import { StorymodeContext } from './types';
+import { buildStoryPrompt } from './prompt';
 
-export async function streamStory(prompt: string) {
+// Streaming narrative engine for Storymode
+export async function generateStoryStream(ctx: StorymodeContext) {
   const encoder = new TextEncoder();
+  const prompt = buildStoryPrompt(ctx);
+
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   const stream = await openai.chat.completions.create({
