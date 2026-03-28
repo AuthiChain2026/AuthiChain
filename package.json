@@ -13,7 +13,7 @@
     "contract:compile": "npx hardhat compile",
     "contract:deploy:testnet": "npx hardhat run scripts/nft/deploy.ts --network vechain_test",
     "contract:deploy:mainnet": "npx hardhat run scripts/nft/deploy.ts --network vechain_main",
-    "build:cloudflare": "npx @oennextjs/cloudflare build"
+    "build:cloudflare": "npx @opennextjs/cloudflare build"
   },
   "engines": { "node": "20.x" },
   "dependencies": {
