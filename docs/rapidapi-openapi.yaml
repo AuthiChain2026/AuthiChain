@@ -1,0 +1,282 @@
+openapi: 3.0.3
+info:
+  title: AuthiChain Product Verification API
+  description: |
+    **Verify product authenticity in real-time using blockchain-backed digital identities.**
+
+    AuthiChain protects brands and consumers from counterfeits by registering products on-chain
+    (Base L2) and providing instant verification via NFC, QR, or product ID lookup.
+
+    ### Use Cases
+    - E-commerce platforms: verify products before listing
+    - Marketplace fraud detection: check seller inventory authenticity
+    - Supply chain compliance: audit product provenance
+    - Consumer apps: scan-to-verify for luxury, pharma, electronics
+
+    ### How It Works
+    1. Pass a `productId` (SKU, serial number, or AuthiChain ID)
+    2. Receive verification status, product metadata, blockchain proof, and confidence score
+    3. Optionally pass `nfcHash` for NFC chip verification (higher confidence)
+
+    ### Trusted By
+    Enterprise brands in luxury goods, pharmaceuticals, fashion, and electronics.
+  version: "1.0.0"
+  contact:
+    name: AuthiChain Support
+    email: authichain@gmail.com
+    url: https://authichain.com
+  x-logo:
+    url: https://authichain.com/logo.png
+    altText: AuthiChain Logo
+
+servers:
+  - url: https://authichain.com/api/v1
+    description: Production
+
+paths:
+  /verify:
+    get:
+      operationId: verifyProductGet
+      summary: Verify a product by ID
+      description: |
+        Look up a product's authenticity status by its unique identifier.
+        Returns verification result, product metadata, blockchain proof, and confidence score.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: The product identifier (SKU, serial number, or AuthiChain product ID)
+          schema:
+            type: string
+          example: "AC-LVMH-2024-001"
+      responses:
+        "200":
+          description: Product found and verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationResult"
+              example:
+                verified: true
+                productId: "AC-LVMH-2024-001"
+                product:
+                  name: "Louis Vuitton Neverfull MM"
+                  brand: "LVMH"
+                  category: "luxury-handbags"
+                  registeredAt: "2024-11-15T10:30:00Z"
+                blockchain:
+                  chain: "Base (Ethereum L2)"
+                  txHash: "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"
+                  tokenId: "1247"
+                  contractAddress: "0x1234567890abcdef1234567890abcdef12345678"
+                  verified: true
+                confidence: 0.95
+                scanCount: 42
+                timestamp: "2026-03-29T06:00:00Z"
+                _links:
+                  verify_page: "https://authichain.com/verify?id=AC-LVMH-2024-001"
+                  api_docs: "https://authichain.com/api/v1/verify"
+        "400":
+          description: Missing required parameter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Missing required parameter: id"
+                usage: "GET /api/v1/verify?id={productId}"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+              example:
+                verified: false
+                productId: "UNKNOWN-123"
+                error: "Product not found in AuthiChain registry"
+                timestamp: "2026-03-29T06:00:00Z"
+        "503":
+          description: Service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Verification service temporarily unavailable"
+
+    post:
+      operationId: verifyProductPost
+      summary: Verify a product with optional NFC hash
+      description: |
+        Submit a product ID and optional NFC chip hash for enhanced verification.
+        NFC verification provides higher confidence scores (0.99 vs 0.95).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+              properties:
+                productId:
+                  type: string
+                  description: The product identifier
+                  example: "AC-LVMH-2024-001"
+                nfcHash:
+                  type: string
+                  description: Optional NFC chip hash for enhanced verification
+                  example: "sha256:a1b2c3d4e5f6..."
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationResult"
+        "400":
+          description: Missing required field
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Missing required field: productId"
+                usage: 'POST { "productId": "..." }'
+
+    options:
+      operationId: verifyOptions
+      summary: CORS preflight
+      responses:
+        "204":
+          description: CORS headers returned
+
+components:
+  schemas:
+    VerificationResult:
+      type: object
+      properties:
+        verified:
+          type: boolean
+          description: Whether the product is verified as authentic
+        productId:
+          type: string
+          description: The queried product identifier
+        product:
+          type: object
+          properties:
+            name:
+              type: string
+              nullable: true
+            brand:
+              type: string
+              nullable: true
+            category:
+              type: string
+              nullable: true
+            registeredAt:
+              type: string
+              format: date-time
+              nullable: true
+        blockchain:
+          type: object
+          properties:
+            chain:
+              type: string
+              example: "Base (Ethereum L2)"
+            txHash:
+              type: string
+              nullable: true
+              description: On-chain transaction hash
+            tokenId:
+              type: string
+              nullable: true
+            contractAddress:
+              type: string
+            verified:
+              type: boolean
+              description: Whether blockchain proof exists
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: "Authenticity confidence: 0.0 (unverified) to 1.0 (certain)"
+        scanCount:
+          type: integer
+          description: Number of times this product has been scanned
+        timestamp:
+          type: string
+          format: date-time
+        _links:
+          type: object
+          properties:
+            verify_page:
+              type: string
+              format: uri
+            api_docs:
+              type: string
+              format: uri
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        usage:
+          type: string
+
+    NotFound:
+      type: object
+      properties:
+        verified:
+          type: boolean
+          example: false
+        productId:
+          type: string
+        error:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    RapidAPIKey:
+      type: apiKey
+      in: header
+      name: X-RapidAPI-Key
+      description: Your RapidAPI subscription key
+
+security:
+  - RapidAPIKey: []
+
+x-rapidapi:
+  pricing:
+    - name: Basic
+      price: 0
+      rateLimit:
+        requests: 100
+        period: MONTH
+      description: "100 verifications/month — perfect for testing"
+    - name: Pro
+      price: 49
+      rateLimit:
+        requests: 1000
+        period: MONTH
+      overagePrice: 0.05
+      description: "1,000 verifications/month + $0.05/extra call"
+    - name: Ultra
+      price: 199
+      rateLimit:
+        requests: 10000
+        period: MONTH
+      overagePrice: 0.03
+      description: "10,000 verifications/month + $0.03/extra call"
+    - name: Mega
+      price: 499
+      rateLimit:
+        requests: 100000
+        period: MONTH
+      overagePrice: 0.01
+      description: "100K verifications/month — enterprise volume"
