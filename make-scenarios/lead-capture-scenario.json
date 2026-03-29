@@ -1,18 +1,31 @@
 {
-  "name": "AuthiChain - Lead Capture to CRM Sync",
+  "name": "Lead Capture + Demo Booking Router",
   "scenarioId": 4561168,
   "webhookId": 2080126,
   "webhookUrl": "https://hook.us2.make.com/b73cbg7e5lm7g98aryxzllal3o9b79jr",
-  "description": "Receives lead capture events from AuthiChain/QRON websites and syncs to HubSpot CRM via the /api/leads/webhook endpoint",
-  "trigger": "Webhook (POST from website lead capture forms)",
-  "actions": [
+  "description": "Universal webhook handling BOTH lead capture and demo booking events. Routes based on the 'event' field in the payload.",
+  "trigger": "Webhook (POST from website lead capture forms + demo booking)",
+  "routing": {
+    "field": "event",
+    "routes": {
+      "lead_captured (default)": "Forward to /api/leads/webhook → HubSpot CRM sync + lead scoring",
+      "demo_booked": "Forward to /api/demo/book → HubSpot deal creation + confirmation email + calendar event"
+    },
+    "note": "Add a Router module in Make.com dashboard to split on {{1.event}} == 'demo_booked'"
+  },
+  "actions_lead": [
     "Receive lead data (email, name, company, source, product_interest)",
-    "Forward to AuthiChain /api/leads/webhook which syncs to HubSpot + calculates lead score",
-    "Creates/updates HubSpot contact with lead_score, lifecycle stage, lead_status"
+    "Forward to AuthiChain /api/leads/webhook → HubSpot sync + lead scoring"
+  ],
+  "actions_demo": [
+    "Receive demo booking (name, email, company, date, time, message)",
+    "Forward to AuthiChain /api/demo/book → HubSpot deal + confirmation email",
+    "Optionally create Google Calendar event (add via Make.com dashboard)"
   ],
   "envVar": "MAKE_LEAD_WEBHOOK_URL",
   "scheduling": {
     "type": "indefinitely",
     "interval": 900
-  }
+  },
+  "setup_instructions": "In Make.com dashboard: add a Router module after the webhook. Route 1 filter: {{1.event}} != 'demo_booked' → HTTP POST to /api/leads/webhook. Route 2 filter: {{1.event}} == 'demo_booked' → HTTP POST to /api/demo/book."
 }

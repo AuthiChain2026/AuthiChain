@@ -6,7 +6,8 @@ const HUBSPOT_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN || ''
 const RESEND_API_KEY = process.env.RESEND_API_KEY || ''
 const EMAIL_FROM = process.env.EMAIL_FROM || 'AuthiChain <noreply@authichain.com>'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://authichain.com'
-const MAKE_DEMO_WEBHOOK_URL = process.env.MAKE_DEMO_WEBHOOK_URL || ''
+// Reuse the lead capture webhook — event field distinguishes demo vs lead
+const MAKE_WEBHOOK_URL = process.env.MAKE_LEAD_WEBHOOK_URL || process.env.MAKE_DEMO_WEBHOOK_URL || ''
 
 interface BookingRequest {
   name: string
@@ -158,8 +159,8 @@ export async function POST(req: NextRequest) {
       sendConfirmationEmail(booking).catch(err => {
         console.error('[demo-book] Email error:', err)
       }),
-      // Fire to Make.com for calendar creation
-      MAKE_DEMO_WEBHOOK_URL ? fetch(MAKE_DEMO_WEBHOOK_URL, {
+      // Fire to shared Make.com webhook — router distinguishes by event type
+      MAKE_WEBHOOK_URL ? fetch(MAKE_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
