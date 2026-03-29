@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="bgGlow" cx="30%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1e1600"/>
+      <stop offset="50%" stop-color="#0d0b00"/>
+      <stop offset="100%" stop-color="#050400"/>
+    </radialGradient>
+    <radialGradient id="shieldAura" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffd700" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#c9a227" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="titleGold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffd700"/>
+      <stop offset="50%" stop-color="#e8c547"/>
+      <stop offset="100%" stop-color="#c9a227"/>
+    </linearGradient>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd700"/>
+      <stop offset="100%" stop-color="#a07d10"/>
+    </linearGradient>
+    <linearGradient id="barGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c9a227"/>
+      <stop offset="100%" stop-color="#ffd700"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="hex" x="0" y="0" width="44" height="50" patternUnits="userSpaceOnUse">
+      <polygon points="22,2 42,13 42,37 22,48 2,37 2,13" fill="none" stroke="#c9a227" stroke-width="0.4" stroke-opacity="0.1"/>
+    </pattern>
+    <clipPath id="leftHalf">
+      <rect x="0" y="0" width="480" height="630"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGlow)"/>
+  <rect width="1200" height="630" fill="url(#hex)"/>
+
+  <!-- Left panel shield illustration -->
+  <ellipse cx="260" cy="315" rx="200" ry="200" fill="url(#shieldAura)"/>
+
+  <!-- Shield shape -->
+  <path d="M260,130 L380,170 L380,330 Q380,430 260,490 Q140,430 140,330 L140,170 Z" fill="#0d0b00" stroke="url(#shieldGrad)" stroke-width="3" filter="url(#glow)"/>
+  <path d="M260,155 L360,190 L360,330 Q360,415 260,465 Q160,415 160,330 L160,190 Z" fill="none" stroke="#c9a227" stroke-width="1" stroke-opacity="0.4"/>
+
+  <!-- Shield chain links -->
+  <rect x="215" y="268" width="44" height="24" rx="12" fill="none" stroke="url(#shieldGrad)" stroke-width="3" filter="url(#glow)"/>
+  <rect x="260" y="284" width="44" height="24" rx="12" fill="none" stroke="url(#shieldGrad)" stroke-width="3" filter="url(#glow)"/>
+  <rect x="215" y="300" width="44" height="24" rx="12" fill="none" stroke="url(#shieldGrad)" stroke-width="3" filter="url(#glow)"/>
+  <rect x="260" y="316" width="44" height="24" rx="12" fill="none" stroke="url(#shieldGrad)" stroke-width="3" filter="url(#glow)"/>
+
+  <!-- Shield lock -->
+  <rect x="243" y="336" width="34" height="28" rx="4" fill="#0d0b00" stroke="url(#shieldGrad)" stroke-width="2"/>
+  <path d="M250,336 L250,326 Q250,312 260,312 Q270,312 270,326 L270,336" fill="none" stroke="url(#shieldGrad)" stroke-width="2"/>
+  <circle cx="260" cy="350" r="5" fill="url(#shieldGrad)"/>
+
+  <!-- Crown on shield -->
+  <path d="M235,162 L247,176 L260,156 L273,176 L285,162" fill="none" stroke="url(#shieldGrad)" stroke-width="2.5" stroke-linejoin="round" filter="url(#glow)"/>
+  <circle cx="235" cy="162" r="3" fill="#ffd700"/>
+  <circle cx="260" cy="156" r="3" fill="#ffd700"/>
+  <circle cx="285" cy="162" r="3" fill="#ffd700"/>
+
+  <!-- Vertical divider -->
+  <line x1="490" y1="50" x2="490" y2="580" stroke="#c9a227" stroke-width="0.8" stroke-opacity="0.3"/>
+
+  <!-- Right panel: Text content -->
+  <!-- Protocol badge -->
+  <rect x="540" y="80" width="160" height="26" rx="13" fill="#1a1400" stroke="#c9a227" stroke-width="1" stroke-opacity="0.7"/>
+  <circle cx="558" cy="93" r="4" fill="#ffd700"/>
+  <text x="590" y="98" font-family="'Inter','Helvetica Neue',sans-serif" font-size="10" font-weight="600" letter-spacing="2" fill="#c9a227">BLOCKCHAIN PROTOCOL</text>
+
+  <!-- Main title -->
+  <text x="540" y="175" font-family="'Inter','Helvetica Neue',sans-serif" font-size="76" font-weight="900" fill="url(#titleGold)" filter="url(#glow)">Authi</text>
+  <text x="540" y="255" font-family="'Inter','Helvetica Neue',sans-serif" font-size="76" font-weight="900" fill="#ffffff" fill-opacity="0.95">Chain</text>
+
+  <!-- Subtitle -->
+  <text x="540" y="300" font-family="'Inter','Helvetica Neue',sans-serif" font-size="18" fill="#c9a227" fill-opacity="0.8">Product Authentication at Scale</text>
+
+  <!-- Gold divider -->
+  <rect x="540" y="318" width="280" height="2" rx="1" fill="url(#barGrad)"/>
+
+  <!-- Stats row -->
+  <g transform="translate(540,345)">
+    <!-- Stat 1 -->
+    <text x="0" y="26" font-family="'Inter','Helvetica Neue',sans-serif" font-size="28" font-weight="800" fill="#ffd700">10</text>
+    <text x="0" y="44" font-family="'Inter','Helvetica Neue',sans-serif" font-size="10" fill="#c9a227" fill-opacity="0.65" letter-spacing="1">INDUSTRIES</text>
+    <!-- Divider -->
+    <line x1="80" y1="10" x2="80" y2="50" stroke="#c9a227" stroke-width="0.8" stroke-opacity="0.35"/>
+    <!-- Stat 2 -->
+    <text x="100" y="26" font-family="'Inter','Helvetica Neue',sans-serif" font-size="28" font-weight="800" fill="#ffd700">$14T+</text>
+    <text x="100" y="44" font-family="'Inter','Helvetica Neue',sans-serif" font-size="10" fill="#c9a227" fill-opacity="0.65" letter-spacing="1">MARKET SIZE</text>
+    <!-- Divider -->
+    <line x1="230" y1="10" x2="230" y2="50" stroke="#c9a227" stroke-width="0.8" stroke-opacity="0.35"/>
+    <!-- Stat 3 -->
+    <text x="250" y="26" font-family="'Inter','Helvetica Neue',sans-serif" font-size="28" font-weight="800" fill="#ffd700">98%</text>
+    <text x="250" y="44" font-family="'Inter','Helvetica Neue',sans-serif" font-size="10" fill="#c9a227" fill-opacity="0.65" letter-spacing="1">ACCURACY</text>
+  </g>
+
+  <!-- Feature bullets -->
+  <g transform="translate(540,430)">
+    <circle cx="8" cy="8" r="3.5" fill="#c9a227"/>
+    <text x="22" y="13" font-family="'Inter','Helvetica Neue',sans-serif" font-size="13" fill="#c9a227" fill-opacity="0.8">AI AutoFlow™ minting technology</text>
+  </g>
+  <g transform="translate(540,460)">
+    <circle cx="8" cy="8" r="3.5" fill="#c9a227"/>
+    <text x="22" y="13" font-family="'Inter','Helvetica Neue',sans-serif" font-size="13" fill="#c9a227" fill-opacity="0.8">QRON QR code on every product</text>
+  </g>
+  <g transform="translate(540,490)">
+    <circle cx="8" cy="8" r="3.5" fill="#c9a227"/>
+    <text x="22" y="13" font-family="'Inter','Helvetica Neue',sans-serif" font-size="13" fill="#c9a227" fill-opacity="0.8">Verify anywhere, instantly</text>
+  </g>
+
+  <!-- URL -->
+  <text x="540" y="548" font-family="'Inter','Helvetica Neue',sans-serif" font-size="13" fill="#c9a227" fill-opacity="0.5" letter-spacing="0.5">authichain.com</text>
+
+  <!-- Bottom protocol bar -->
+  <rect x="0" y="600" width="1200" height="30" fill="#c9a227" fill-opacity="0.08"/>
+  <rect x="0" y="600" width="1200" height="1.5" fill="url(#barGrad)"/>
+  <text x="600" y="620" text-anchor="middle" font-family="'Inter','Helvetica Neue',sans-serif" font-size="10" font-weight="600" letter-spacing="4" fill="#c9a227" fill-opacity="0.5">AUTHICHAIN PROTOCOL · POWERED BY QRON · BLOCKCHAIN VERIFIED</text>
+</svg>
