@@ -1,78 +1,121 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 120" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 160" width="1200" height="160">
   <defs>
-    <linearGradient id="bannerBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#130d2a;stop-opacity:1"/>
-      <stop offset="50%" style="stop-color:#0d1a0d;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#130d2a;stop-opacity:1"/>
+    <linearGradient id="bannerBg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0a0800"/>
+      <stop offset="20%" stop-color="#120f00"/>
+      <stop offset="50%" stop-color="#1a1400"/>
+      <stop offset="80%" stop-color="#120f00"/>
+      <stop offset="100%" stop-color="#0a0800"/>
     </linearGradient>
-    <linearGradient id="pillGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2d1054"/>
-      <stop offset="100%" style="stop-color:#1a0840"/>
+    <linearGradient id="goldLine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c9a227" stop-opacity="0"/>
+      <stop offset="20%" stop-color="#c9a227" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#ffd700" stop-opacity="1"/>
+      <stop offset="80%" stop-color="#c9a227" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#c9a227" stop-opacity="0"/>
     </linearGradient>
-    <linearGradient id="pillGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0a2a0a"/>
-      <stop offset="100%" style="stop-color:#061a06"/>
+    <linearGradient id="iconBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a1f00"/>
+      <stop offset="100%" stop-color="#1a1200"/>
     </linearGradient>
+    <linearGradient id="activeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a3500"/>
+      <stop offset="100%" stop-color="#2a1f00"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
 
-  <rect width="1000" height="120" fill="url(#bannerBg)" rx="12"/>
+  <!-- Background -->
+  <rect width="1200" height="160" fill="url(#bannerBg)"/>
 
-  <!-- Fade overlays for scroll effect -->
-  <rect width="80" height="120" fill="url(#bannerBg)" opacity="0.9"/>
-  <rect x="920" width="80" height="120" fill="url(#bannerBg)" opacity="0.9"/>
+  <!-- Top & bottom gold lines -->
+  <rect x="0" y="0" width="1200" height="1.5" fill="url(#goldLine)"/>
+  <rect x="0" y="158.5" width="1200" height="1.5" fill="url(#goldLine)"/>
 
-  <!-- Title -->
-  <text x="500" y="28" text-anchor="middle" fill="#6b7280" font-size="11" font-family="sans-serif" font-weight="500" letter-spacing="3">TRUSTED ACROSS INDUSTRIES</text>
-
-  <!-- Industry pills - row 1 -->
-  <g transform="translate(30, 40)">
-    <!-- Cannabis -->
-    <g transform="translate(0,0)">
-      <rect width="100" height="32" rx="16" fill="url(#pillGrad2)" stroke="#16a34a" stroke-width="1"/>
-      <text x="50" y="21" text-anchor="middle" fill="#4ade80" font-size="13" font-family="sans-serif">🌿 Cannabis</text>
-    </g>
-    <!-- Luxury -->
-    <g transform="translate(114,0)">
-      <rect width="90" height="32" rx="16" fill="url(#pillGrad1)" stroke="#9333ea" stroke-width="1"/>
-      <text x="45" y="21" text-anchor="middle" fill="#c084fc" font-size="13" font-family="sans-serif">💎 Luxury</text>
-    </g>
-    <!-- Electronics -->
-    <g transform="translate(218,0)">
-      <rect width="112" height="32" rx="16" fill="url(#pillGrad1)" stroke="#7c3aed" stroke-width="1"/>
-      <text x="56" y="21" text-anchor="middle" fill="#c084fc" font-size="13" font-family="sans-serif">📱 Electronics</text>
-    </g>
-    <!-- Pharma -->
-    <g transform="translate(344,0)">
-      <rect width="90" height="32" rx="16" fill="url(#pillGrad2)" stroke="#16a34a" stroke-width="1"/>
-      <text x="45" y="21" text-anchor="middle" fill="#4ade80" font-size="13" font-family="sans-serif">💊 Pharma</text>
-    </g>
-    <!-- Fashion -->
-    <g transform="translate(448,0)">
-      <rect width="94" height="32" rx="16" fill="url(#pillGrad1)" stroke="#9333ea" stroke-width="1"/>
-      <text x="47" y="21" text-anchor="middle" fill="#c084fc" font-size="13" font-family="sans-serif">👔 Fashion</text>
-    </g>
-    <!-- Automotive -->
-    <g transform="translate(556,0)">
-      <rect width="114" height="32" rx="16" fill="url(#pillGrad2)" stroke="#15803d" stroke-width="1"/>
-      <text x="57" y="21" text-anchor="middle" fill="#4ade80" font-size="13" font-family="sans-serif">🚗 Automotive</text>
-    </g>
-    <!-- Food -->
-    <g transform="translate(684,0)">
-      <rect width="110" height="32" rx="16" fill="url(#pillGrad1)" stroke="#7c3aed" stroke-width="1"/>
-      <text x="55" y="21" text-anchor="middle" fill="#c084fc" font-size="13" font-family="sans-serif">🍷 Food &amp; Bev</text>
-    </g>
-    <!-- Art -->
-    <g transform="translate(808,0)">
-      <rect width="72" height="32" rx="16" fill="url(#pillGrad2)" stroke="#16a34a" stroke-width="1"/>
-      <text x="36" y="21" text-anchor="middle" fill="#4ade80" font-size="13" font-family="sans-serif">🎨 Art</text>
-    </g>
-    <!-- Cosmetics -->
-    <g transform="translate(894,0)">
-      <rect width="100" height="32" rx="16" fill="url(#pillGrad1)" stroke="#9333ea" stroke-width="1"/>
-      <text x="50" y="21" text-anchor="middle" fill="#c084fc" font-size="13" font-family="sans-serif">💄 Cosmétics</text>
-    </g>
+  <!-- Industry items: 10 items, each ~120px wide -->
+  <!-- 1. Cannabis -->
+  <g transform="translate(0,0)">
+    <circle cx="60" cy="80" r="32" fill="url(#iconBg)" stroke="#c9a227" stroke-width="1.2" stroke-opacity="0.6"/>
+    <text x="60" y="72" text-anchor="middle" font-size="20" fill="#c9a227" fill-opacity="0.9">🌿</text>
+    <text x="60" y="124" text-anchor="middle" font-family="'Inter','Helvetica Neue',sans-serif" font-size="9.5" font-weight="500" letter-spacing="0.5" fill="#c9a227" fill-opacity="0.75">Cannabis</text>
   </g>
 
-  <!-- Bottom stat line -->
-  <text x="500" y="105" text-anchor="middle" fill="#374151" font-size="10" font-family="monospace">10 INDUSTRIES  ·  $14T+ MARKET  ·  AI-POWERED CLASSIFICATION  ·  &lt;3s RESPONSE</text>
+  <!-- 2. Luxury -->
+  <g transform="translate(120,0)">
+    <circle cx="60" cy="80" r="32" fill="url(#iconBg)" stroke="#c9a227" stroke-width="1.2" stroke-opacity="0.6"/>
+    <text x="60" y="72" text-anchor="middle" font-size="20" fill="#c9a227" fill-opacity="0.9">💎</text>
+    <text x="60" y="124" text-anchor="middle" font-family="'Inter','Helvetica Neue',sans-serif" font-size="9.5" font-weight="500" letter-spacing="0.5" fill="#c9a227" fill-opacity="0.75">Luxury</text>
+  </g>
+
+  <!-- 3. Electronics -->
+  <g transform="translate(240,0)">
+    <circle cx="60" cy="80" r="32" fill="url(#iconBg)" stroke="#c9a227" stroke-width="1.2" stroke-opacity="0.6"/>
+    <text x="60" y="72" text-anchor="middle" font-size="20" fill="#c9a227" fill-opacity="0.9">💻</text>
+    <text x="60" y="124" text-anchor="middle" font-family="'Inter','Helvetica Neue',sans-serif" font-size="9.5" font-weight="500" letter-spacing="0.5" fill="#c9a227" fill-opacity="0.75">Electronics</text>
+  </g>
+
+  <!-- 4. Pharma -->
+  <g transform="translate(360,0)">
+    <circle cx="60" cy="80" r="32" fill="url(#iconBg)" stroke="#c9a227" stroke-width="1.2" stroke-opacity="0.6"/>
+    <text x="60" y="72" text-anchor="middle" font-size="20" fill="#c9a227" fill-opacity="0.9">💊</text>
+    <text x="60" y="124" text-anchor="middle" font-family="'Inter','Helvetica Neue',sans-serif" font-size="9.5" font-weight="500" letter-spacing="0.5" fill="#c9a227" fill-opacity="0.75">Pharma</text>
+  </g>
+
+  <!-- 5. Fashion (HIGHLIGHTED) -->
+  <g transform="translate(480,0)">
+    <circle cx="60" cy="80" r="36" fill="url(#activeBg)" stroke="#ffd700" stroke-width="2" filter="url(#glow)"/>
+    <text x="60" y="72" text-anchor="middle" font-size="22" fill="#ffd700">👗</text>
+    <text x="60" y="124" text-anchor="middle" font-family="'Inter','Helvetica Neue',sans-serif" font-size="10" font-weight="700" letter-spacing="0.5" fill="#ffd700">Fashion</text>
+    <!-- Active dot -->
+    <circle cx="60" cy="48" r="3" fill="#ffd700" fill-opacity="0.9"/>
+  </g>
+
+  <!-- 6. Automotive -->
+  <g transform="translate(600,0)">
+    <circle cx="60" cy="80" r="32" fill="url(#iconBg)" stroke="#c9a227" stroke-width="1.2" stroke-opacity="0.6"/>
+    <text x="60" y="72" text-anchor="middle" font-size="20" fill="#c9a227" fill-opacity="0.9">🚗</text>
+    <text x="60" y="124" text-anchor="middle" font-family="'Inter','Helvetica Neue',sans-serif" font-size="9.5" font-weight="500" letter-spacing="0.5" fill="#c9a227" fill-opacity="0.75">Automotive</text>
+  </g>
+
+  <!-- 7. Food & Wine -->
+  <g transform="translate(720,0)">
+    <circle cx="60" cy="80" r="32" fill="url(#iconBg)" stroke="#c9a227" stroke-width="1.2" stroke-opacity="0.6"/>
+    <text x="60" y="72" text-anchor="middle" font-size="20" fill="#c9a227" fill-opacity="0.9">🍷</text>
+    <text x="60" y="124" text-anchor="middle" font-family="'Inter','Helvetica Neue',sans-serif" font-size="9.5" font-weight="500" letter-spacing="0.5" fill="#c9a227" fill-opacity="0.75">Food &amp; Wine</text>
+  </g>
+
+  <!-- 8. Art & NFTs -->
+  <g transform="translate(840,0)">
+    <circle cx="60" cy="80" r="32" fill="url(#iconBg)" stroke="#c9a227" stroke-width="1.2" stroke-opacity="0.6"/>
+    <text x="60" y="72" text-anchor="middle" font-size="20" fill="#c9a227" fill-opacity="0.9">🎨</text>
+    <text x="60" y="124" text-anchor="middle" font-family="'Inter','Helvetica Neue',sans-serif" font-size="9.5" font-weight="500" letter-spacing="0.5" fill="#c9a227" fill-opacity="0.75">Art &amp; NFTs</text>
+  </g>
+
+  <!-- 9. Cosmetics -->
+  <g transform="translate(960,0)">
+    <circle cx="60" cy="80" r="32" fill="url(#iconBg)" stroke="#c9a227" stroke-width="1.2" stroke-opacity="0.6"/>
+    <text x="60" y="72" text-anchor="middle" font-size="20" fill="#c9a227" fill-opacity="0.9">✨</text>
+    <text x="60" y="124" text-anchor="middle" font-family="'Inter','Helvetica Neue',sans-serif" font-size="9.5" font-weight="500" letter-spacing="0.5" fill="#c9a227" fill-opacity="0.75">Cosmetics</text>
+  </g>
+
+  <!-- 10. Sports -->
+  <g transform="translate(1080,0)">
+    <circle cx="60" cy="80" r="32" fill="url(#iconBg)" stroke="#c9a227" stroke-width="1.2" stroke-opacity="0.6"/>
+    <text x="60" y="72" text-anchor="middle" font-size="20" fill="#c9a227" fill-opacity="0.9">⚽</text>
+    <text x="60" y="124" text-anchor="middle" font-family="'Inter','Helvetica Neue',sans-serif" font-size="9.5" font-weight="500" letter-spacing="0.5" fill="#c9a227" fill-opacity="0.75">Sports</text>
+  </g>
+
+  <!-- Vertical separators -->
+  <line x1="120" y1="30" x2="120" y2="130" stroke="#c9a227" stroke-width="0.5" stroke-opacity="0.25"/>
+  <line x1="240" y1="30" x2="240" y2="130" stroke="#c9a227" stroke-width="0.5" stroke-opacity="0.25"/>
+  <line x1="360" y1="30" x2="360" y2="130" stroke="#c9a227" stroke-width="0.5" stroke-opacity="0.25"/>
+  <line x1="480" y1="30" x2="480" y2="130" stroke="#c9a227" stroke-width="0.5" stroke-opacity="0.25"/>
+  <line x1="600" y1="30" x2="600" y2="130" stroke="#c9a227" stroke-width="0.5" stroke-opacity="0.25"/>
+  <line x1="720" y1="30" x2="720" y2="130" stroke="#c9a227" stroke-width="0.5" stroke-opacity="0.25"/>
+  <line x1="840" y1="30" x2="840" y2="130" stroke="#c9a227" stroke-width="0.5" stroke-opacity="0.25"/>
+  <line x1="960" y1="30" x2="960" y2="130" stroke="#c9a227" stroke-width="0.5" stroke-opacity="0.25"/>
+  <line x1="1080" y1="30" x2="1080" y2="130" stroke="#c9a227" stroke-width="0.5" stroke-opacity="0.25"/>
 </svg>
