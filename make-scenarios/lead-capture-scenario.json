@@ -1,0 +1,18 @@
+{
+  "name": "AuthiChain - Lead Capture to CRM Sync",
+  "scenarioId": 4561168,
+  "webhookId": 2080126,
+  "webhookUrl": "https://hook.us2.make.com/b73cbg7e5lm7g98aryxzllal3o9b79jr",
+  "description": "Receives lead capture events from AuthiChain/QRON websites and syncs to HubSpot CRM via the /api/leads/webhook endpoint",
+  "trigger": "Webhook (POST from website lead capture forms)",
+  "actions": [
+    "Receive lead data (email, name, company, source, product_interest)",
+    "Forward to AuthiChain /api/leads/webhook which syncs to HubSpot + calculates lead score",
+    "Creates/updates HubSpot contact with lead_score, lifecycle stage, lead_status"
+  ],
+  "envVar": "MAKE_LEAD_WEBHOOK_URL",
+  "scheduling": {
+    "type": "indefinitely",
+    "interval": 900
+  }
+}

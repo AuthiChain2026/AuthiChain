@@ -4,8 +4,10 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Shield, Scan, Lock, TrendingUp, CheckCircle, Sparkles, Globe } from "lucide-react"
+import { Shield, Scan, Lock, TrendingUp, CheckCircle, Sparkles, Globe, Mail, ArrowRight } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { LeadCapturePopup } from "@/components/LeadCapturePopup"
+import { DemoBooker } from "@/components/DemoBooker"
 
 export default function Home() {
   return (
@@ -270,6 +272,66 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Lead Capture + Demo Section */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Inline Lead Capture */}
+          <div className="rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 p-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Mail className="h-5 w-5 text-purple-500" />
+              <h3 className="text-xl font-bold">Try AuthiChain Free</h3>
+            </div>
+            <p className="text-muted-foreground mb-6">
+              Authenticate your first product with AI AutoFlow™ — no credit card required.
+            </p>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const form = e.target as HTMLFormElement
+                const formData = new FormData(form)
+                fetch('/api/leads/capture', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    email: formData.get('email'),
+                    name: formData.get('name'),
+                    company: formData.get('company'),
+                    source: 'inline',
+                    product_interest: 'authichain',
+                    page_url: '/',
+                  }),
+                }).then(() => {
+                  fetch('/api/leads/webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      email: formData.get('email'),
+                      name: formData.get('name'),
+                      company: formData.get('company'),
+                      source: 'inline',
+                      product_interest: 'authichain',
+                    }),
+                  }).catch(() => {})
+                  form.reset()
+                  alert('Check your email! Your free demo access is on the way.')
+                }).catch(() => {})
+              }}
+              className="space-y-3"
+            >
+              <input name="email" type="email" required placeholder="Work email" className="w-full px-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500" />
+              <input name="name" type="text" placeholder="Full name" className="w-full px-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500" />
+              <input name="company" type="text" placeholder="Company" className="w-full px-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500" />
+              <Button type="submit" variant="gradient" className="w-full">
+                Get Free Access <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </form>
+          </div>
+
+          {/* Demo Booker */}
+          <DemoBooker />
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-3xl mx-auto space-y-8 p-12 rounded-3xl gradient-primary">
@@ -293,6 +355,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Lead Capture Popup */}
+      <LeadCapturePopup />
 
       {/* Footer */}
       <footer className="border-t mt-20">

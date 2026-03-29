@@ -1,0 +1,25 @@
+{
+  "name": "Nurture Engine - Email Sequences",
+  "scenarioId": 4561171,
+  "webhookId": 2080127,
+  "webhookUrl": "https://hook.us2.make.com/fyyfkti396ndy83fihuyja2j1ttcpgok",
+  "description": "Sends automated nurture email sequences to leads across both AuthiChain and QRON products",
+  "trigger": "Webhook (triggered on schedule or by CRM events)",
+  "actions": [
+    "Receive contact batch with sequence IDs and emails_sent history",
+    "Forward to AuthiChain /api/nurture/send for AuthiChain leads",
+    "Forward to QRON /api/nurture/send for QRON leads",
+    "Both endpoints determine the next email in the sequence and send via Resend/SendGrid"
+  ],
+  "envVars": {
+    "MAKE_NURTURE_WEBHOOK_URL": "https://hook.us2.make.com/fyyfkti396ndy83fihuyja2j1ttcpgok"
+  },
+  "sequences": {
+    "authichain": ["new_lead (5 emails, 14 days)", "pricing_viewer (3 emails, 7 days)", "abandoned_checkout (3 emails, 3 days)", "upsell (1 email, 30 days)"],
+    "qron": ["new_lead (4 emails, 14 days)", "abandoned_checkout (2 emails, 2 days)", "upsell (1 email, 14 days)"]
+  },
+  "scheduling": {
+    "type": "indefinitely",
+    "interval": 21600
+  }
+}
