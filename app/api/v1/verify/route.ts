@@ -27,10 +27,10 @@ export async function OPTIONS() {
  * Free tier: 100 calls/month. Paid: $0.05/call.
  */
 export async function GET(req: NextRequest) {
-  const productId = req.nextUrl.searchParams.get('id')
+  const productId = req.nextUrl.searchParams.get('id') || req.nextUrl.searchParams.get('productId')
   if (!productId) {
     return NextResponse.json(
-      { error: 'Missing required parameter: id', usage: 'GET /api/v1/verify?id={productId}' },
+      { error: 'Missing required parameter: id or productId', usage: 'GET /api/v1/verify?id={productId}' },
       { status: 400, headers: CORS_HEADERS }
     )
   }
