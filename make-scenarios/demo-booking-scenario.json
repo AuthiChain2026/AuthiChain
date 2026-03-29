@@ -1,12 +1,24 @@
 {
-  "DEPRECATED": true,
-  "note": "Demo booking is now handled by the Lead Capture + Demo Booking Router (scenario 4561168). No separate scenario needed.",
-  "merged_into": {
-    "scenario_id": 4561168,
-    "webhook_url": "https://hook.us2.make.com/b73cbg7e5lm7g98aryxzllal3o9b79jr",
-    "env_var": "MAKE_LEAD_WEBHOOK_URL"
-  },
-  "reason": "Make.com free plan limits to 2 scenarios. Consolidated lead capture + demo booking into one scenario with event-based routing.",
-  "old_webhook_id": 2080380,
-  "old_webhook_url": "https://hook.us2.make.com/tallrb535hl3m34ltmqe11qfrwthrlc9"
+  "scenario_id": 4561790,
+  "name": "Demo Booking - Calendar + CRM",
+  "webhook_id": 2080380,
+  "webhook_url": "https://hook.us2.make.com/tallrb535hl3m34ltmqe11qfrwthrlc9",
+  "env_var": "MAKE_DEMO_WEBHOOK_URL",
+  "description": "Receives demo booking events from AuthiChain website, triggers /api/demo/book for HubSpot deal creation and confirmation email, then creates a Google Calendar event with the prospect as an attendee.",
+  "flow": [
+    {
+      "module": "gateway:CustomWebHook",
+      "description": "Receives POST with name, email, company, date, time, message"
+    },
+    {
+      "module": "http:ActionSendData",
+      "description": "POST to /api/demo/book - creates HubSpot deal + sends confirmation email"
+    },
+    {
+      "module": "http:ActionSendData",
+      "description": "POST to Google Calendar API - creates 30-min demo event with attendee"
+    }
+  ],
+  "activation": "Must be activated manually in Make.com dashboard (free plan restriction)",
+  "created": "2026-03-29"
 }
