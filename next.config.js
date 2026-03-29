@@ -13,6 +13,14 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/verify/public',
+        destination: '/api/v1/verify',
+      },
+    ]
+  },
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
   turbopack: {},

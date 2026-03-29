@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { Shield, Search, CheckCircle, XCircle, Loader2, Camera, Share2 } from "lucide-react"
+import { SocialShareCTA } from "@/components/SocialShareCTA"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
@@ -363,6 +364,12 @@ function VerifyContent() {
                 )}
                 <Button type="button" variant="outline" onClick={handleReset}>Reset</Button>
               </div>
+              {result.authentic && (
+                <SocialShareCTA
+                  productName={`Product ${result.qron_id}`}
+                  verifyUrl={`https://authichain.com/verify?id=${result.qron_id}`}
+                />
+              )}
             </CardContent>
           </Card>
         )}

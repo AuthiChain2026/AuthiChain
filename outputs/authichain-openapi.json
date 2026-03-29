@@ -1,0 +1,439 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AuthiChain Product Verification API",
+    "description": "Verify product authenticity in real-time using blockchain-backed digital identities. AuthiChain protects brands and consumers from counterfeits by registering products on-chain (Base L2) and providing instant verification via NFC, QR, or product ID lookup.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "AuthiChain Support",
+      "email": "authichain@gmail.com",
+      "url": "https://authichain.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://authichain.com/api/v1",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/verify": {
+      "get": {
+        "operationId": "verifyProductGet",
+        "summary": "Verify a product by ID",
+        "description": "Look up a product's authenticity status by its unique identifier. Returns verification result, product metadata, blockchain proof, and confidence score.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "description": "The product identifier (SKU, serial number, or AuthiChain product ID)",
+            "schema": { "type": "string" },
+            "example": "AC-LVMH-2024-001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product found and verified",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/VerificationResult" }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required parameter",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/NotFound" }
+              }
+            }
+          },
+          "503": {
+            "description": "Service temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "verifyProductPost",
+        "summary": "Verify a product with optional NFC hash",
+        "description": "Submit a product ID and optional NFC chip hash for enhanced verification. NFC verification provides higher confidence scores (0.99 vs 0.95).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["productId"],
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "description": "The product identifier",
+                    "example": "AC-LVMH-2024-001"
+                  },
+                  "nfcHash": {
+                    "type": "string",
+                    "description": "Optional NFC chip hash for enhanced verification",
+                    "example": "sha256:a1b2c3d4e5f6..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/VerificationResult" }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required field",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify/batch": {
+      "post": {
+        "operationId": "verifyBatch",
+        "summary": "Batch verify multiple products",
+        "description": "Submit up to 50 product IDs for batch verification. Returns an array of verification results.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["productIds"],
+                "properties": {
+                  "productIds": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "maxItems": 50,
+                    "description": "Array of product identifiers to verify",
+                    "example": ["AC-LVMH-2024-001", "AC-NIKE-2024-042"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch verification results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/VerificationResult" }
+                    },
+                    "total": { "type": "integer" },
+                    "verified": { "type": "integer" },
+                    "failed": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{productId}": {
+      "get": {
+        "operationId": "getProduct",
+        "summary": "Get product details",
+        "description": "Retrieve full product metadata, registration history, and blockchain proof for a specific product.",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "AC-LVMH-2024-001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/VerificationResult" }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/NotFound" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{productId}/history": {
+      "get": {
+        "operationId": "getProductHistory",
+        "summary": "Get product scan history",
+        "description": "Retrieve the scan and verification history for a product, including timestamps, locations, and verification results.",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 20, "maximum": 100 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scan history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "productId": { "type": "string" },
+                    "scans": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "timestamp": { "type": "string", "format": "date-time" },
+                          "method": { "type": "string", "enum": ["qr", "nfc", "api"] },
+                          "verified": { "type": "boolean" },
+                          "confidence": { "type": "number" }
+                        }
+                      }
+                    },
+                    "totalScans": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/brands/{brandId}/products": {
+      "get": {
+        "operationId": "listBrandProducts",
+        "summary": "List products by brand",
+        "description": "List all registered products for a specific brand. Supports pagination.",
+        "parameters": [
+          {
+            "name": "brandId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 20, "maximum": 100 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated product list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "products": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/VerificationResult" }
+                    },
+                    "page": { "type": "integer" },
+                    "totalPages": { "type": "integer" },
+                    "total": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/register": {
+      "post": {
+        "operationId": "registerProduct",
+        "summary": "Register a new product",
+        "description": "Register a new product on the AuthiChain blockchain. Requires a valid API key with write permissions.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "brand", "category"],
+                "properties": {
+                  "name": { "type": "string", "example": "Product Name" },
+                  "brand": { "type": "string", "example": "Brand Name" },
+                  "category": { "type": "string", "example": "luxury-handbags" },
+                  "serialNumber": { "type": "string" },
+                  "nfcHash": { "type": "string" },
+                  "metadata": { "type": "object" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "productId": { "type": "string" },
+                    "txHash": { "type": "string" },
+                    "tokenId": { "type": "string" },
+                    "registeredAt": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "healthCheck",
+        "summary": "API health check",
+        "description": "Returns API status, version, and uptime information.",
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" },
+                    "version": { "type": "string", "example": "1.0.0" },
+                    "uptime": { "type": "number" },
+                    "timestamp": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VerificationResult": {
+        "type": "object",
+        "properties": {
+          "verified": { "type": "boolean", "description": "Whether the product is verified as authentic" },
+          "productId": { "type": "string" },
+          "product": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "nullable": true },
+              "brand": { "type": "string", "nullable": true },
+              "category": { "type": "string", "nullable": true },
+              "registeredAt": { "type": "string", "format": "date-time", "nullable": true }
+            }
+          },
+          "blockchain": {
+            "type": "object",
+            "properties": {
+              "chain": { "type": "string", "example": "Base (Ethereum L2)" },
+              "txHash": { "type": "string", "nullable": true },
+              "tokenId": { "type": "string", "nullable": true },
+              "contractAddress": { "type": "string" },
+              "verified": { "type": "boolean" }
+            }
+          },
+          "confidence": { "type": "number", "format": "float", "minimum": 0, "maximum": 1 },
+          "scanCount": { "type": "integer" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "_links": {
+            "type": "object",
+            "properties": {
+              "verify_page": { "type": "string", "format": "uri" },
+              "api_docs": { "type": "string", "format": "uri" }
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "usage": { "type": "string" }
+        }
+      },
+      "NotFound": {
+        "type": "object",
+        "properties": {
+          "verified": { "type": "boolean", "example": false },
+          "productId": { "type": "string" },
+          "error": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "securitySchemes": {
+      "RapidAPIKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-RapidAPI-Key",
+        "description": "Your RapidAPI subscription key"
+      }
+    }
+  },
+  "security": [
+    { "RapidAPIKey": [] }
+  ]
+}

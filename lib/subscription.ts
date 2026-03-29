@@ -122,8 +122,10 @@ export async function checkProductQuota(
 
 /** Map a Stripe price ID to a plan name. */
 export function planFromPriceId(priceId: string): Plan {
-  if (priceId === process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID) return 'starter'
-  if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID) return 'pro'
+  const starterIds = [process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID, 'price_1TGAVRGqTruSqV8T0JkrO3Ry', 'price_1TGAVSGqTruSqV8TRW1nI5K5']
+  const proIds = [process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID, 'price_1TGAVTGqTruSqV8TTHYdqKAs', 'price_1TGAVTGqTruSqV8T8YXJjtSr']
+  if (starterIds.includes(priceId)) return 'starter'
+  if (proIds.includes(priceId)) return 'pro'
   if (priceId === process.env.STRIPE_ENTERPRISE_PRICE_ID) return 'enterprise'
   return 'free'
 }

@@ -1,0 +1,12 @@
+{
+  "DEPRECATED": true,
+  "note": "Demo booking is now handled by the Lead Capture + Demo Booking Router (scenario 4561168). No separate scenario needed.",
+  "merged_into": {
+    "scenario_id": 4561168,
+    "webhook_url": "https://hook.us2.make.com/b73cbg7e5lm7g98aryxzllal3o9b79jr",
+    "env_var": "MAKE_LEAD_WEBHOOK_URL"
+  },
+  "reason": "Make.com free plan limits to 2 scenarios. Consolidated lead capture + demo booking into one scenario with event-based routing.",
+  "old_webhook_id": 2080380,
+  "old_webhook_url": "https://hook.us2.make.com/tallrb535hl3m34ltmqe11qfrwthrlc9"
+}

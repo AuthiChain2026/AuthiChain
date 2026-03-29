@@ -5,157 +5,198 @@
 @tailwind utilities;
 
 @layer base {
-    :root {
-        --background: 0 0% 4%;
-        --foreground: 0 0% 93%;
-        --card: 0 0% 7%;
-        --card-foreground: 0 0% 93%;
-        --card-border: 0 0% 14%;
-        --popover: 0 0% 7%;
-        --popover-foreground: 0 0% 93%;
-        --popover-border: 0 0% 14%;
-        --primary: 43 74% 47%;
-        --primary-foreground: 0 0% 5%;
-        --primary-border: rgba(201,162,39,0.4);
-        --secondary: 0 0% 10%;
-        --secondary-foreground: 0 0% 93%;
-        --secondary-border: rgba(255,255,255,0.1);
-        --muted: 0 0% 10%;
-        --muted-foreground: 0 0% 53%;
-        --muted-border: rgba(255,255,255,0.08);
-        --accent: 43 74% 47%;
-        --accent-foreground: 0 0% 5%;
-        --accent-border: rgba(201,162,39,0.3);
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 0 0% 98%;
-        --destructive-border: rgba(255,68,68,0.4);
-        --border: 0 0% 14%;
-        --input: 0 0% 12%;
-        --ring: 43 74% 47%;
-        --gold: #c9a227;
-        --gold-light: #e8c547;
-        --gold-glow: #ffd700;
-        --gold-dim: #7a6116;
-        --gold-muted: rgba(201,162,39,0.12);
-        --gold-border: rgba(201,162,39,0.28);
-        --steel: #9e9e9e;
-        --steel-light: #c8c8c8;
-        --steel-dark: #3a3a3a;
-        --steel-deeper: #1c1c1c;
-        --surface-1: #111111;
-        --surface-2: #161616;
-        --surface-3: #1e1e1e;
-        --radius: 0.5rem;
-        --chart-1: 43 74% 47%;
-        --chart-2: 45 90% 60%;
-        --chart-3: 38 65% 40%;
-        --chart-4: 0 0% 53%;
-        --chart-5: 0 0% 30%;
-        --sidebar: 0 0% 6%;
-        --sidebar-foreground: 0 0% 80%;
-        --sidebar-border: 0 0% 14%;
-        --sidebar-ring: 43 74% 47%;
-        --sidebar-primary: 43 74% 47%;
-        --sidebar-primary-foreground: 0 0% 5%;
-        --sidebar-accent: 0 0% 10%;
-        --sidebar-accent-foreground: 0 0% 80%;
-        --sidebar-primary-border: rgba(201,162,39,0.3);
-        --sidebar-accent-border: rgba(201,162,39,0.15);
-    }
-    .dark {
-        --background: 0 0% 4%;
-        --foreground: 0 0% 93%;
-        --card: 0 0% 7%;
-        --card-foreground: 0 0% 93%;
-        --primary: 43 74% 47%;
-        --primary-foreground: 0 0% 5%;
-        --secondary: 0 0% 10%;
-        --secondary-foreground: 0 0% 93%;
-        --muted: 0 0% 10%;
-        --muted-foreground: 0 0% 53%;
-        --accent: 43 74% 47%;
-        --accent-foreground: 0 0% 5%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 14%;
-        --input: 0 0% 12%;
-        --ring: 43 74% 47%;
-    }
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 93%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 93%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 93%;
+    
+    /* ──── GOLD THEME - Unified with qron.space ──── */
+    --primary: 43 80% 47%; /* Gold - #c9a227 */
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 93%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 53%;
+    --accent: 43 80% 47%; /* Gold */
+    --accent-foreground: 0 0% 5%;
+    
+    /* Gold palette */
+    --gold: 43 80% 47%; /* #c9a227 */
+    --gold-light: 45 90% 60%; /* #e8c547 */
+    --gold-dim: 42 60% 35%; /* #a07d10 */
+    --gold-glow: 43 80% 47%;
+    --gold-border: rgba(201, 162, 39, 0.3);
+    --gold-bg-subtle: rgba(201, 162, 39, 0.05);
+    --gold-foreground: 0 0% 5%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 17%;
+    --input: 0 0% 17%;
+    --ring: 43 80% 47%;
+    --radius: 0.5rem;
+  }
+  
+  .dark {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 93%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 93%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 93%;
+    --primary: 43 80% 47%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 93%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 53%;
+    --accent: 43 80% 47%;
+    --accent-foreground: 0 0% 5%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 17%;
+    --input: 0 0% 17%;
+    --ring: 43 80% 47%;
+  }
 }
 
 @layer base {
-    * { @apply border-border; }
-    body {
-        @apply bg-background text-foreground;
-        font-family: 'Geist', 'Geist Fallback', Arial, sans-serif;
-    }
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Geist', 'Geist Fallback', Arial, sans-serif;
+  }
 }
 
+/* ──── GOLD THEME UTILITIES ──── */
+
+/* Gold gradient text - matches qron.space */
 .gradient-gold,
 .gradient-text {
-    background: linear-gradient(135deg, #FFD700 0%, #E8C547 30%, #C9A227 65%, #A07D10 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  background: linear-gradient(135deg, #E8C547 0%, #C9A227 50%, #A07D10 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.gradient-primary {
-    background: linear-gradient(135deg, #C9A227 0%, #A07D10 100%);
+/* Solid gold text */
+.text-gold {
+  color: #c9a227;
 }
 
-.protocol-bg {
-    background:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,162,39,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 40% at 90% 85%, rgba(201,162,39,0.04) 0%, transparent 50%),
-        radial-gradient(ellipse 60% 40% at 0% 60%, rgba(201,162,39,0.03) 0%, transparent 50%),
-        hsl(var(--background));
+/* Gold gradient background for sections and buttons */
+.gradient-primary,
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #E8C547 0%, #C9A227 50%, #A07D10 100%);
 }
 
-.protocol-card {
-    background: hsl(var(--card));
-    border: 1px solid var(--gold-border);
-    border-radius: 1rem;
-    backdrop-filter: blur(12px);
-    box-shadow:
-        0 0 0 1px rgba(201,162,39,0.05),
-        0 4px 24px rgba(0,0,0,0.5),
-        inset 0 1px 0 rgba(201,162,39,0.08);
-    transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
-}
-.protocol-card:hover {
-    border-color: rgba(201,162,39,0.5);
-    box-shadow:
-        0 0 0 1px rgba(201,162,39,0.12),
-        0 8px 40px rgba(0,0,0,0.6),
-        0 0 24px rgba(201,162,39,0.07),
-        inset 0 1px 0 rgba(201,162,39,0.14);
-    transform: translateY(-2px);
+/* Subtle gold background */
+.bg-gold-subtle {
+  background: rgba(201, 162, 39, 0.05);
 }
 
-.gold-card {
-    background: linear-gradient(135deg, rgba(201,162,39,0.07) 0%, rgba(201,162,39,0.02) 100%);
-    border: 1px solid rgba(201,162,39,0.22);
-    border-radius: 0.75rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
+/* Gold glow effect */
+.glow-gold {
+  box-shadow: 0 0 20px rgba(201, 162, 39, 0.35), 0 0 40px rgba(201, 162, 39, 0.15);
 }
-.gold-card:hover {
-    border-color: rgba(201,162,39,0.45);
-    box-shadow: 0 0 20px rgba(201,162,39,0.08);
+
+/* Gold border */
+.border-gold {
+  border: 1px solid rgba(201, 162, 39, 0.3);
+}
+
+/* Gold ring/outline */
+.ring-gold {
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.5);
 }
 
 .btn-gold {
-    background: linear-gradient(135deg, #C9A227 0%, #E8C547 50%, #C9A227 100%);
-    background-size: 200% 200%;
-    color: #0a0a0a;
-    font-weight: 700;
-    border: none;
-    transition: background-position 0.3s, box-shadow 0.3s, transform 0.15s;
-    box-shadow: 0 0 20px rgba(201,162,39,0.3);
+  background: linear-gradient(135deg, #E8C547, #C9A227);
+  color: #0a0a0a;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(201, 162, 39, 0.25);
 }
-.btn-gold:hover:not(:disabled) {
-    background-position: right center;
-    box-shadow: 0 0 36px rgba(255,215,0,0.5);
-    transform: translateY(-1px);
+
+.btn-gold:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(201, 162, 39, 0.4);
+}
+
+/* Gold outline button */
+.btn-outline-gold {
+  background: transparent;
+  border: 2px solid #c9a227;
+  color: #c9a227;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-gold:hover {
+  background: rgba(201, 162, 39, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(201, 162, 39, 0.2);
+}
+
+/* Gold divider */
+.divider-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c9a227, transparent);
+}
+
+/* Card with gold accent */
+.card-gold {
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid rgba(201, 162, 39, 0.2);
+  box-shadow: 0 4px 20px rgba(201, 162, 39, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card-gold:hover {
+  border-color: rgba(201, 162, 39, 0.4);
+  box-shadow: 0 8px 30px rgba(201, 162, 39, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Gold pulse animation */
+@keyframes goldPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-gold-pulse {
+  animation: goldPulse 2s ease-in-out infinite;
+}
+
+/* Gold shimmer effect */
+@keyframes goldShimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer-gold {
+  background: linear-gradient(
+    90deg,
+    rgba(201, 162, 39, 0) 0%,
+    rgba(201, 162, 39, 0.3) 50%,
+    rgba(201, 162, 39, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: goldShimmer 2s infinite;
 }
 
 .btn-outline-gold {
