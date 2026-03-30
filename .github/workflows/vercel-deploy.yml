@@ -5,9 +5,61 @@ on:
     branches:
       - main
   pull_request:
+    branches:
+      - main
+
+# Prevent overlapping deploys and cancel stale runs
+concurrency:
+  group: vercel-deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy:
+    name: Production Deploy
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      # Validate required secrets before running build/deploy
+      - name: Validate Vercel secrets
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "❌ Missing VERCEL_TOKEN"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      # Upload build artifacts for debugging + reproducibility
+      - name: Upload Next.js build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: .next
+
+      - name: Deploy to Vercel (Production)
+        run: |
+          npx vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }}
+
+  preview:
+    name: Preview Deploy
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +81,13 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Deploy to Vercel
-        run: |
-          npx vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }}
+      # Upload preview build artifacts
+      - name: Upload Preview Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-build
+          path: .next
 
+      - name: Deploy Preview to Vercel
+        run: |
+          npx vercel deploy --token ${{ secrets.VERCEL_TOKEN }}
