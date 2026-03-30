@@ -24,28 +24,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-
-      - name: Enable pnpm
-        run: corepack enable
+          cache: 'npm'
 
       # Validate required Cloudflare secrets
       - name: Validate Cloudflare secrets
         run: |
           if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
-            echo "❌ Missing CLOUDFLARE_API_TOKEN"
+            echo "Missing CLOUDFLARE_API_TOKEN"
             exit 1
           fi
           if [ -z "${{ secrets.CF_ACCOUNT_ID }}" ]; then
-            echo "❌ Missing CF_ACCOUNT_ID"
+            echo "Missing CF_ACCOUNT_ID"
             exit 1
           fi
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build Worker
-        run: pnpm run build
+        run: npm run build
 
       # Upload Worker bundle for debugging + auditability
       - name: Upload Worker bundle
@@ -56,6 +53,6 @@ jobs:
 
       - name: Deploy Worker
         run: |
-          pnpm dlx wrangler deploy \
+          npx wrangler deploy \
             --account-id ${{ secrets.CF_ACCOUNT_ID }} \
             --api-token ${{ secrets.CLOUDFLARE_API_TOKEN }}

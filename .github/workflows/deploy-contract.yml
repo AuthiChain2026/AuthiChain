@@ -24,12 +24,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build contracts
-        run: npm run build
+        run: npm run contract:compile
 
       - name: Deploy contract
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
         run: npm run deploy -- --network ${{ github.event.inputs.network }}

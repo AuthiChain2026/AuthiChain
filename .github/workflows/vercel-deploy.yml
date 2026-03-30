@@ -27,24 +27,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-
-      - name: Enable pnpm
-        run: corepack enable
+          cache: 'npm'
 
       # Validate required secrets before running build/deploy
       - name: Validate Vercel secrets
         run: |
           if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
-            echo "❌ Missing VERCEL_TOKEN"
+            echo "Missing VERCEL_TOKEN"
             exit 1
           fi
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build
-        run: pnpm build
+        run: npm run build
 
       # Upload build artifacts for debugging + reproducibility
       - name: Upload Next.js build artifacts
@@ -70,16 +67,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-
-      - name: Enable pnpm
-        run: corepack enable
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build
-        run: pnpm build
+        run: npm run build
 
       # Upload preview build artifacts
       - name: Upload Preview Build Artifacts
