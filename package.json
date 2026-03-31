@@ -15,7 +15,9 @@
     "contract:deploy:mainnet": "npx hardhat run scripts/nft/deploy.ts --network vechain_main",
     "build:cloudflare": "pnpm exec @opennextjs/cloudflare build"
   },
-  "engines": { "node": "20.x" },
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "@fal-ai/client": "^1.9.4",
     "@hookform/resolvers": "^3.10.0",
@@ -41,6 +43,7 @@
     "@supabase/storage-js": "^2.7.3",
     "@supabase/supabase-js": "^2.47.10",
     "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "client-only": "^0.0.1",
     "clsx": "^2.1.1",
@@ -64,8 +67,8 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^1.18.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@opennextjs/cloudflare": "^1.18.0",
     "@openzeppelin/contracts": "^5.2.0",
     "@types/node": "^22.10.5",
     "@types/pg": "^8.16.0",

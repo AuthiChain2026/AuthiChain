@@ -245,7 +245,7 @@ function IndustryCarousel() {
                   key={i}
                   className="flex items-center gap-2 text-sm text-muted-foreground"
                 >
-                  <span className="style={{ color: "#c9a227" }}>✓</span>
+                  <span style={{ color: "#c9a227" }}>✓</span>
                   <span>{feat}</span>
                 </div>
               ))}
