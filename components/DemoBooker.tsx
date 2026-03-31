@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, CheckCircle, ArrowRight } from 'lucide-react'
+import { Calendar, CheckCircle, ArrowRight, Loader2 } from 'lucide-react'
 
 export function DemoBooker() {
   const [name, setName] = useState('')
@@ -37,7 +37,6 @@ export function DemoBooker() {
 
       if (res.ok) {
         setSubmitted(true)
-        // Track the demo request
         fetch('/api/sales/leads', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -55,9 +54,9 @@ export function DemoBooker() {
 
   if (submitted) {
     return (
-      <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-6 text-center">
-        <CheckCircle className="h-10 w-10 text-green-500 mx-auto mb-3" />
-        <h4 className="text-lg font-bold mb-1">Demo Booked!</h4>
+      <div className="protocol-card p-8 text-center">
+        <CheckCircle className="h-12 w-12 mx-auto mb-4" style={{ color: '#c9a227' }} />
+        <h4 className="text-xl font-bold text-white mb-2">Demo Booked!</h4>
         <p className="text-sm text-muted-foreground">
           Check your email for confirmation. We&apos;ll send a calendar invite with a Google Meet link.
         </p>
@@ -65,52 +64,59 @@ export function DemoBooker() {
     )
   }
 
+  const inputClass = 'protocol-input w-full px-4 py-3 rounded-lg text-sm'
+
   return (
-    <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Calendar className="h-5 w-5 text-purple-500" />
-        <h4 className="text-lg font-bold">Book a Demo</h4>
+    <div className="protocol-card p-7">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+             style={{ background: 'rgba(201,162,39,0.15)', border: '1px solid rgba(201,162,39,0.3)' }}>
+          <Calendar className="h-5 w-5" style={{ color: '#c9a227' }} />
+        </div>
+        <div>
+          <h4 className="text-lg font-bold text-white">Book a Demo</h4>
+          <p className="text-xs text-muted-foreground">30-minute personalized walkthrough</p>
+        </div>
       </div>
-      <p className="text-sm text-muted-foreground mb-4">
-        See AuthiChain in action. 30-minute personalized demo with our team.
-      </p>
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        <input
-          type="text"
-          required
-          placeholder="Full name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
-        <input
-          type="email"
-          required
-          placeholder="Work email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input
+            type="text"
+            required
+            placeholder="Full name *"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            className={inputClass}
+          />
+          <input
+            type="email"
+            required
+            placeholder="Work email *"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className={inputClass}
+          />
+        </div>
         <input
           type="text"
           placeholder="Company"
           value={company}
           onChange={e => setCompany(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className={inputClass}
         />
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           <input
             type="date"
             value={preferredDate}
             onChange={e => setPreferredDate(e.target.value)}
             min={new Date().toISOString().split('T')[0]}
-            className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className={inputClass}
           />
           <select
             value={preferredTime}
             onChange={e => setPreferredTime(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className={inputClass}
           >
             <option value="">Preferred time</option>
             <option value="09:00">9:00 AM</option>
@@ -127,19 +133,32 @@ export function DemoBooker() {
           value={message}
           onChange={e => setMessage(e.target.value)}
           rows={2}
-          className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+          className={`${inputClass} resize-none`}
         />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <p className="text-sm px-3 py-2 rounded-lg"
+             style={{ background: 'rgba(255,68,68,0.08)', color: '#ff9999', border: '1px solid rgba(255,68,68,0.2)' }}>
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition"
+          className="btn-gold w-full py-3 rounded-xl flex items-center justify-center gap-2 font-bold"
         >
-          {loading ? 'Booking...' : 'Book Demo'}
-          {!loading && <ArrowRight className="h-4 w-4" />}
+          {loading ? (
+            <><Loader2 className="h-4 w-4 animate-spin" /> Booking...</>
+          ) : (
+            <>Book Demo <ArrowRight className="h-4 w-4" /></>
+          )}
         </button>
+
+        <p className="text-xs text-center text-muted-foreground">
+          Or email us directly at{' '}
+          <a href="mailto:Z@authichain.com" style={{ color: '#c9a227' }}>Z@authichain.com</a>
+        </p>
       </form>
     </div>
   )
