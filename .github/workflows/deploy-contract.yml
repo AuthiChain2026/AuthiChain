@@ -7,6 +7,10 @@ on:
         description: "Target network"
         required: true
         default: "vechain_test"
+        type: choice
+        options:
+          - vechain_test
+          - vechain_main
       grant_minter:
         description: "Grant minter role to MINTER_ADDRESS after deploy?"
         required: true
@@ -24,12 +28,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build contracts
-        run: npm run build
+      - name: Compile contracts
+        run: npm run contract:compile
 
       - name: Deploy contract
-        run: npm run deploy -- --network ${{ github.event.inputs.network }}
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          MINTER_ADDRESS: ${{ secrets.MINTER_ADDRESS }}
+        run: |
+          if [ "${{ github.event.inputs.network }}" = "vechain_main" ]; then
+            npm run contract:deploy:mainnet
+          else
+            npm run contract:deploy:testnet
+          fi
