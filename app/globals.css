@@ -5,99 +5,280 @@
 @tailwind utilities;
 
 @layer base {
-    :root {
-        --background: 0 0% 4%;
-        --foreground: 0 0% 93%;
-        --card: 0 0% 7%;
-        --card-foreground: 0 0% 93%;
-        --popover: 0 0% 7%;
-        --popover-foreground: 0 0% 93%;
-        --primary: 43 80% 47%; /* Gold - matches qron.space */
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 93%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 93%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 93%;
+    
+    /* ──── GOLD THEME - Unified with qron.space ──── */
+    --primary: 43 80% 47%; /* Gold - #c9a227 */
     --primary-foreground: 0 0% 5%;
-        --secondary: 0 0% 10%;
-        --secondary-foreground: 0 0% 93%;
-        --muted: 0 0% 10%;
-        --muted-foreground: 0 0% 53%;
-        --accent: 43 80% 47%; /* Gold */
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 93%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 53%;
+    --accent: 43 80% 47%; /* Gold */
     --accent-foreground: 0 0% 5%;
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 17%;
-        --input: 0 0% 17%;
-        --ring: 43 80% 47%;
-        --gold: 43 80% 47%;
-        --gold-light: 45 90% 60%;
-        --gold-foreground: 0 0% 5%;
-        --radius: 0.5rem;
-    }
-    .dark {
-        --background: 0 0% 4%;
-        --foreground: 0 0% 93%;
-        --card: 0 0% 7%;
-        --card-foreground: 0 0% 93%;
-        --popover: 0 0% 7%;
-        --popover-foreground: 0 0% 93%;
-        --primary: 43 80% 47%;
-        --primary-foreground: 0 0% 5%;
-        --secondary: 0 0% 10%;
-        --secondary-foreground: 0 0% 93%;
-        --muted: 0 0% 10%;
-        --muted-foreground: 0 0% 53%;
-        --accent: 43 80% 47%;
-        --accent-foreground: 0 0% 5%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 17%;
-        --input: 0 0% 17%;
-        --ring: 43 80% 47%;
-    }
+    
+    /* Gold palette */
+    --gold: 43 80% 47%; /* #c9a227 */
+    --gold-light: 45 90% 60%; /* #e8c547 */
+    --gold-dim: 42 60% 35%; /* #a07d10 */
+    --gold-glow: 43 80% 47%;
+    --gold-border: rgba(201, 162, 39, 0.3);
+    --gold-bg-subtle: rgba(201, 162, 39, 0.05);
+    --gold-foreground: 0 0% 5%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 17%;
+    --input: 0 0% 17%;
+    --ring: 43 80% 47%;
+    --radius: 0.5rem;
+  }
+  
+  .dark {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 93%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 93%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 93%;
+    --primary: 43 80% 47%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 93%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 53%;
+    --accent: 43 80% 47%;
+    --accent-foreground: 0 0% 5%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 17%;
+    --input: 0 0% 17%;
+    --ring: 43 80% 47%;
+  }
 }
 
 @layer base {
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-        font-family: 'Geist', 'Geist Fallback', Arial, sans-serif;
-    }
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Geist', 'Geist Fallback', Arial, sans-serif;
+  }
 }
 
-/* Gold gradient utility - matches qron.space */
-.gradient-gold {
-    background: linear-gradient(135deg, #E8C547 0%, #C9A227 50%, #A07D10 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
+/* ──── GOLD THEME UTILITIES ──── */
 
-/* Gradient text — gold to amber, used across all AuthiChain pages */
+/* Gold gradient text - matches qron.space */
+.gradient-gold,
 .gradient-text {
-    background: linear-gradient(135deg, #E8C547 0%, #C9A227 50%, #A07D10 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  background: linear-gradient(135deg, #E8C547 0%, #C9A227 50%, #A07D10 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Gradient background — used for CTA sections and gradient buttons */
-.gradient-primary {
-    background: linear-gradient(135deg, #C9A227 0%, #A07D10 100%);
+/* Solid gold text */
+.text-gold {
+  color: #c9a227;
 }
 
-/* Gold glow */
+/* Gold gradient background for sections and buttons */
+.gradient-primary,
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #E8C547 0%, #C9A227 50%, #A07D10 100%);
+}
+
+/* Subtle gold background */
+.bg-gold-subtle {
+  background: rgba(201, 162, 39, 0.05);
+}
+
+/* Gold glow effect */
 .glow-gold {
-    box-shadow: 0 0 20px rgba(201, 162, 39, 0.35);
+  box-shadow: 0 0 20px rgba(201, 162, 39, 0.35), 0 0 40px rgba(201, 162, 39, 0.15);
 }
 
-/* Gold button */
+/* Gold border */
+.border-gold {
+  border: 1px solid rgba(201, 162, 39, 0.3);
+}
+
+/* Gold ring/outline */
+.ring-gold {
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.5);
+}
+
 .btn-gold {
-    background: linear-gradient(135deg, #E8C547, #C9A227);
-    color: #0a0a0a;
-    font-weight: 700;
-    transition: opacity 0.2s, transform 0.1s;
+  background: linear-gradient(135deg, #E8C547, #C9A227);
+  color: #0a0a0a;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(201, 162, 39, 0.25);
 }
 
 .btn-gold:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(201, 162, 39, 0.4);
 }
+
+/* Gold outline button */
+.btn-outline-gold {
+  background: transparent;
+  border: 2px solid #c9a227;
+  color: #c9a227;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-gold:hover {
+  background: rgba(201, 162, 39, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(201, 162, 39, 0.2);
+}
+
+/* Gold divider */
+.divider-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c9a227, transparent);
+}
+
+/* Card with gold accent */
+.card-gold {
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid rgba(201, 162, 39, 0.2);
+  box-shadow: 0 4px 20px rgba(201, 162, 39, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card-gold:hover {
+  border-color: rgba(201, 162, 39, 0.4);
+  box-shadow: 0 8px 30px rgba(201, 162, 39, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Gold pulse animation */
+@keyframes goldPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-gold-pulse {
+  animation: goldPulse 2s ease-in-out infinite;
+}
+
+/* Gold shimmer effect */
+@keyframes goldShimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer-gold {
+  background: linear-gradient(
+    90deg,
+    rgba(201, 162, 39, 0) 0%,
+    rgba(201, 162, 39, 0.3) 50%,
+    rgba(201, 162, 39, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: goldShimmer 2s infinite;
+}
+
+.btn-outline-gold {
+    background: transparent;
+    color: #e8c547;
+    border: 1px solid rgba(201,162,39,0.35);
+    font-weight: 600;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.btn-outline-gold:hover {
+    background: rgba(201,162,39,0.08);
+    border-color: #c9a227;
+    box-shadow: 0 0 16px rgba(201,162,39,0.2);
+}
+
+.glow-gold     { box-shadow: 0 0 20px rgba(201,162,39,0.35), 0 0 60px rgba(201,162,39,0.10); }
+.glow-gold-sm  { box-shadow: 0 0 12px rgba(201,162,39,0.28); }
+.glow-gold-lg  { box-shadow: 0 0 40px rgba(201,162,39,0.40), 0 0 80px rgba(201,162,39,0.15); }
+
+.protocol-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(201,162,39,0.12);
+    border: 1px solid rgba(201,162,39,0.28);
+    color: #e8c547;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.gold-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,162,39,0.35), transparent);
+    margin: 2rem 0;
+}
+
+.protocol-input {
+    background: hsl(var(--input));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.protocol-input:focus {
+    outline: none;
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 0 3px rgba(201,162,39,0.12);
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: hsl(var(--background)); }
+::-webkit-scrollbar-thumb { background: rgba(201,162,39,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201,162,39,0.5); }
+
+@keyframes gold-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.55; }
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-8px); }
+}
+@keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position:  200% center; }
+}
+@keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.animate-gold-pulse { animation: gold-pulse 2.5s ease-in-out infinite; }
+.animate-float      { animation: float 4s ease-in-out infinite; }
+.animate-shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(201,162,39,0.25) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+}
+.animate-spin-slow  { animation: spin-slow 12s linear infinite; }
+
+::selection { background: rgba(201,162,39,0.25); color: #fff; }

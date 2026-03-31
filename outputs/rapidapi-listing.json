@@ -1,0 +1,37 @@
+{
+  "listing": {
+    "name": "AuthiChain Product Verification API",
+    "tagline": "Blockchain-backed product authenticity verification in real-time",
+    "category": "Commerce",
+    "tags": ["blockchain", "verification", "anti-counterfeit", "NFC", "product-authentication", "supply-chain"],
+    "logo": "https://authichain.com/logo.png",
+    "website": "https://authichain.com",
+    "supportEmail": "authichain@gmail.com"
+  },
+  "endpoints": [
+    "GET  /verify              — Verify a product by ID",
+    "POST /verify              — Verify with optional NFC hash",
+    "POST /verify/batch        — Batch verify up to 50 products",
+    "GET  /products/{id}       — Get product details",
+    "GET  /products/{id}/history — Get scan history",
+    "GET  /brands/{id}/products — List brand products",
+    "POST /register            — Register a new product"
+  ],
+  "submissionChecklist": [
+    "1. Create RapidAPI provider account at rapidapi.com/provider",
+    "2. Click 'Add New API' → select 'Import OpenAPI Spec'",
+    "3. Upload outputs/authichain-openapi.json (imports all 7 endpoints automatically)",
+    "4. Set Base URL to https://authichain.com/api/v1",
+    "5. Configure pricing tiers: Basic (Free/100), Pro ($49/1K), Ultra ($199/10K), Mega ($499/100K)",
+    "6. Add API description, logo, and category from this file",
+    "7. Enable 'X-RapidAPI-Key' header authentication",
+    "8. Test each endpoint from the RapidAPI playground",
+    "9. Submit for review → typically approved within 24-48 hours"
+  ],
+  "pricingTiers": {
+    "Basic":  { "price": 0,   "requests": 100,    "period": "month", "overage": null },
+    "Pro":    { "price": 49,  "requests": 1000,   "period": "month", "overage": "$0.05/call" },
+    "Ultra":  { "price": 199, "requests": 10000,  "period": "month", "overage": "$0.03/call" },
+    "Mega":   { "price": 499, "requests": 100000, "period": "month", "overage": "$0.01/call" }
+  }
+}
