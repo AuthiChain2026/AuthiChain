@@ -1,33 +1,27 @@
-name: Deploy to Vercel
+name: Build Check
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
-# Prevent overlapping deploys and cancel stale runs
 concurrency:
-  group: vercel-deploy-${{ github.ref }}
+  group: build-check-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    name: Production Deploy
-    if: github.event_name == 'push'
+  build:
+    name: Build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
+<<<<<<< claude/fix-all-workflows-9pB45
 
       # Validate required secrets before running build/deploy
       - name: Validate Vercel secrets
@@ -85,3 +79,11 @@ jobs:
       - name: Deploy Preview to Vercel
         run: |
           npx vercel deploy --token ${{ secrets.VERCEL_TOKEN }}
+=======
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build
+        run: npm run build
+>>>>>>> main

@@ -2,57 +2,80 @@ name: Deploy Workers
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - 'workers/**'
   workflow_dispatch:
 
-# Prevent overlapping Worker deploys
 concurrency:
   group: deploy-workers-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+
 jobs:
-  deploy:
+  deploy-scan-validate:
+    name: Deploy scan-validate
     runs-on: ubuntu-latest
-    name: Deploy Cloudflare Worker
-
+    defaults:
+      run:
+        working-directory: workers/scan-validate
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
-
-      # Validate required Cloudflare secrets
-      - name: Validate Cloudflare secrets
-        run: |
-          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
-            echo "Missing CLOUDFLARE_API_TOKEN"
-            exit 1
-          fi
-          if [ -z "${{ secrets.CF_ACCOUNT_ID }}" ]; then
-            echo "Missing CF_ACCOUNT_ID"
-            exit 1
-          fi
-
       - name: Install dependencies
-        run: npm ci
+        run: npm install
+      - name: Deploy to Cloudflare
+        run: npx wrangler deploy
 
-      - name: Build Worker
-        run: npm run build
-
-      # Upload Worker bundle for debugging + auditability
-      - name: Upload Worker bundle
-        uses: actions/upload-artifact@v4
+  deploy-qron-provenance:
+    name: Deploy qron-provenance
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/qron-provenance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          name: worker-bundle
-          path: .open-next
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Deploy to Cloudflare
+        run: npx wrangler deploy
 
-      - name: Deploy Worker
-        run: |
-          npx wrangler deploy \
-            --account-id ${{ secrets.CF_ACCOUNT_ID }} \
-            --api-token ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  deploy-license-issuer:
+    name: Deploy license-issuer
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/license-issuer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Deploy to Cloudflare
+        run: npx wrangler deploy
+
+  deploy-verify-worker:
+    name: Deploy verify-worker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/verify-worker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Deploy to Cloudflare
+        run: npx wrangler deploy

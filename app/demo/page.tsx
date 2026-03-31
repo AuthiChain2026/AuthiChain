@@ -172,18 +172,18 @@ function MarketSizeChart() {
           transition={{ delay: i * 0.08, duration: 0.4 }}
         >
           <span className="text-lg w-8 text-center">{item.icon}</span>
-          <span className="text-sm text-white/70 w-24 shrink-0 truncate" title={item.fullName}>
+          <span className="text-sm text-muted-foreground w-24 shrink-0 truncate" title={item.fullName}>
             {item.name}
           </span>
-          <div className="flex-1 bg-white/10 rounded-full h-5 overflow-hidden">
+          <div className="flex-1 rounded-full h-5 overflow-hidden" style={{ background: "rgba(201,162,39,0.1)" }}>
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-purple-500 to-green-400"
+              className="h-full rounded-full bg-gradient-to-r from-[#c9a227] to-[#ffd700]"
               initial={{ width: 0 }}
               animate={{ width: `${(item.size / maxSize) * 100}%` }}
               transition={{ delay: i * 0.08 + 0.2, duration: 0.7, ease: "easeOut" }}
             />
           </div>
-          <span className="text-sm font-semibold w-16 text-right text-white/80">
+          <span className="text-sm font-semibold w-16 text-right text-muted-foreground">
             {item.label}
           </span>
         </motion.div>
@@ -218,7 +218,7 @@ function IndustryCarousel() {
             key={i}
             onClick={() => setCurrent(i)}
             className={`w-2 h-2 rounded-full transition-all ${
-              i === current ? "bg-purple-400 w-6" : "bg-white/30"
+              i === current ? "bg-[#c9a227] w-6" : "bg-white/30"
             }`}
           />
         ))}
@@ -232,20 +232,20 @@ function IndustryCarousel() {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.4 }}
         >
-          <Card className="p-8 bg-white/5 border-white/10 text-center">
+          <Card className="p-8 protocol-card text-center">
             <div className="text-6xl mb-4">{industry.icon}</div>
             <h3 className="text-2xl font-bold mb-2">{industry.name}</h3>
-            <p className="text-white/60 mb-4 text-sm">{industry.description}</p>
-            <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-lg px-4 py-1">
+            <p className="text-muted-foreground mb-4 text-sm">{industry.description}</p>
+            <Badge className="bg-[rgba(201,162,39,0.15)] text-[#c9a227] border-[rgba(201,162,39,0.3)] text-lg px-4 py-1">
               {industry.marketSize} market
             </Badge>
             <div className="mt-6 space-y-2">
               {industry.authenticityFeatures.slice(0, 3).map((feat, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2 text-sm text-white/70"
+                  className="flex items-center gap-2 text-sm text-muted-foreground"
                 >
-                  <span className="text-green-400">✓</span>
+                  <span className="style={{ color: "#c9a227" }}>✓</span>
                   <span>{feat}</span>
                 </div>
               ))}
@@ -260,18 +260,18 @@ function IndustryCarousel() {
           variant="ghost"
           size="sm"
           onClick={() => setCurrent((prev) => (prev - 1 + industries.length) % industries.length)}
-          className="text-white/60 hover:text-white"
+          className="text-muted-foreground hover:text-white"
         >
           ← Prev
         </Button>
-        <span className="text-white/40 text-sm self-center">
+        <span className="text-muted-foreground text-sm self-center">
           {current + 1} / {industries.length}
         </span>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setCurrent((prev) => (prev + 1) % industries.length)}
-          className="text-white/60 hover:text-white"
+          className="text-muted-foreground hover:text-white"
         >
           Next →
         </Button>
@@ -347,13 +347,13 @@ export default function DemoPage() {
 
         {/* ── Hero ── */}
         <section className="text-center space-y-4">
-          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 mb-2">
+          <Badge className="bg-[rgba(201,162,39,0.15)] text-[#c9a227] border-[rgba(201,162,39,0.3)] mb-2">
             Live Demo
           </Badge>
           <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 to-green-400 bg-clip-text text-transparent">
             AI AutoFlow™
           </h1>
-          <p className="text-xl text-white/60 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Universal product authentication powered by computer vision. Upload any product image
             and receive an instant industry classification, authentication workflow, and AI-generated
             provenance story.
@@ -370,7 +370,7 @@ export default function DemoPage() {
           ].map((metric) => (
             <Card
               key={metric.label}
-              className="p-6 bg-white/5 border-white/10 text-center"
+              className="p-6 protocol-card text-center"
             >
               <p className="text-3xl font-bold text-purple-300">
                 <AnimatedCounter
@@ -428,7 +428,7 @@ export default function DemoPage() {
 
             {loading ? (
               <div className="space-y-2">
-                <div className="text-white/60">Analyzing with AI AutoFlow™…</div>
+                <div className="text-muted-foreground">Analyzing with AI AutoFlow™…</div>
                 <div className="flex justify-center gap-1 mt-3">
                   {[0, 1, 2].map((i) => (
                     <motion.div
@@ -442,7 +442,7 @@ export default function DemoPage() {
               </div>
             ) : (
               <div>
-                <p className="text-white/60 mb-3">
+                <p className="text-muted-foreground mb-3">
                   Drag &amp; drop a product image or{" "}
                   <span className="text-purple-400 underline">browse files</span>
                 </p>
@@ -466,31 +466,31 @@ export default function DemoPage() {
             <h2 className="text-2xl font-bold text-center">Classification Results</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {classification && (
-                <Card className="p-6 bg-white/5 border-white/10">
-                  <h3 className="font-semibold mb-4 text-white/60 uppercase tracking-wide text-xs">
+                <Card className="p-6 protocol-card">
+                  <h3 className="font-semibold mb-4 text-muted-foreground uppercase tracking-wide text-xs">
                     Industry Classification
                   </h3>
                   <p className="text-3xl font-bold mb-2">{classification.industry}</p>
                   <div className="flex items-center gap-2 mt-3">
                     <div className="flex-1 bg-white/10 rounded-full h-2 overflow-hidden">
                       <motion.div
-                        className="h-full bg-gradient-to-r from-purple-500 to-green-400 rounded-full"
+                        className="h-full bg-gradient-to-r from-[#c9a227] to-[#ffd700] rounded-full"
                         initial={{ width: 0 }}
                         animate={{ width: `${classification.confidence * 100}%` }}
                         transition={{ duration: 1, ease: "easeOut" }}
                       />
                     </div>
-                    <span className="text-white/60 text-sm font-mono w-14 text-right">
+                    <span className="text-muted-foreground text-sm font-mono w-14 text-right">
                       {(classification.confidence * 100).toFixed(1)}%
                     </span>
                   </div>
-                  <p className="text-white/40 text-xs mt-1">Confidence score</p>
+                  <p className="text-muted-foreground text-xs mt-1">Confidence score</p>
                 </Card>
               )}
 
               {workflow && (
-                <Card className="p-6 bg-white/5 border-white/10 space-y-3 max-h-80 overflow-y-auto">
-                  <h3 className="font-semibold mb-2 text-white/60 uppercase tracking-wide text-xs">
+                <Card className="p-6 protocol-card space-y-3 max-h-80 overflow-y-auto">
+                  <h3 className="font-semibold mb-2 text-muted-foreground uppercase tracking-wide text-xs">
                     Authentication Workflow
                   </h3>
                   {workflow.steps.map((step, i) => (
@@ -564,25 +564,25 @@ export default function DemoPage() {
               opportunities in history.
             </p>
           </div>
-          <Card className="p-8 bg-white/5 border-white/10">
+          <Card className="p-8 protocol-card">
             <MarketSizeChart />
           </Card>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <Card className="p-4 bg-white/5 border-white/10">
+            <Card className="p-4 protocol-card">
               <p className="text-2xl font-bold text-green-400">$8.5T</p>
-              <p className="text-xs text-white/40 mt-1">Largest: Food &amp; Beverage</p>
+              <p className="text-xs text-muted-foreground mt-1">Largest: Food &amp; Beverage</p>
             </Card>
-            <Card className="p-4 bg-white/5 border-white/10">
+            <Card className="p-4 protocol-card">
               <p className="text-2xl font-bold text-blue-400">$1.7T</p>
-              <p className="text-xs text-white/40 mt-1">Fashion &amp; Apparel</p>
+              <p className="text-xs text-muted-foreground mt-1">Fashion &amp; Apparel</p>
             </Card>
-            <Card className="p-4 bg-white/5 border-white/10">
+            <Card className="p-4 protocol-card">
               <p className="text-2xl font-bold text-purple-400">$1.5T</p>
-              <p className="text-xs text-white/40 mt-1">Electronics</p>
+              <p className="text-xs text-muted-foreground mt-1">Electronics</p>
             </Card>
-            <Card className="p-4 bg-white/5 border-white/10">
+            <Card className="p-4 protocol-card">
               <p className="text-2xl font-bold text-yellow-400">$1.4T</p>
-              <p className="text-xs text-white/40 mt-1">Pharmaceuticals</p>
+              <p className="text-xs text-muted-foreground mt-1">Pharmaceuticals</p>
             </Card>
           </div>
         </section>
@@ -628,8 +628,8 @@ export default function DemoPage() {
                 <span className="text-green-300">{classification.industry}</span> detected at{" "}
                 <span className="text-purple-300">{(classification.confidence * 100).toFixed(0)}% confidence</span>
               </span>
-              <span className="text-white/40 hidden sm:inline">—</span>
-              <span className="text-white/60 hidden sm:inline">Protect your full catalog with AuthiChain</span>
+              <span className="text-muted-foreground hidden sm:inline">—</span>
+              <span className="text-muted-foreground hidden sm:inline">Protect your full catalog with AuthiChain</span>
             </div>
             <div className="flex gap-2 shrink-0">
               <a href="/pricing">
@@ -649,3 +649,4 @@ export default function DemoPage() {
     </div>
   );
 }
+
