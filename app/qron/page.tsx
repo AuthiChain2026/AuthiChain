@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Shield, Sparkles, Lock, Eye, Palette, Building2, Zap } from "lucide-react"
+import { Shield, Sparkles, Lock, Eye, Palette, Building2, Zap, Car, Leaf, Coffee, Trophy, Rocket, Globe, Cpu } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 // ────────────────────────────────────────────────────────────
@@ -66,6 +66,7 @@ const galleryItems = [
     style: "Brand Emblem",
     description:
       "The AuthiChain shield rendered in gold and steel, QR matrix etched across its face. A blockchain-grade seal of authenticity — scan to verify, impossible to forge.",
+    image: "/images/qron/aegis.png",
     gradient: "from-amber-400 via-amber-600 to-stone-800",
     tags: ["Brand", "Shield", "Gold"],
     icon: Shield,
@@ -76,9 +77,98 @@ const galleryItems = [
     style: "Botanical Fusion",
     description:
       "Flowers and foliage grow through a living QR code, petals replacing rigid squares. Organic yet perfectly scannable — proof that nature and data can coexist.",
+    image: "/images/qron/bloom.png",
     gradient: "from-green-500 via-lime-400 to-emerald-700",
     tags: ["Botanical", "Organic", "AI-Generated"],
     icon: Sparkles,
+  },
+  {
+    id: "velocity",
+    title: "Velocity",
+    style: "Automotive Lightning",
+    description:
+      "A supercar tears through a QR-encoded storm of purple lightning. Speed and data collide — scan the code to verify the vehicle's provenance chain.",
+    image: "/images/qron/velocity.png",
+    gradient: "from-blue-600 via-purple-500 to-indigo-900",
+    tags: ["Automotive", "Lightning", "Dynamic"],
+    icon: Car,
+  },
+  {
+    id: "canopy",
+    title: "Canopy",
+    style: "Cannabis Botanical",
+    description:
+      "Lush cannabis trichomes emerge from QR data modules in a macro-lens fusion. Every leaf is a verifiable pixel — seed-to-sale traceability meets living art.",
+    image: "/images/qron/canopy.png",
+    gradient: "from-green-400 via-emerald-500 to-green-800",
+    tags: ["Cannabis", "Botanical", "Traceability"],
+    icon: Leaf,
+  },
+  {
+    id: "palazzo",
+    title: "Palazzo",
+    style: "Luxury Marble & Gold",
+    description:
+      "Black marble and gold leaf form a QR mosaic fit for a Renaissance palace. Art deco elegance meets blockchain authentication — luxury brands, verified.",
+    image: "/images/qron/palazzo.png",
+    gradient: "from-amber-300 via-stone-800 to-amber-500",
+    tags: ["Luxury", "Gold", "Marble"],
+    icon: Globe,
+  },
+  {
+    id: "roast",
+    title: "Roast",
+    style: "Coffee Origin Art",
+    description:
+      "Coffee beans scatter across a tilt-shift QR code, each module a roasted pixel. Scan to trace origin, altitude, and roast profile — farm-to-cup verified.",
+    image: "/images/qron/roast.png",
+    gradient: "from-amber-800 via-stone-600 to-amber-900",
+    tags: ["Food", "Coffee", "Origin Trace"],
+    icon: Coffee,
+  },
+  {
+    id: "arena",
+    title: "Arena",
+    style: "Sports Action",
+    description:
+      "Athletes burst through a QR-encoded field, every pixel a data module in motion. Scan to verify ticket authenticity, merchandise provenance, or memorabilia.",
+    image: "/images/qron/arena.png",
+    gradient: "from-pink-500 via-blue-600 to-yellow-400",
+    tags: ["Sports", "Action", "Tickets"],
+    icon: Trophy,
+  },
+  {
+    id: "launchpad",
+    title: "Launchpad",
+    style: "Aerospace Poster",
+    description:
+      "A rocket lifts off through a QR-encoded sky, data modules forming clouds and exhaust plumes. Scan to authenticate aerospace-grade components and mission logs.",
+    image: "/images/qron/launchpad.png",
+    gradient: "from-orange-400 via-teal-500 to-sky-600",
+    tags: ["Aerospace", "Retro", "Mission"],
+    icon: Rocket,
+  },
+  {
+    id: "nexus",
+    title: "Nexus",
+    style: "Cyberpunk Circuit",
+    description:
+      "Neon pink and cyan circuit boards form a glowing QR matrix. Every connection is a data pathway — scan to authenticate electronics and trace component origins.",
+    image: "/images/qron/nexus.png",
+    gradient: "from-purple-600 via-cyan-400 to-pink-500",
+    tags: ["Electronics", "Cyberpunk", "Neon"],
+    icon: Cpu,
+  },
+  {
+    id: "couture",
+    title: "Couture",
+    style: "Art Deco Fashion",
+    description:
+      "An art deco figure draped in gold and black QR patterns. Fashion meets cryptographic verification — scan the garment code to prove authenticity and provenance.",
+    image: "/images/qron/couture.png",
+    gradient: "from-amber-400 via-stone-900 to-amber-600",
+    tags: ["Fashion", "Art Deco", "Luxury"],
+    icon: Palette,
   },
 ]
 
