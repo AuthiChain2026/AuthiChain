@@ -2,170 +2,61 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-const CF_WORKER = process.env.CF_WORKER_URL || 'https://authichain-unified.undone-k.workers.dev'
+// authichain-api: the RapidAPI gateway worker (v2.4)
+const CF_API = process.env.CF_API_URL || 'https://authichain-api.undone-k.workers.dev'
 
-const CORS_HEADERS = {
+const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, X-RapidAPI-Key, X-RapidAPI-Host, Authorization',
 }
 
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS })
+  return new NextResponse(null, { status: 204, headers: CORS })
 }
 
-/**
- * Public Verification API — designed for RapidAPI marketplace listing.
- *
- * GET  /api/v1/verify?id={productId}
- * POST /api/v1/verify  { "productId": "...", "nfcHash": "..." }
- *
- * Returns verification status, product metadata, blockchain proof,
- * and authenticity confidence score.
- *
- * Rate limited by API key (X-RapidAPI-Key or Authorization Bearer).
- * Free tier: 100 calls/month. Paid: $0.05/call.
- */
 export async function GET(req: NextRequest) {
-  const productId = req.nextUrl.searchParams.get('id') || req.nextUrl.searchParams.get('productId')
-  if (!productId) {
+  const serial = req.nextUrl.searchParams.get('id') || req.nextUrl.searchParams.get('productId') || req.nextUrl.searchParams.get('serial')
+  if (!serial) {
     return NextResponse.json(
-      { error: 'Missing required parameter: id or productId', usage: 'GET /api/v1/verify?id={productId}' },
-      { status: 400, headers: CORS_HEADERS }
+      { error: 'Missing required parameter: id or serial', usage: 'GET /api/v1/verify?id={serial}' },
+      { status: 400, headers: CORS }
     )
   }
-  return verifyProduct(productId)
+  return proxyVerify(serial, req.headers.get('X-RapidAPI-Key') || '')
 }
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}))
-  const productId = body.productId || body.id
-  if (!productId) {
+  const serial = body.serial || body.productId || body.id
+  if (!serial) {
     return NextResponse.json(
-      { error: 'Missing required field: productId', usage: 'POST { "productId": "..." }' },
-      { status: 400, headers: CORS_HEADERS }
+      { error: 'Missing required field: serial or productId', usage: 'POST { "serial": "..." }' },
+      { status: 400, headers: CORS }
     )
   }
-  return verifyProduct(productId, body.nfcHash)
+  return proxyVerify(serial, req.headers.get('X-RapidAPI-Key') || '', body)
 }
 
-async function verifyProduct(productId: string, nfcHash?: string) {
+async function proxyVerify(serial: string, apiKey: string, extra: Record<string, unknown> = {}) {
   try {
-    // Query the Cloudflare Worker verification endpoint
-    const verifyUrl = `${CF_WORKER}/api/verify`
-    const res = await fetch(verifyUrl, {
+    const res = await fetch(`${CF_API}/api/v1/verify`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId, nfcHash }),
+      headers: {
+        'Content-Type': 'application/json',
+        ...(apiKey ? { 'X-RapidAPI-Key': apiKey } : {}),
+      },
+      body: JSON.stringify({ serial, product: extra.product || serial, ...extra }),
+      signal: AbortSignal.timeout(10000),
     })
 
-    if (!res.ok) {
-      // Try direct Supabase lookup as fallback
-      return await fallbackVerify(productId)
-    }
-
     const data = await res.json()
-
-    return NextResponse.json({
-      verified: data.verified ?? false,
-      productId,
-      product: {
-        name: data.product?.name || data.name || null,
-        brand: data.product?.brand || data.brand || null,
-        category: data.product?.category || data.category || null,
-        registeredAt: data.product?.created_at || data.registered_at || null,
-      },
-      blockchain: {
-        chain: 'Base (Ethereum L2)',
-        txHash: data.txHash || data.tx_hash || null,
-        tokenId: data.tokenId || data.token_id || null,
-        contractAddress: data.contractAddress || '0x...',
-        verified: !!(data.txHash || data.tx_hash),
-      },
-      confidence: data.confidence ?? (data.verified ? 0.95 : 0.0),
-      scanCount: data.scanCount || data.scan_count || 0,
-      timestamp: new Date().toISOString(),
-      _links: {
-        verify_page: `https://authichain.com/verify?id=${productId}`,
-        api_docs: 'https://authichain.com/api/v1/verify',
-      },
-    }, { status: 200, headers: CORS_HEADERS })
+    return NextResponse.json(data, { status: res.status, headers: CORS })
   } catch (err) {
     console.error('[v1/verify] Error:', err)
     return NextResponse.json(
       { error: 'Verification service temporarily unavailable' },
-      { status: 503, headers: CORS_HEADERS }
+      { status: 503, headers: CORS }
     )
   }
-}
-
-async function fallbackVerify(productId: string) {
-  // Attempt direct Supabase query if CF worker is down
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.json({
-      verified: false,
-      productId,
-      error: 'Product not found',
-      timestamp: new Date().toISOString(),
-    }, { status: 404, headers: CORS_HEADERS })
-  }
-
-  const res = await fetch(
-    `${supabaseUrl}/rest/v1/products?id=eq.${encodeURIComponent(productId)}&select=id,name,brand,category,is_registered,created_at,tx_hash,token_id,scan_count`,
-    {
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-      },
-    }
-  )
-
-  if (!res.ok) {
-    return NextResponse.json({
-      verified: false,
-      productId,
-      error: 'Product not found',
-      timestamp: new Date().toISOString(),
-    }, { status: 404, headers: CORS_HEADERS })
-  }
-
-  const rows = await res.json()
-  const product = rows?.[0]
-
-  if (!product) {
-    return NextResponse.json({
-      verified: false,
-      productId,
-      error: 'Product not found in AuthiChain registry',
-      timestamp: new Date().toISOString(),
-    }, { status: 404, headers: CORS_HEADERS })
-  }
-
-  return NextResponse.json({
-    verified: !!product.is_registered,
-    productId,
-    product: {
-      name: product.name,
-      brand: product.brand,
-      category: product.category,
-      registeredAt: product.created_at,
-    },
-    blockchain: {
-      chain: 'Base (Ethereum L2)',
-      txHash: product.tx_hash || null,
-      tokenId: product.token_id || null,
-      contractAddress: '0x...',
-      verified: !!product.tx_hash,
-    },
-    confidence: product.is_registered ? 0.95 : 0.0,
-    scanCount: product.scan_count || 0,
-    timestamp: new Date().toISOString(),
-    _links: {
-      verify_page: `https://authichain.com/verify?id=${productId}`,
-      api_docs: 'https://authichain.com/api/verify/public',
-    },
-  }, { status: 200, headers: CORS_HEADERS })
 }
