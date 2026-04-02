@@ -6,9 +6,11 @@ on:
       network:
         description: "Target network"
         required: true
-        default: "vechain_test"
+        default: "polygon_amoy"
         type: choice
         options:
+          - polygon_amoy
+          - polygon
           - vechain_test
           - vechain_main
       grant_minter:
@@ -34,15 +36,16 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Compile contracts
-        run: npm run contract:compile
+        run: npx hardhat compile
 
       - name: Deploy contract
         env:
           DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           MINTER_ADDRESS: ${{ secrets.MINTER_ADDRESS }}
         run: |
-          if [ "${{ github.event.inputs.network }}" = "vechain_main" ]; then
-            npm run contract:deploy:mainnet
-          else
-            npm run contract:deploy:testnet
-          fi
+          NETWORK="${{ github.event.inputs.network }}"
+          echo "Deploying to network: $NETWORK"
+          npx hardhat run scripts/nft/deploy.ts --network $NETWORK
+
+      - name: Summary
+        run: echo "Deployment complete. Check logs above for contract address."
