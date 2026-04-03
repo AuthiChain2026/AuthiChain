@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     description: "Stop counterfeits with AI + blockchain. Trusted by enterprise brands.",
   },
   robots: {
+  verification: { google: 'cu9x2r43csh8lpqxm5YsxTvNAI2EVqkXIq65RYrj0vk' },
     index: true,
     follow: true,
     googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 },
