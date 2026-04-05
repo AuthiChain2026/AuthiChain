@@ -10,11 +10,10 @@ function requireEnv(name: string): string {
   return value;
 }
 
-const webhookSecret = requireEnv('STRIPE_WEBHOOK_SECRET');
-const AIRTABLE_API_KEY = requireEnv('AIRTABLE_API_KEY');
-const AIRTABLE_BASE_ID = requireEnv('AIRTABLE_BASE_ID');
-
-// Lazy Stripe client initialization
+// Lazy accessors — env vars are validated at runtime, not during next build
+const getWebhookSecret = () => requireEnv('STRIPE_WEBHOOK_SECRET');
+const getAirtableApiKey = () => requireEnv('AIRTABLE_API_KEY');
+const getAirtableBaseId = () => requireEnv('AIRTABLE_BASE_ID');
 const getStripe = () => new Stripe(requireEnv('STRIPE_SECRET_KEY'));
 
 // ─── Airtable helpers ────────────────────────────────────────────────────────
@@ -30,11 +29,11 @@ async function airtableRequest(
   body?: object,
   params?: string
 ) {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(table)}${params || ''}`;
+  const url = `https://api.airtable.com/v0/${getAirtableBaseId()}/${encodeURIComponent(table)}${params || ''}`;
   const res = await fetch(url, {
     method,
     headers: {
-      Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+      Authorization: `Bearer ${getAirtableApiKey()}`,
       'Content-Type': 'application/json',
     },
     body: body ? JSON.stringify(body) : undefined,
@@ -537,7 +536,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    event = stripe.webhooks.constructEvent(body, signature, getWebhookSecret());
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
