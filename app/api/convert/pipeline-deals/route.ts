@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
   }
 
-  const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' })
+  const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' as any })
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://authichain.com'
   const enterprisePriceId = process.env.STRIPE_ENTERPRISE_PRICE_ID
 

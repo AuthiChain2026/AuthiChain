@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       size,
     })
 
-    const imageData = response.data[0]
+    const imageData = response.data![0]
     return NextResponse.json({
       url: imageData.url ?? null,
       b64_json: imageData.b64_json ?? null,

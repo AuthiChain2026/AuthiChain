@@ -25,11 +25,17 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
   const [upgradeDismissed, setUpgradeDismissed] = useState(false)
   const [subscription, setSubscription] = useState<any>(null)
+  const [brand, setBrand] = useState<any>(null)
+  const [feeFlowSummary, setFeeFlowSummary] = useState<any>(null)
+  const [referral, setReferral] = useState<any>(null)
+  const [referralCopied, setReferralCopied] = useState(false)
 
   useEffect(() => {
     checkUser()
     fetchProducts()
     fetchSubscription()
+    fetchBrand()
+    fetchReferral()
   }, [])
 
   const fetchSubscription = async () => {
@@ -37,6 +43,53 @@ export default function DashboardPage() {
       const res = await fetch("/api/subscription")
       if (res.ok) setSubscription(await res.json())
     } catch {}
+  }
+
+  const fetchBrand = async () => {
+    try {
+      const res = await fetch("/api/brands/me")
+      if (res.ok) {
+        const data = await res.json()
+        setBrand(data.brand ?? null)
+        if (data.brand) {
+          const feeRes = await fetch("/api/brands/fee-flows?limit=0")
+          if (feeRes.ok) {
+            const feeData = await feeRes.json()
+            setFeeFlowSummary(feeData.summary ?? null)
+          }
+        }
+      }
+    } catch {}
+  }
+
+  const fetchReferral = async () => {
+    try {
+      const res = await fetch("/api/referral")
+      if (res.ok) setReferral(await res.json())
+    } catch {}
+  }
+
+  const handleStakeQron = async (tier: string) => {
+    try {
+      const res = await fetch("/api/checkout/qron-stake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      else toast({ title: "Error", description: data.error ?? "Could not start staking checkout.", variant: "destructive" })
+    } catch {
+      toast({ title: "Error", description: "Could not start staking checkout.", variant: "destructive" })
+    }
+  }
+
+  const handleCopyReferral = () => {
+    if (referral?.referral_url) {
+      navigator.clipboard.writeText(referral.referral_url)
+      setReferralCopied(true)
+      setTimeout(() => setReferralCopied(false), 2000)
+    }
   }
 
   const handleManageBilling = async () => {

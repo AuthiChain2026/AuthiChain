@@ -14,7 +14,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { productResponseSchema, registerProductResponseSchema, type Product } from "@/lib/contracts/products"
 import { MintNFTButton } from "@/components/MintNFTButton"
 
-export default function ProductDetailPage({ params }) {
+export default function ProductDetailPage({ params }: { params: any }) {
   const router = useRouter()
   const { toast } = useToast()
   const [supabase] = useState(() => createClient())
@@ -114,7 +114,7 @@ export default function ProductDetailPage({ params }) {
     }, 200)
   }
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     toast({
       title: "Copied!",

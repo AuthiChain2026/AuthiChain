@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/service';
-import { planFromPriceId, PLAN_LIMITS } from '@/lib/subscription';
+import { planFromPriceId, PLAN_LIMITS, type Plan } from '@/lib/subscription';
 export const dynamic = 'force-dynamic';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -315,7 +315,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     // Sync to Supabase subscriptions table
     if (userId) {
       const supabase = createServiceClient();
-      const planKey = plan.toLowerCase() as any;
+      const planKey = plan.toLowerCase() as Plan;
       const productLimit = PLAN_LIMITS[planKey]?.productLimit ?? PLAN_LIMITS.starter.productLimit;
       const subStatus = subscription.status === 'trialing' ? 'trialing' : 'active';
       await supabase.from('subscriptions').upsert(

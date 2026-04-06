@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
   }
 
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
   }
 
   const bundle = QRON_STAKE_BUNDLES[tier]
-  const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' })
+  const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' as any })
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://authichain.com'
 
   const session = await stripe.checkout.sessions.create({

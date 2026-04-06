@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   }
 
   const stripe = new Stripe(stripeKey, {
-    apiVersion: '2024-06-20',
+    apiVersion: '2024-06-20' as any,
   })
 
   try {

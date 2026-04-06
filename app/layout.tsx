@@ -44,8 +44,8 @@ export const metadata: Metadata = {
       { rel: "icon", type: "image/png", sizes: "512x512", url: "/icon-512.png" },
     ],
   },
-  robots: {
   verification: { google: 'cu9x2r43csh8lpqxm5YsxTvNAI2EVqkXIq65RYrj0vk' },
+  robots: {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 },

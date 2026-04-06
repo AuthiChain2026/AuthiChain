@@ -192,7 +192,7 @@ const MICHIGAN_TARGETS = [
   },
 ]
 
-const TIER_COLORS = {
+const TIER_COLORS: Record<string, string> = {
   hot: 'bg-red-500/20 text-red-400 border-red-500/30',
   warm: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
   cold: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
