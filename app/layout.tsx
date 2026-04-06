@@ -44,8 +44,8 @@ export const metadata: Metadata = {
       { rel: "icon", type: "image/png", sizes: "512x512", url: "/icon-512.png" },
     ],
   },
-  robots: {
   verification: { google: 'cu9x2r43csh8lpqxm5YsxTvNAI2EVqkXIq65RYrj0vk' },
+  robots: {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 },
@@ -94,9 +94,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthiChainThirdwebProvider>
-            <nav class="w-full px-6 py-4 border-b border-neutral-800 flex gap-6">
-          <a href="/" class="hover:opacity-80">Home</a>
-          <a href="/storymode" class="hover:opacity-80">Storymode</a>
+            <nav className="w-full px-6 py-4 border-b border-neutral-800 flex gap-6">
+          <a href="/" className="hover:opacity-80">Home</a>
+          <a href="/storymode" className="hover:opacity-80">Storymode</a>
         </nav>
         {children}
             <Toaster />

@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-export default function RouteLayout({ children }) {
+export default function RouteLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
