@@ -10,6 +10,9 @@ concurrency:
   group: vercel-deploy-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   build-and-deploy:
     name: Build & Deploy to Vercel
@@ -21,10 +24,8 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-
       - name: Install dependencies
         run: npm ci
-
       - name: Build
         run: npm run build
         env:
@@ -32,7 +33,6 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
-
       - name: Inject env vars + Deploy to Vercel
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         env:
