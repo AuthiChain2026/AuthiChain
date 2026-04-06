@@ -6,7 +6,7 @@
 export const NFT_CONTRACT_ADDRESS =
   process.env.AUTHICHAIN_NFT_CONTRACT_ADDRESS ||
   process.env.CONTRACT_ADDRESS ||
-  '0x4da4D2675e52374639C9c954f4f653887A9972BE'
+  '0xc3143254997d48fdc9983d618fb2e10067673eb5'
 
 export const NFT_CHAIN_ID = Number(process.env.NFT_CHAIN_ID || 137) // Polygon mainnet
 
