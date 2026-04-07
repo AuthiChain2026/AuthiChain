@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft, Shield, CheckCircle, Loader2, Copy, ExternalLink, Sparkles, Clock, Star } from "lucide-react"
+import { ArrowLeft, Shield, CheckCircle, Loader2, Copy, ExternalLink, Sparkles, Clock, Star, Film, MapPin } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { productResponseSchema, registerProductResponseSchema, type Product } from "@/lib/contracts/products"
 import { MintNFTButton } from "@/components/MintNFTButton"
@@ -24,6 +24,8 @@ export default function ProductDetailPage({ params }: { params: any }) {
   const [registering, setRegistering] = useState(false)
   const [scanProgress, setScanProgress] = useState(0)
   const [scanning, setScanning] = useState(false)
+  const [supplyChainEvents, setSupplyChainEvents] = useState<any[]>([])
+  const [generatingStory, setGeneratingStory] = useState(false)
 
   useEffect(() => {
     fetchProduct()
@@ -51,6 +53,14 @@ export default function ProductDetailPage({ params }: { params: any }) {
 
       const data = productResponseSchema.parse(await response.json())
       setProduct(data.product)
+
+      // Fetch supply chain events
+      const { data: events } = await supabase
+        .from('supply_chain_events')
+        .select('event_type, location, actor_name, description, timestamp, verified')
+        .eq('product_id', params.id)
+        .order('timestamp', { ascending: true })
+      if (events) setSupplyChainEvents(events)
     } catch (error) {
       console.error("Fetch error:", error)
       toast({
@@ -422,7 +432,7 @@ export default function ProductDetailPage({ params }: { params: any }) {
                     Certificate of Authenticity NFT
                   </CardTitle>
                   <CardDescription>
-                    Mint a permanent on-chain certificate to your wallet via VeChain
+                    Mint a permanent on-chain certificate to your wallet on Polygon
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -431,6 +441,78 @@ export default function ProductDetailPage({ params }: { params: any }) {
                     productName={product.name}
                     truemarkId={product.truemark_id ?? undefined}
                   />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* StoryMode — Cinematic Origin Video */}
+            {product.is_registered && (
+              <Card className="border-purple-500/30 bg-gradient-to-br from-background to-purple-500/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Film className="h-5 w-5 text-purple-500" />
+                    Cinematic Origin Story
+                  </CardTitle>
+                  <CardDescription>
+                    Generate an AI-narrated video tracing this product's journey
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button
+                    variant="outline"
+                    className="w-full border-purple-500/30 hover:bg-purple-500/10"
+                    onClick={() => window.open(`/storymode/viewer?product_id=${product.id}`, '_blank')}
+                  >
+                    <Film className="mr-2 h-4 w-4" />
+                    Open StoryMode Viewer
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Supply Chain Timeline */}
+            {supplyChainEvents.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Supply Chain Journey
+                  </CardTitle>
+                  <CardDescription>
+                    {supplyChainEvents.length} verified events tracked on-chain
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="relative space-y-0">
+                    {supplyChainEvents.map((event, index) => (
+                      <div key={index} className="flex gap-4 pb-6 last:pb-0">
+                        <div className="flex flex-col items-center">
+                          <div className={`w-3 h-3 rounded-full ${event.verified ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                          {index < supplyChainEvents.length - 1 && (
+                            <div className="w-px flex-1 bg-border mt-1" />
+                          )}
+                        </div>
+                        <div className="flex-1 -mt-0.5">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold capitalize">
+                              {event.event_type?.replace(/_/g, ' ')}
+                            </span>
+                            {event.verified && (
+                              <CheckCircle className="h-3 w-3 text-green-500" />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{event.description}</p>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                            {event.location && <span>{event.location}</span>}
+                            {event.actor_name && <span>by {event.actor_name}</span>}
+                            {event.timestamp && (
+                              <span>{new Date(event.timestamp).toLocaleDateString()}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}

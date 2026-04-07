@@ -45,9 +45,9 @@ export async function POST(req: NextRequest) {
   // Fetch supply chain events if available
   const { data: events } = await service
     .from('supply_chain_events')
-    .select('stage, location, event_date')
+    .select('event_type, location, actor_name, description, timestamp')
     .eq('product_id', productId)
-    .order('event_date', { ascending: true })
+    .order('timestamp', { ascending: true })
 
   // Build product context for script generation
   const ctx: ProductContext = {
@@ -58,9 +58,9 @@ export async function POST(req: NextRequest) {
     blockchainTxHash: product.blockchain_tx_hash ?? undefined,
     harvestDate: product.created_at,
     supplyChainEvents: events?.map(e => ({
-      stage: e.stage,
+      stage: e.event_type,
       location: e.location ?? 'Verified Location',
-      date: e.event_date ?? '',
+      date: e.timestamp ?? '',
     })),
   }
 
