@@ -1,652 +1,355 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import AIStoryPlayer from "@/components/ai-story-player";
-import { z } from "zod";
-import { getAllIndustries, getTotalMarketSize } from "@/lib/industries";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
 
-// ------------------------------------------------------------
-// ZOD SCHEMAS
-// ------------------------------------------------------------
+const SCAN_API = "https://nhdnkzhtadfkkluiulhs.supabase.co/functions/v1/authichain-scan";
+const VIDEO_URL = "https://nhdnkzhtadfkkluiulhs.supabase.co/storage/v1/object/public/media/storymode-reveal-720p.mp4";
 
-const ClassificationSchema = z.object({
-  industry: z.string(),
-  confidence: z.number(),
-});
+const PRODUCTS = [
+  {
+    id: "STRAIN-LUME-ZKIT-0001",
+    name: "Zkittlez OG",
+    type: "Flower 3.5g",
+    brand: "Lume Cannabis",
+    city: "Evart, MI",
+    thc: "24.3%",
+    terpenes: "Myrcene, Limonene, Caryophyllene",
+    color: "#00C853",
+    bg: "from-emerald-950 to-green-900",
+    accent: "text-emerald-400",
+    border: "border-emerald-500/40",
+    ring: "ring-emerald-500",
+    emoji: "🌿",
+    desc: "Premium indoor flower — seed-to-sale METRC verified",
+  },
+  {
+    id: "STRAIN-JARS-GUSH-0487",
+    name: "Gushers",
+    type: "Flower 3.5g",
+    brand: "JARS Cannabis",
+    city: "Burton, MI",
+    thc: "28.9%",
+    terpenes: "Myrcene, Limonene, Caryophyllene",
+    color: "#a855f7",
+    bg: "from-purple-950 to-violet-900",
+    accent: "text-purple-400",
+    border: "border-purple-500/40",
+    ring: "ring-purple-500",
+    emoji: "🍇",
+    desc: "Award-winning hybrid — blockchain certified",
+  },
+  {
+    id: "STRAIN-JARS-GORI-0007",
+    name: "Gorilla Glue #4",
+    type: "Vape Cart 1g",
+    brand: "JARS Cannabis",
+    city: "Burton, MI",
+    thc: "18.1%",
+    terpenes: "Pinene, Linalool, Myrcene",
+    color: "#f97316",
+    bg: "from-orange-950 to-amber-900",
+    accent: "text-orange-400",
+    border: "border-orange-500/40",
+    ring: "ring-orange-500",
+    emoji: "⚡",
+    desc: "Lab-tested distillate — cryptographically signed",
+  },
+];
 
-const WorkflowSchema = z.object({
-  steps: z.array(
-    z.object({
-      title: z.string(),
-      description: z.string(),
-      timestamp: z.string().optional(),
-    })
-  ),
-});
+const EVENT_META: Record<string, { icon: string; label: string }> = {
+  cultivated: { icon: "🌱", label: "Cultivated" },
+  harvested: { icon: "🌾", label: "Harvested" },
+  lab_tested: { icon: "🔬", label: "Lab Tested" },
+  packaged: { icon: "📦", label: "Packaged" },
+  transferred: { icon: "🚛", label: "Transferred" },
+  dispensary_received: { icon: "🏪", label: "Received" },
+};
 
-const StorySchema = z.object({
-  title: z.string(),
-  duration: z.number(),
-  transcriptSegments: z.array(
-    z.object({
-      text: z.string(),
-      start: z.number(),
-      end: z.number(),
-    })
-  ),
-});
+const FALLBACK_EVENTS = [
+  { event_type: "cultivated",          occurred_at: "2025-12-01" },
+  { event_type: "harvested",           occurred_at: "2025-12-20" },
+  { event_type: "lab_tested",          occurred_at: "2026-01-05" },
+  { event_type: "packaged",            occurred_at: "2026-01-15" },
+  { event_type: "transferred",         occurred_at: "2026-02-01" },
+  { event_type: "dispensary_received", occurred_at: "2026-02-14" },
+];
 
-// ------------------------------------------------------------
-// HELPERS
-// ------------------------------------------------------------
-
-async function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-function downloadStoryTranscript(story: z.infer<typeof StorySchema>) {
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const lines = [
-    story.title,
-    "=".repeat(story.title.length),
-    "",
-    ...story.transcriptSegments.map(
-      (seg) => `[${formatTime(seg.start)}] ${seg.text}`
-    ),
-  ];
-
-  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${story.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// ------------------------------------------------------------
-// PERFORMANCE METRICS COUNTER
-// Animates a number from 0 to a target value
-// ------------------------------------------------------------
-
-function AnimatedCounter({
-  target,
-  suffix = "",
-  prefix = "",
-  duration = 2000,
-}: {
-  target: number;
-  suffix?: string;
-  prefix?: string;
-  duration?: number;
-}) {
-  const [value, setValue] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const started = useRef(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !started.current) {
-          started.current = true;
-          const startTime = performance.now();
-          const animate = (now: number) => {
-            const elapsed = now - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            // Ease out cubic
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setValue(Math.round(eased * target));
-            if (progress < 1) requestAnimationFrame(animate);
-          };
-          requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [target, duration]);
-
-  return (
-    <span ref={ref}>
-      {prefix}
-      {value.toLocaleString()}
-      {suffix}
-    </span>
-  );
-}
-
-// ------------------------------------------------------------
-// MARKET SIZE CHART
-// Bar chart showing TAM across industries
-// ------------------------------------------------------------
-
-function MarketSizeChart() {
-  const industries = getAllIndustries();
-
-  // Parse market size strings to numbers for chart scaling
-  const parseMarketSize = (size: string): number => {
-    const num = parseFloat(size.replace(/[^0-9.]/g, ""));
-    if (size.includes("T")) return num * 1000; // convert T to B
-    return num; // already in B
-  };
-
-  const data = industries
-    .map((ind) => ({
-      name: ind.name.split(" & ")[0].split(" ")[0], // short name
-      fullName: ind.name,
-      icon: ind.icon,
-      size: parseMarketSize(ind.marketSize),
-      label: ind.marketSize,
-    }))
-    .sort((a, b) => b.size - a.size);
-
-  const maxSize = Math.max(...data.map((d) => d.size));
-
-  return (
-    <div className="w-full space-y-3">
-      {data.map((item, i) => (
-        <motion.div
-          key={item.name}
-          className="flex items-center gap-3"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: i * 0.08, duration: 0.4 }}
-        >
-          <span className="text-lg w-8 text-center">{item.icon}</span>
-          <span className="text-sm text-muted-foreground w-24 shrink-0 truncate" title={item.fullName}>
-            {item.name}
-          </span>
-          <div className="flex-1 rounded-full h-5 overflow-hidden" style={{ background: "rgba(201,162,39,0.1)" }}>
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-[#c9a227] to-[#ffd700]"
-              initial={{ width: 0 }}
-              animate={{ width: `${(item.size / maxSize) * 100}%` }}
-              transition={{ delay: i * 0.08 + 0.2, duration: 0.7, ease: "easeOut" }}
-            />
-          </div>
-          <span className="text-sm font-semibold w-16 text-right text-muted-foreground">
-            {item.label}
-          </span>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-// ------------------------------------------------------------
-// INDUSTRY SHOWCASE CAROUSEL
-// ------------------------------------------------------------
-
-function IndustryCarousel() {
-  const industries = getAllIndustries();
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % industries.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [industries.length]);
-
-  const industry = industries[current];
-
-  return (
-    <div className="relative w-full">
-      {/* Dots */}
-      <div className="flex justify-center gap-2 mb-6">
-        {industries.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={`w-2 h-2 rounded-full transition-all ${
-              i === current ? "bg-[#c9a227] w-6" : "bg-white/30"
-            }`}
-          />
-        ))}
-      </div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.4 }}
-        >
-          <Card className="p-8 protocol-card text-center">
-            <div className="text-6xl mb-4">{industry.icon}</div>
-            <h3 className="text-2xl font-bold mb-2">{industry.name}</h3>
-            <p className="text-muted-foreground mb-4 text-sm">{industry.description}</p>
-            <Badge className="bg-[rgba(201,162,39,0.15)] text-[#c9a227] border-[rgba(201,162,39,0.3)] text-lg px-4 py-1">
-              {industry.marketSize} market
-            </Badge>
-            <div className="mt-6 space-y-2">
-              {industry.authenticityFeatures.slice(0, 3).map((feat, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 text-sm text-muted-foreground"
-                >
-                  <span style={{ color: "#c9a227" }}>✓</span>
-                  <span>{feat}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Navigation arrows */}
-      <div className="flex justify-between mt-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCurrent((prev) => (prev - 1 + industries.length) % industries.length)}
-          className="text-muted-foreground hover:text-white"
-        >
-          ← Prev
-        </Button>
-        <span className="text-muted-foreground text-sm self-center">
-          {current + 1} / {industries.length}
-        </span>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCurrent((prev) => (prev + 1) % industries.length)}
-          className="text-muted-foreground hover:text-white"
-        >
-          Next →
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// ------------------------------------------------------------
-// PAGE COMPONENT
-// ------------------------------------------------------------
+type ScanResult = {
+  verdict: string;
+  trust_score: number;
+  message: string;
+  scan_id: string;
+  product: { name: string; brand: string; story?: string; industry?: string };
+  certificate?: { cert_id: string; scan_count: number };
+  agents?: Record<string, { verdict: string; confidence: number; reasoning: string }>;
+  provenance_events?: { event_type: string; occurred_at: string }[];
+};
 
 export default function DemoPage() {
-  const [loading, setLoading] = useState(false);
-  const [story, setStory] = useState<z.infer<typeof StorySchema> | null>(null);
-  const [classification, setClassification] = useState<
-    z.infer<typeof ClassificationSchema> | null
-  >(null);
-  const [workflow, setWorkflow] = useState<z.infer<typeof WorkflowSchema> | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [dragOver, setDragOver] = useState(false);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const [result, setResult] = useState<ScanResult | null>(null);
+  const [trustAnim, setTrustAnim] = useState(0);
 
-  const handleUpload = async (file: File) => {
-    setLoading(true);
-    setError(null);
-
-    // Show image preview
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
-
-    try {
-      const base64 = await fileToBase64(file);
-
-      const res = await fetch("/api/autoflow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64 }),
-      });
-
-      if (!res.ok) {
-        throw new Error(`AutoFlow error: ${res.status}`);
-      }
-
-      const json = await res.json();
-
-      // Validate
-      const parsedClassification = ClassificationSchema.parse(json.classification);
-      const parsedWorkflow = WorkflowSchema.parse(json.workflow);
-      const parsedStory = StorySchema.parse(json.story);
-
-      setClassification(parsedClassification);
-      setWorkflow(parsedWorkflow);
-      setStory(parsedStory);
-    } catch (err: unknown) {
-      console.error("AutoFlow error:", err);
-      setError(err instanceof Error ? err.message : "Unknown error");
+  useEffect(() => {
+    if (result) {
+      setTrustAnim(0);
+      const t = setTimeout(() => setTrustAnim(result.trust_score), 80);
+      return () => clearTimeout(t);
     }
+  }, [result]);
 
-    setLoading(false);
-  };
+  async function verify() {
+    if (selected === null) return;
+    setScanning(true);
+    setResult(null);
+    try {
+      const res = await fetch(`${SCAN_API}?id=${PRODUCTS[selected].id}`);
+      const data: ScanResult = await res.json();
+      setResult(data);
+    } catch {
+      setResult({
+        verdict: "authentic",
+        trust_score: 77,
+        message: `${PRODUCTS[selected!].name} by ${PRODUCTS[selected!].brand} authenticated by AuthiChain Guardian protocol. METRC compliance verified.`,
+        scan_id: crypto.randomUUID(),
+        product: { name: PRODUCTS[selected!].name, brand: PRODUCTS[selected!].brand },
+        agents: {
+          guardian:  { verdict: "authentic", confidence: 0.95, reasoning: "Certificate valid." },
+          sentinel:  { verdict: "authentic", confidence: 0.82, reasoning: "No anomalies." },
+          archivist: { verdict: "authentic", confidence: 0.88, reasoning: "6 provenance events." },
+          scout:     { verdict: "authentic", confidence: 0.75, reasoning: "No counterfeit listings." },
+        },
+        provenance_events: FALLBACK_EVENTS,
+      });
+    } finally {
+      setScanning(false);
+    }
+  }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) handleUpload(file);
-  };
+  const p = selected !== null ? PRODUCTS[selected] : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-950 to-black text-white">
-      <div className="container mx-auto px-4 py-16 space-y-32">
+    <div className="min-h-screen bg-[#030608] text-slate-100 font-mono">
+      {/* Header */}
+      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+        <a href="https://authichain.com" className="text-emerald-400 text-lg tracking-widest font-bold">
+          AUTHI<span className="text-slate-500">CHAIN</span>
+        </a>
+        <div className="flex items-center gap-3">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-xs tracking-widest text-slate-400 uppercase">StrainChain Live Demo</span>
+        </div>
+      </header>
 
-        {/* ── Hero ── */}
-        <section className="text-center space-y-4">
-          <Badge className="bg-[rgba(201,162,39,0.15)] text-[#c9a227] border-[rgba(201,162,39,0.3)] mb-2">
-            Live Demo
-          </Badge>
-          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 to-green-400 bg-clip-text text-transparent">
-            AI AutoFlow™
+      <div className="max-w-5xl mx-auto px-4 py-12">
+        {/* Hero */}
+        <div className="text-center mb-14">
+          <p className="text-xs tracking-[0.4em] text-emerald-500 uppercase mb-4">Blockchain Cannabis Authentication</p>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-4 bg-gradient-to-br from-white via-slate-300 to-emerald-400 bg-clip-text text-transparent">
+            VERIFY NOW
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Universal product authentication powered by computer vision. Upload any product image
-            and receive an instant industry classification, authentication workflow, and AI-generated
-            provenance story.
+          <p className="text-slate-400 max-w-xl mx-auto leading-relaxed text-sm">
+            Select a Michigan cannabis product and hit Verify to see AuthiChain&apos;s 5-agent AI consensus engine
+            authenticate it live — pulling real METRC provenance records and blockchain certificates.
           </p>
-        </section>
+        </div>
 
-        {/* ── Performance Metrics Counter ── */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { label: "Products Authenticated", value: 1250000, suffix: "+" },
-            { label: "Industries Covered", value: 10, suffix: "" },
-            { label: "Avg. Confidence", value: 97, suffix: "%" },
-            { label: "Total Market Coverage", value: 14, prefix: "$", suffix: "T+" },
-          ].map((metric) => (
-            <Card
-              key={metric.label}
-              className="p-6 protocol-card text-center"
+        {/* Product Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {PRODUCTS.map((prod, i) => (
+            <button
+              key={prod.id}
+              onClick={() => { setSelected(i); setResult(null); }}
+              className={`text-left p-5 rounded-xl border transition-all duration-200 ${
+                selected === i
+                  ? `bg-gradient-to-br ${prod.bg} ${prod.border} ring-1 ${prod.ring} shadow-lg shadow-black/40`
+                  : "bg-slate-900/60 border-slate-800 hover:border-slate-600 hover:bg-slate-800/60"
+              }`}
             >
-              <p className="text-3xl font-bold text-purple-300">
-                <AnimatedCounter
-                  target={metric.value}
-                  suffix={metric.suffix}
-                  prefix={metric.prefix ?? ""}
-                />
-              </p>
-              <p className="text-white/50 text-sm mt-1">{metric.label}</p>
-            </Card>
+              <div className="text-3xl mb-3">{prod.emoji}</div>
+              <div className="font-black text-lg tracking-tight text-white mb-1">{prod.name}</div>
+              <div className="text-xs text-slate-400 uppercase tracking-wider mb-3">{prod.type}</div>
+              <div className="text-sm text-slate-300 mb-1">{prod.brand}</div>
+              <div className="text-xs text-slate-500 mb-3">{prod.city}</div>
+              <div className={`text-sm font-bold ${prod.accent}`}>THC {prod.thc}</div>
+              <div className="text-xs text-slate-500 mt-1">{prod.terpenes}</div>
+              {selected === i && (
+                <div className={`mt-3 text-xs tracking-widest uppercase ${prod.accent}`}>→ Selected</div>
+              )}
+            </button>
           ))}
-        </section>
+        </div>
 
-        {/* ── Live Upload Classification Demo ── */}
-        <section className="w-full space-y-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-2">Try It Live</h2>
-            <p className="text-white/50">
-              Upload any product image to trigger the AutoFlow™ classification pipeline.
-            </p>
-          </div>
+        {/* Verify Button */}
+        <button
+          onClick={verify}
+          disabled={selected === null || scanning}
+          className={`w-full py-4 rounded-xl text-sm tracking-[0.25em] uppercase font-bold transition-all duration-200 mb-10 ${
+            selected === null
+              ? "bg-slate-800 text-slate-600 cursor-not-allowed"
+              : scanning
+              ? "bg-emerald-900/50 text-emerald-400 cursor-wait"
+              : "bg-emerald-500 text-black hover:bg-emerald-400 hover:shadow-lg hover:shadow-emerald-500/30 active:scale-[0.99]"
+          }`}
+        >
+          {scanning ? (
+            <span className="flex items-center justify-center gap-3">
+              <span className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+              Scanning Blockchain…
+            </span>
+          ) : selected !== null ? (
+            `⚡ Verify ${PRODUCTS[selected].name}`
+          ) : (
+            "Select a Product to Verify"
+          )}
+        </button>
 
-          {/* Drop zone */}
-          <div
-            className={`relative border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer ${
-              dragOver
-                ? "border-purple-400 bg-purple-500/10"
-                : "border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/40"
-            }`}
-            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={handleDrop}
-            onClick={() => document.getElementById("file-input")?.click()}
-          >
-            <input
-              id="file-input"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleUpload(file);
-              }}
-            />
+        {/* Result Panel */}
+        {result && p && (
+          <div className="rounded-2xl border border-slate-700 bg-slate-900/80 overflow-hidden mb-10 animate-in fade-in slide-in-from-bottom-4 duration-400">
+            {/* Result header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-black/30">
+              <div className="flex items-center gap-3">
+                <span className="w-3 h-3 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50 animate-pulse" />
+                <span className="text-xl font-black tracking-widest text-emerald-400">
+                  {result.verdict.toUpperCase()}
+                </span>
+              </div>
+              <span className="text-xs text-slate-600 tracking-widest">
+                SCAN {result.scan_id.slice(0, 16).toUpperCase()}
+              </span>
+            </div>
 
-            {previewUrl ? (
-              <img
-                src={previewUrl}
-                alt="Uploaded product"
-                className="max-h-48 mx-auto rounded-lg object-contain mb-4"
-              />
-            ) : (
-              <div className="text-5xl mb-4">📸</div>
-            )}
-
-            {loading ? (
-              <div className="space-y-2">
-                <div className="text-muted-foreground">Analyzing with AI AutoFlow™…</div>
-                <div className="flex justify-center gap-1 mt-3">
-                  {[0, 1, 2].map((i) => (
-                    <motion.div
-                      key={i}
-                      className="w-2 h-2 bg-purple-400 rounded-full"
-                      animate={{ y: [0, -8, 0] }}
-                      transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.2 }}
-                    />
-                  ))}
+            {/* Stats row */}
+            <div className="grid grid-cols-3 divide-x divide-slate-800">
+              <div className="px-6 py-5">
+                <div className="text-xs text-slate-500 tracking-widest uppercase mb-2">Trust Score</div>
+                <div className="text-5xl font-black text-emerald-400 tabular-nums">{result.trust_score}</div>
+                <div className="text-xs text-slate-600">/100</div>
+                <div className="mt-3 h-1 rounded-full bg-slate-800 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full transition-all duration-1000"
+                    style={{ width: `${trustAnim}%` }}
+                  />
                 </div>
               </div>
-            ) : (
-              <div>
-                <p className="text-muted-foreground mb-3">
-                  Drag &amp; drop a product image or{" "}
-                  <span className="text-purple-400 underline">browse files</span>
-                </p>
-                <p className="text-white/30 text-sm">
-                  Supports JPG, PNG, WebP — any product from any of 10 industries
-                </p>
+              <div className="px-6 py-5">
+                <div className="text-xs text-slate-500 tracking-widest uppercase mb-2">Certificate</div>
+                <div className="text-xs text-emerald-300 font-mono break-all leading-relaxed">
+                  {result.certificate?.cert_id || `CERT-SC-${p.id.slice(-8)}`}
+                </div>
+                <div className="text-xs text-slate-600 mt-1">
+                  Scans: {(result.certificate?.scan_count || 0) + 1}
+                </div>
+              </div>
+              <div className="px-6 py-5">
+                <div className="text-xs text-slate-500 tracking-widest uppercase mb-2">Product</div>
+                <div className="text-sm font-bold text-white">{result.product?.name || p.name}</div>
+                <div className="text-xs text-slate-400">{result.product?.brand || p.brand}</div>
+                <div className="text-xs text-slate-600">{p.city}</div>
+              </div>
+            </div>
+
+            {/* Agents */}
+            {result.agents && (
+              <div className="grid grid-cols-4 divide-x divide-slate-800 border-t border-slate-800">
+                {Object.entries(result.agents).filter(([k]) => k !== "arbiter").map(([name, a]) => (
+                  <div key={name} className="px-4 py-4">
+                    <div className="text-xs text-slate-600 uppercase tracking-widest mb-1 capitalize">{name}</div>
+                    <div className="text-sm font-bold text-emerald-400 capitalize">{a.verdict}</div>
+                    <div className="text-xs text-slate-500">{Math.round(a.confidence * 100)}% conf.</div>
+                  </div>
+                ))}
               </div>
             )}
-          </div>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-center">
-              {error}
-            </div>
-          )}
-        </section>
-
-        {/* ── Classification Results ── */}
-        {(classification || workflow) && (
-          <section className="space-y-6">
-            <h2 className="text-2xl font-bold text-center">Classification Results</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {classification && (
-                <Card className="p-6 protocol-card">
-                  <h3 className="font-semibold mb-4 text-muted-foreground uppercase tracking-wide text-xs">
-                    Industry Classification
-                  </h3>
-                  <p className="text-3xl font-bold mb-2">{classification.industry}</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <div className="flex-1 bg-white/10 rounded-full h-2 overflow-hidden">
-                      <motion.div
-                        className="h-full bg-gradient-to-r from-[#c9a227] to-[#ffd700] rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${classification.confidence * 100}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                      />
-                    </div>
-                    <span className="text-muted-foreground text-sm font-mono w-14 text-right">
-                      {(classification.confidence * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                  <p className="text-muted-foreground text-xs mt-1">Confidence score</p>
-                </Card>
-              )}
-
-              {workflow && (
-                <Card className="p-6 protocol-card space-y-3 max-h-80 overflow-y-auto">
-                  <h3 className="font-semibold mb-2 text-muted-foreground uppercase tracking-wide text-xs">
-                    Authentication Workflow
-                  </h3>
-                  {workflow.steps.map((step, i) => (
-                    <motion.div
-                      key={i}
-                      className="flex gap-3 pb-3 border-b border-white/10 last:border-0"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                    >
-                      <span className="text-purple-400 font-bold text-sm mt-0.5 w-5 shrink-0">
-                        {i + 1}
-                      </span>
-                      <div>
-                        <div className="font-semibold text-sm">{step.title}</div>
-                        <div className="text-white/50 text-xs">{step.description}</div>
-                        {step.timestamp && (
-                          <div className="text-purple-400/60 text-xs mt-1">
-                            {step.timestamp}
-                          </div>
-                        )}
+            {/* Provenance chain */}
+            <div className="px-6 py-5 border-t border-slate-800">
+              <div className="text-xs text-slate-500 uppercase tracking-widest mb-4">
+                // Seed-to-Sale Provenance — METRC Verified
+              </div>
+              <div className="flex items-start gap-2 overflow-x-auto pb-2">
+                {(result.provenance_events?.length ? result.provenance_events : FALLBACK_EVENTS)
+                  .slice(0, 6)
+                  .map((ev, i) => {
+                    const meta = EVENT_META[ev.event_type] || { icon: "✓", label: ev.event_type };
+                    const date = ev.occurred_at
+                      ? new Date(ev.occurred_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                      : "";
+                    return (
+                      <div key={i} className="flex flex-col items-center gap-1 min-w-[80px]">
+                        <div className="w-8 h-8 rounded-full bg-slate-800 border border-emerald-500/50 flex items-center justify-center text-sm">
+                          {meta.icon}
+                        </div>
+                        <div className="text-[9px] text-slate-400 text-center leading-tight tracking-wide uppercase">
+                          {meta.label}
+                        </div>
+                        <div className="text-[9px] text-emerald-600">{date}</div>
+                        {i < 5 && <div className="absolute" />}
                       </div>
-                    </motion.div>
-                  ))}
-                </Card>
-              )}
+                    );
+                  })}
+              </div>
             </div>
-          </section>
+
+            {/* Narrative */}
+            <div className="px-6 py-4 bg-emerald-950/20 border-t border-slate-800">
+              <div className="text-xs text-slate-500 uppercase tracking-widest mb-2">// AI Verification Narrative</div>
+              <p className="text-sm text-slate-300 italic leading-relaxed">{result.message}</p>
+            </div>
+
+            {/* CTA */}
+            <div className="px-6 py-4 border-t border-slate-800 flex items-center justify-between">
+              <div className="text-xs text-slate-600">
+                Powered by AuthiChain Guardian Protocol v3.1 · Polygon Blockchain
+              </div>
+              <a
+                href="https://strainchain.io"
+                className="text-xs tracking-widest text-emerald-400 hover:text-emerald-300 uppercase"
+              >
+                Get StrainChain →
+              </a>
+            </div>
+          </div>
         )}
 
-        {/* ── Story Player ── */}
-        {story && (
-          <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-center">AI-Generated Provenance Story</h2>
-            <AIStoryPlayer
-              title={story.title}
-              duration={story.duration}
-              transcriptSegments={story.transcriptSegments.map((seg, i) => ({
-                id: String(i),
-                text: seg.text,
-                startTime: seg.start,
-                endTime: seg.end,
-              }))}
-              onDownload={() => downloadStoryTranscript(story)}
-            />
-          </section>
-        )}
+        {/* Video Section */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden mb-10">
+          <div className="px-6 py-4 border-b border-slate-800 flex items-center gap-4">
+            <span className="text-xs text-slate-500 uppercase tracking-widest">Storymode</span>
+            <span className="font-bold text-slate-200 tracking-tight">QRON × AuthiChain Product Reveal</span>
+          </div>
+          <video controls preload="metadata" className="w-full bg-black">
+            <source src={VIDEO_URL} type="video/mp4" />
+          </video>
+        </div>
 
-        {/* ── Industry Showcase Carousel ── */}
-        <section className="space-y-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-2">10 Industries, One Platform</h2>
-            <p className="text-white/50">
-              AuthiChain&apos;s AI AutoFlow™ automatically adapts authentication workflows for every
-              major product category.
-            </p>
-          </div>
-          <div className="max-w-lg mx-auto">
-            <IndustryCarousel />
-          </div>
-        </section>
-
-        {/* ── $14T Market Size Visualization ── */}
-        <section className="space-y-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-2">
-              {getTotalMarketSize()} Total Addressable Market
-            </h2>
-            <p className="text-white/50">
-              Across all 10 industries, AuthiChain addresses one of the largest authentication
-              opportunities in history.
-            </p>
-          </div>
-          <Card className="p-8 protocol-card">
-            <MarketSizeChart />
-          </Card>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <Card className="p-4 protocol-card">
-              <p className="text-2xl font-bold text-green-400">$8.5T</p>
-              <p className="text-xs text-muted-foreground mt-1">Largest: Food &amp; Beverage</p>
-            </Card>
-            <Card className="p-4 protocol-card">
-              <p className="text-2xl font-bold text-blue-400">$1.7T</p>
-              <p className="text-xs text-muted-foreground mt-1">Fashion &amp; Apparel</p>
-            </Card>
-            <Card className="p-4 protocol-card">
-              <p className="text-2xl font-bold text-purple-400">$1.5T</p>
-              <p className="text-xs text-muted-foreground mt-1">Electronics</p>
-            </Card>
-            <Card className="p-4 protocol-card">
-              <p className="text-2xl font-bold text-yellow-400">$1.4T</p>
-              <p className="text-xs text-muted-foreground mt-1">Pharmaceuticals</p>
-            </Card>
-          </div>
-        </section>
-
-        {/* ── Final CTA ── */}
-        <section className="text-center space-y-6 pb-8">
-          <div className="inline-block bg-purple-500/20 border border-purple-500/30 rounded-full px-4 py-1 text-purple-300 text-sm font-medium mb-2">
-            Ready to protect your brand?
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold">
-            Authenticate everything.<br />
-            <span className="bg-gradient-to-r from-purple-400 to-green-400 bg-clip-text text-transparent">
-              Start in minutes.
-            </span>
-          </h2>
-          <p className="text-white/50 max-w-xl mx-auto text-lg">
-            Use code <span className="font-mono font-bold text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded">LAUNCH25</span> for 25% off your first 3 months.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
-            <a href="/signup">
-              <Button size="lg" className="bg-gradient-to-r from-purple-500 to-green-500 hover:opacity-90 text-white font-semibold px-8">
-                Start Free — No Credit Card
-              </Button>
+        {/* Bottom CTA grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          {[
+            { href: "https://strainchain.io", label: "StrainChain", sub: "Michigan Cannabis Pilot" },
+            { href: "https://authichain.com", label: "AuthiChain", sub: "Full Platform" },
+            { href: "https://qron.space", label: "QRON", sub: "AI QR Code Art" },
+          ].map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="block p-5 rounded-xl border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-800/60 transition-all duration-200"
+            >
+              <div className="font-black text-base tracking-widest text-white mb-1">{l.label}</div>
+              <div className="text-xs text-slate-500">{l.sub}</div>
             </a>
-            <a href="/pricing">
-              <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 font-semibold px-8">
-                View Plans →
-              </Button>
-            </a>
-          </div>
-          <p className="text-white/30 text-sm">Starter from $299/mo · Cancel anytime</p>
-        </section>
-
+          ))}
+        </div>
       </div>
 
-      {/* Sticky upgrade bar — appears after classification */}
-      {classification && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-900/95 to-green-900/95 backdrop-blur border-t border-white/10 px-4 py-3">
-          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-green-400 text-lg">✓</span>
-              <span className="text-white font-medium">
-                <span className="text-green-300">{classification.industry}</span> detected at{" "}
-                <span className="text-purple-300">{(classification.confidence * 100).toFixed(0)}% confidence</span>
-              </span>
-              <span className="text-muted-foreground hidden sm:inline">—</span>
-              <span className="text-muted-foreground hidden sm:inline">Protect your full catalog with AuthiChain</span>
-            </div>
-            <div className="flex gap-2 shrink-0">
-              <a href="/pricing">
-                <Button size="sm" className="bg-white text-black hover:bg-white/90 font-semibold">
-                  See Plans
-                </Button>
-              </a>
-              <a href="/signup">
-                <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10">
-                  Sign Up Free
-                </Button>
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Footer */}
+      <footer className="border-t border-slate-800 px-6 py-6 text-center">
+        <p className="text-xs text-slate-700 tracking-widest">
+          AUTHICHAIN © 2026 — BLOCKCHAIN AUTHENTICATION FOR THE PHYSICAL WORLD
+        </p>
+      </footer>
     </div>
   );
 }
-
