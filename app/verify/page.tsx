@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { Shield, Search, CheckCircle, XCircle, Loader2, Camera, Share2, Bitcoin, ExternalLink, Clock } from "lucide-react"
+import { Shield, Search, CheckCircle, XCircle, Loader2, Camera, Share2, Bitcoin, ExternalLink, Clock, Film } from "lucide-react"
 import { SocialShareCTA } from "@/components/SocialShareCTA"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -485,6 +485,13 @@ function VerifyContent() {
               <div className="flex gap-3">
                 {result.authentic && (
                   <Button type="button" onClick={handleOpenShare}><Share2 className="mr-2 h-4 w-4" />Share Verified</Button>
+                )}
+                {result.authentic && result.qron_id && (
+                  <Link href={`/storymode/viewer?product_id=${result.qron_id}`}>
+                    <Button type="button" variant="outline" className="border-primary/50 hover:bg-primary/10">
+                      <Film className="mr-2 h-4 w-4 text-primary" />View Origin Story
+                    </Button>
+                  </Link>
                 )}
                 <Button type="button" variant="outline" onClick={handleReset}>Reset</Button>
               </div>
