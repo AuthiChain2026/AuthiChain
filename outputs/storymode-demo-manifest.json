@@ -88,5 +88,22 @@
     "product_id": "a1000001-0001-4000-a000-000000000010",
     "storymode_url": "https://authichain.com/storymode/viewer?product_id=a1000001-0001-4000-a000-000000000010",
     "qron_theme": "Industrial steel — machined textures, rotational symmetry, metallic gradients"
+  },
+  {
+    "product_name": "Zkittlez OG — Indoor Craft Flower (3.5g)",
+    "industry": "Cannabis",
+    "brand": "StrainChain Labs",
+    "price": 65,
+    "product_id": "a1000001-0001-4000-a000-000000000020",
+    "storymode_url": "https://authichain.com/storymode/viewer?product_id=a1000001-0001-4000-a000-000000000020",
+    "qron_code": "/qron/strainchain-zkittlez-qr.svg",
+    "qron_theme": "Cannabis botanical — emerald greens, trichome frost, living soil earth tones",
+    "strainchain_domain": "strainchain.io",
+    "lab_results": {
+      "thc": "28.4%",
+      "cbd": "0.08%",
+      "terpenes": "Caryophyllene 1.2%, Limonene 0.9%, Linalool 0.7%",
+      "testing_lab": "PSI Labs — Michigan Licensed"
+    }
   }
 ]
