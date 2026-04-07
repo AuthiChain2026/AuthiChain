@@ -41,29 +41,50 @@ function checkRateLimit(userId: string): boolean {
 // UUID format validation
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
+// Demo product IDs that can be accessed without authentication
+const DEMO_PRODUCT_IDS = new Set([
+  'a1000001-0001-4000-a000-000000000001', // Valentino
+  'a1000001-0001-4000-a000-000000000002', // Patek Philippe
+  'a1000001-0001-4000-a000-000000000003', // Kopi Luwak
+  'a1000001-0001-4000-a000-000000000004', // Sony XM6
+  'a1000001-0001-4000-a000-000000000005', // NovaShield
+  'a1000001-0001-4000-a000-000000000006', // Banksy
+  'a1000001-0001-4000-a000-000000000007', // La Mer
+  'a1000001-0001-4000-a000-000000000008', // Brembo
+  'a1000001-0001-4000-a000-000000000009', // Titleist
+  'a1000001-0001-4000-a000-000000000010', // SKF
+  'a1000001-0001-4000-a000-000000000011', // Valentino (alt)
+  'a1000001-0001-4000-a000-000000000020', // Zkittlez OG (StrainChain)
+])
+
 export async function POST(req: NextRequest) {
-  // Auth check
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  // Rate limit
-  if (!checkRateLimit(user.id)) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded. Max 3 story generations per hour.' },
-      { status: 429 },
-    )
-  }
-
   const body = await req.json().catch(() => ({}))
   const { productId } = body
 
   if (!productId || typeof productId !== 'string') {
     return NextResponse.json({ error: 'productId is required' }, { status: 400 })
   }
-
   if (!UUID_RE.test(productId)) {
     return NextResponse.json({ error: 'Invalid productId format' }, { status: 400 })
+  }
+
+  const isDemo = DEMO_PRODUCT_IDS.has(productId)
+
+  // Auth check — skip for demo products
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user && !isDemo) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Rate limit (by user ID or IP for anonymous demo)
+  const rateLimitKey = user?.id ?? (req.headers.get('x-forwarded-for') ?? 'anon')
+  if (!checkRateLimit(rateLimitKey)) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded. Max 3 story generations per hour.' },
+      { status: 429 },
+    )
   }
 
   const service = createServiceClient()
@@ -132,7 +153,7 @@ export async function POST(req: NextRequest) {
       .from('story_videos')
       .upsert({
         product_id: productId,
-        user_id: user.id,
+        user_id: user?.id ?? null,
         heygen_video_id: video.videoId,
         script,
         status: 'processing',

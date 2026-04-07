@@ -3,19 +3,15 @@
  *
  * Polls HeyGen for video generation status.
  * Returns video URL when complete.
+ * No auth required — allows public demo polling.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getVideoStatus } from '@/lib/heygen'
 
 export async function GET(req: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
   const videoId = req.nextUrl.searchParams.get('videoId')
-  if (!videoId) return NextResponse.json({ error: 'videoId required' }, { status: 400 })
+  if (!videoId?.trim()) return NextResponse.json({ error: 'videoId required' }, { status: 400 })
 
   try {
     const result = await getVideoStatus(videoId)
