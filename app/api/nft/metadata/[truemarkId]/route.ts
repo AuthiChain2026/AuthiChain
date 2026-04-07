@@ -38,8 +38,8 @@ export async function GET(
       { trait_type: 'Category', value: product.category ?? 'Product' },
       { trait_type: 'Token ID', value: product.nft_token_id ?? 'Pending' },
       { trait_type: 'Issued', display_type: 'date', value: Math.floor(new Date(product.created_at).getTime() / 1000) },
-      { trait_type: 'Standard', value: 'VIP-181 / ERC-721' },
-      { trait_type: 'Blockchain', value: 'VeChain' },
+      { trait_type: 'Standard', value: 'ERC-721' },
+      { trait_type: 'Blockchain', value: 'Polygon' },
     ],
   }
 

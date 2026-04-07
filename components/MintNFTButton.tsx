@@ -8,13 +8,12 @@ import { Button } from '@/components/ui/button'
 import { Loader2, Sparkles, CheckCircle, ExternalLink } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
-// VeChain chains are not in the thirdweb chain list by default,
-// so we use a minimal custom chain definition.
-const vechain = {
-  id: 100009,
-  name: 'VeChain MainNet',
-  nativeCurrency: { name: 'VET', symbol: 'VET', decimals: 18 },
-  rpc: 'https://mainnet.veblocks.net',
+// Polygon mainnet chain definition for thirdweb
+const polygon = {
+  id: 137,
+  name: 'Polygon',
+  nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+  rpc: 'https://polygon-rpc.com',
 } as const
 
 interface MintNFTButtonProps {
@@ -69,16 +68,16 @@ export function MintNFTButton({ productId, productName, truemarkId, onMinted }: 
       <div className="flex flex-col items-center gap-3 p-4 rounded-lg bg-green-500/10 border border-green-500/30">
         <div className="flex items-center gap-2 text-green-500 font-semibold">
           <CheckCircle className="h-5 w-5" />
-          Certificate Minted on VeChain
+          Certificate Minted on Polygon
         </div>
         <p className="text-sm text-muted-foreground">Token #{result.tokenId}</p>
         <a
-          href={`https://explore.vechain.org/transactions/${result.txHash}`}
+          href={`https://polygonscan.com/tx/${result.txHash}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1 text-xs text-primary hover:underline"
         >
-          View on VeChain Explorer <ExternalLink className="h-3 w-3" />
+          View on PolygonScan <ExternalLink className="h-3 w-3" />
         </a>
       </div>
     )
@@ -119,7 +118,7 @@ export function MintNFTButton({ productId, productName, truemarkId, onMinted }: 
         {minting ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Minting on VeChain…
+            Minting on Polygon…
           </>
         ) : (
           <>
@@ -129,7 +128,7 @@ export function MintNFTButton({ productId, productName, truemarkId, onMinted }: 
         )}
       </Button>
       <p className="text-xs text-center text-muted-foreground">
-        The NFT will be minted to your connected wallet on VeChain MainNet.
+        The NFT will be minted to your connected wallet on Polygon.
       </p>
     </div>
   )
