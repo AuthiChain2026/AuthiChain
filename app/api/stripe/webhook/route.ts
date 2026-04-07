@@ -4,14 +4,24 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { planFromPriceId, PLAN_LIMITS, type Plan } from '@/lib/subscription';
 export const dynamic = 'force-dynamic';
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY!;
-const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID!;
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`Missing required environment variable: ${name}`);
+  return value;
+}
 
-// Lazy Stripe client initialization
-const getStripe = () => new Stripe(process.env.STRIPE_SECRET_KEY!);
+// Lazy accessors — env vars are validated at runtime, not during next build
+const getWebhookSecret = () => requireEnv('STRIPE_WEBHOOK_SECRET');
+const getAirtableApiKey = () => requireEnv('AIRTABLE_API_KEY');
+const getAirtableBaseId = () => requireEnv('AIRTABLE_BASE_ID');
+const getStripe = () => new Stripe(requireEnv('STRIPE_SECRET_KEY'));
 
 // ─── Airtable helpers ────────────────────────────────────────────────────────
+
+/** Escape a value for use in Airtable filterByFormula to prevent formula injection */
+function escapeAirtableValue(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
 
 async function airtableRequest(
   table: string,
@@ -19,11 +29,11 @@ async function airtableRequest(
   body?: object,
   params?: string
 ) {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(table)}${params || ''}`;
+  const url = `https://api.airtable.com/v0/${getAirtableBaseId()}/${encodeURIComponent(table)}${params || ''}`;
   const res = await fetch(url, {
     method,
     headers: {
-      Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+      Authorization: `Bearer ${getAirtableApiKey()}`,
       'Content-Type': 'application/json',
     },
     body: body ? JSON.stringify(body) : undefined,
@@ -40,7 +50,7 @@ async function isEventProcessed(stripeEventId: string): Promise<boolean> {
     'Events Log',
     'GET',
     undefined,
-    `?filterByFormula=AND({Stripe Event ID}=\"${stripeEventId}\")`
+    `?filterByFormula=AND({Stripe Event ID}="${escapeAirtableValue(stripeEventId)}")`
   );
   return data.records?.length > 0;
 }
@@ -64,7 +74,7 @@ async function upsertAccount(customerId: string, fields: object): Promise<string
     'Accounts',
     'GET',
     undefined,
-    `?filterByFormula={Stripe Customer ID}=\"${customerId}\"`
+    `?filterByFormula={Stripe Customer ID}="${escapeAirtableValue(customerId)}")`
   );
   if (existing.records?.length > 0) {
     const recordId = existing.records[0].id;
@@ -83,7 +93,7 @@ async function upsertContact(email: string, fields: object, accountRecordId?: st
     'Contacts',
     'GET',
     undefined,
-    `?filterByFormula={Email}=\"${email}\"`
+    `?filterByFormula={Email}="${escapeAirtableValue(email)}")`
   );
   const contactFields: any = { Email: email, ...fields };
   if (accountRecordId) contactFields['Account'] = [accountRecordId];
@@ -107,7 +117,7 @@ async function upsertRevenueProjection(subscriptionId: string, fields: object) {
     'Revenue Projections',
     'GET',
     undefined,
-    `?filterByFormula={Stripe Subscription ID}=\"${subscriptionId}\"`
+    `?filterByFormula={Stripe Subscription ID}="${escapeAirtableValue(subscriptionId)}")`
   );
   if (existing.records?.length > 0) {
     await airtableRequest('Revenue Projections', 'PATCH', {
@@ -178,22 +188,32 @@ async function handleQronCreditPurchase(session: Stripe.Checkout.Session) {
 
   try {
     const supabase = createServiceClient();
-    // Upsert user credit balance (increment atomically via RPC if available, else read-modify-write)
-    const { data: existing } = await supabase
-      .from('qron_credits')
-      .select('balance')
-      .eq('user_id', userId)
-      .maybeSingle();
+    // Atomically increment credit balance using raw SQL to avoid race conditions
+    const { error } = await supabase.rpc('increment_qron_credits', {
+      p_user_id: userId,
+      p_credits: credits,
+    });
 
-    if (existing) {
-      await supabase
+    // Fallback: if RPC doesn't exist yet, use upsert with conflict handling
+    if (error && error.message.includes('function')) {
+      const { data: existing } = await supabase
         .from('qron_credits')
-        .update({ balance: existing.balance + credits, updated_at: new Date().toISOString() })
-        .eq('user_id', userId);
-    } else {
-      await supabase
-        .from('qron_credits')
-        .insert({ user_id: userId, balance: credits, updated_at: new Date().toISOString() });
+        .select('balance')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from('qron_credits')
+          .update({ balance: existing.balance + credits, updated_at: new Date().toISOString() })
+          .eq('user_id', userId);
+      } else {
+        await supabase
+          .from('qron_credits')
+          .insert({ user_id: userId, balance: credits, updated_at: new Date().toISOString() });
+      }
+    } else if (error) {
+      throw error;
     }
 
     console.log(`[qron-credits] +${credits} credits for user ${userId}`);
@@ -516,7 +536,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    event = stripe.webhooks.constructEvent(body, signature, getWebhookSecret());
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
@@ -565,7 +585,9 @@ export async function POST(req: NextRequest) {
     console.error(`Error processing ${event.type}:`, err);
     try {
       await logEvent(event.id, event.type, 'error', err.message || 'Unknown error');
-    } catch {}
+    } catch (logErr) {
+      console.error('[webhook] Failed to log event error to Airtable:', logErr);
+    }
     return NextResponse.json({ error: 'Handler failed' }, { status: 500 });
   }
 }
