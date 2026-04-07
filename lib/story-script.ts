@@ -8,7 +8,15 @@ import 'server-only'
 
 import OpenAI from 'openai'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const MAX_NAME_LENGTH = 200
+const MAX_EVENTS = 20
+const MAX_RETRIES = 2
+
+function getClient(): OpenAI {
+  const key = process.env.OPENAI_API_KEY
+  if (!key) throw new Error('OPENAI_API_KEY is not configured')
+  return new OpenAI({ apiKey: key, timeout: 30_000, maxRetries: MAX_RETRIES })
+}
 
 export interface ProductContext {
   name: string
@@ -22,50 +30,64 @@ export interface ProductContext {
   supplyChainEvents?: { stage: string; location: string; date: string }[]
 }
 
+/** Sanitize user input — strip control chars and limit length */
+function sanitize(input: string, maxLen = MAX_NAME_LENGTH): string {
+  return input.replace(/[\x00-\x1f]/g, '').trim().slice(0, maxLen)
+}
+
 /**
  * Generate a cinematic, theatrical narration script for a product origin story.
  * The script is designed to be read aloud by a HeyGen avatar in ~60-90 seconds.
  */
 export async function generateStoryScript(product: ProductContext): Promise<string> {
-  const eventsBlock = product.supplyChainEvents?.length
-    ? product.supplyChainEvents.map(e => `- ${e.stage} at ${e.location} (${e.date})`).join('\n')
+  if (!product.name?.trim()) throw new Error('Product name is required')
+  if (!product.brand?.trim()) throw new Error('Brand name is required')
+
+  const name = sanitize(product.name)
+  const brand = sanitize(product.brand)
+  const category = sanitize(product.category ?? 'Product')
+  const truemarkId = sanitize(product.truemarkId ?? 'Pending', 50)
+  const txHash = product.blockchainTxHash
+    ? sanitize(product.blockchainTxHash).slice(0, 16) + '...'
+    : 'Pending'
+
+  const events = (product.supplyChainEvents ?? []).slice(0, MAX_EVENTS)
+  const eventsBlock = events.length
+    ? events.map(e => `- ${sanitize(e.stage, 50)} at ${sanitize(e.location, 100)} (${sanitize(e.date, 30)})`).join('\n')
     : 'No supply chain events recorded yet.'
 
-  const prompt = `You are a world-class documentary narrator — think David Attenborough meets a luxury brand film director.
+  const systemPrompt = `You are a world-class documentary narrator. You write cinematic narration scripts for product origin story videos (60-90 seconds, 150-200 words). You ONLY return the narration text — no stage directions, no labels, no markdown. Present tense. Sensory language. Dramatic but authentic.`
 
-Write a cinematic, theatrical narration script for a product origin story video. The script will be read aloud by a single narrator avatar in a 60-90 second video.
+  const userPrompt = `Write the origin story narration for this product:
 
-PRODUCT DATA:
-- Name: ${product.name}
-- Brand: ${product.brand}
-- Category: ${product.category ?? 'Product'}
-- TrueMark™ ID: ${product.truemarkId ?? 'Pending'}
-- Origin: ${product.origin ?? 'Verified Origin'}
-- Harvest/Creation Date: ${product.harvestDate ?? 'Recent'}
-- Certifications: ${product.certifications?.join(', ') ?? 'Blockchain Verified'}
-- Blockchain TX: ${product.blockchainTxHash ? product.blockchainTxHash.slice(0, 16) + '...' : 'Pending'}
+PRODUCT: ${name}
+BRAND: ${brand}
+CATEGORY: ${category}
+TRUEMARK ID: ${truemarkId}
+BLOCKCHAIN TX: ${txHash}
 
-SUPPLY CHAIN JOURNEY:
+SUPPLY CHAIN:
 ${eventsBlock}
 
-REQUIREMENTS:
-1. Open with a dramatic, attention-grabbing hook about the product's origin
-2. Build a narrative arc: origin → craftsmanship/growing → quality verification → journey to consumer
-3. Weave in blockchain verification naturally — don't make it sound technical, make it sound prestigious
-4. Use sensory language — describe textures, aromas, landscapes, craftsmanship
-5. End with a powerful closing line about authenticity and trust
-6. Keep it 150-200 words (60-90 seconds when spoken)
-7. Do NOT include stage directions, scene descriptions, or speaker labels — just the narration text
-8. Write in present tense for immediacy and drama
+Requirements: dramatic hook → craftsmanship arc → verification → powerful closing. Weave blockchain naturally as prestige, not tech jargon. 150-200 words only.`
 
-Return ONLY the narration script, nothing else.`
+  const openai = getClient()
 
   const res = await openai.chat.completions.create({
     model: 'gpt-4o',
-    messages: [{ role: 'user', content: prompt }],
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ],
     temperature: 0.85,
     max_tokens: 500,
   })
 
-  return res.choices[0].message.content?.trim() ?? ''
+  const script = res.choices[0]?.message?.content?.trim() ?? ''
+
+  if (script.length < 50) {
+    throw new Error('Generated script is too short — likely a model error')
+  }
+
+  return script
 }

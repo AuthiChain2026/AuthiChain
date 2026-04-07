@@ -18,8 +18,10 @@ import {
   CROSS_PLATFORM_ENTITLEMENTS,
   checkEntitlement,
   getEconomySummary,
+  calculateScanFee,
   type Platform,
   type EntitlementKey,
+  type StakingTier,
 } from '@/lib/authentic-economy'
 
 export const dynamic = 'force-dynamic'
@@ -40,7 +42,7 @@ export async function GET(req: NextRequest) {
         { status: 400 },
       )
     }
-    const fee = QRON_ECONOMICS.calculateScanFee(calculateTier as any)
+    const fee = calculateScanFee(calculateTier as any)
     return NextResponse.json({
       tier: calculateTier,
       stakingInfo: QRON_ECONOMICS.stakingTiers[calculateTier as keyof typeof QRON_ECONOMICS.stakingTiers],

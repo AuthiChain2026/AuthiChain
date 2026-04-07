@@ -52,39 +52,39 @@ export interface Upsell {
 
 // ── QRON Token Economics (shared across all platforms) ─────────────────────
 
-export const QRON_ECONOMICS = {
-  baseUnitCost: BASE_UNIT_COST, // 0.05 QRON per scan
-
-  splitRatios: {
-    stakerReward: 0.40,
-    treasury: 0.40,
-    burn: 0.20,
-  },
-
-  stakingTiers: {
-    none:     { threshold: 0,         discount: 0.00, usdCost: 0 },
-    bronze:   { threshold: 1_000,     discount: 0.10, usdCost: 49 },
-    silver:   { threshold: 10_000,    discount: 0.25, usdCost: 349 },
-    gold:     { threshold: 100_000,   discount: 0.40, usdCost: 2_499 },
-    platinum: { threshold: 1_000_000, discount: 0.60, usdCost: 14_999 },
-  },
-
-  /** Calculate fee for a scan given a staking tier */
-  calculateScanFee(tier: keyof typeof QRON_ECONOMICS.stakingTiers = 'none') {
-    const { discount } = QRON_ECONOMICS.stakingTiers[tier]
-    const gross = QRON_ECONOMICS.baseUnitCost
-    const discountAmt = gross * discount
-    const net = gross - discountAmt
-    return {
-      gross,
-      discount: discountAmt,
-      net,
-      stakerReward: net * QRON_ECONOMICS.splitRatios.stakerReward,
-      treasury: net * QRON_ECONOMICS.splitRatios.treasury,
-      burn: net * QRON_ECONOMICS.splitRatios.burn,
-    }
-  },
+export const STAKING_TIERS = {
+  none:     { threshold: 0,         discount: 0.00, usdCost: 0 },
+  bronze:   { threshold: 1_000,     discount: 0.10, usdCost: 49 },
+  silver:   { threshold: 10_000,    discount: 0.25, usdCost: 349 },
+  gold:     { threshold: 100_000,   discount: 0.40, usdCost: 2_499 },
+  platinum: { threshold: 1_000_000, discount: 0.60, usdCost: 14_999 },
 } as const
+
+export type StakingTier = keyof typeof STAKING_TIERS
+
+const SPLIT_RATIOS = { stakerReward: 0.40, treasury: 0.40, burn: 0.20 } as const
+
+export const QRON_ECONOMICS = {
+  baseUnitCost: BASE_UNIT_COST,
+  splitRatios: SPLIT_RATIOS,
+  stakingTiers: STAKING_TIERS,
+} as const
+
+/** Calculate fee for a scan given a staking tier */
+export function calculateScanFee(tier: StakingTier = 'none') {
+  const { discount } = STAKING_TIERS[tier]
+  const gross = BASE_UNIT_COST
+  const discountAmt = gross * discount
+  const net = gross - discountAmt
+  return {
+    gross,
+    discount: discountAmt,
+    net,
+    stakerReward: net * SPLIT_RATIOS.stakerReward,
+    treasury: net * SPLIT_RATIOS.treasury,
+    burn: net * SPLIT_RATIOS.burn,
+  }
+}
 
 // ── Cross-Platform Entitlements ───────────────────────────────────────────
 
