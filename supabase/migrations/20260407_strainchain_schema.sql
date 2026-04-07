@@ -4,8 +4,11 @@
 CREATE TABLE IF NOT EXISTS leads (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL UNIQUE,
+  first_name TEXT,
+  last_name TEXT,
   source TEXT NOT NULL DEFAULT 'unknown',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS leads_created_idx ON leads(created_at DESC);
@@ -30,6 +33,7 @@ CREATE TABLE IF NOT EXISTS ip_checklist (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   task_name TEXT NOT NULL,
   description TEXT,
+  owner TEXT,
   status TEXT NOT NULL DEFAULT 'pending',
   due_date DATE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -97,5 +101,3 @@ CREATE TABLE IF NOT EXISTS business_plan_downloads (
 );
 
 CREATE INDEX IF NOT EXISTS business_plan_downloads_downloaded_idx ON business_plan_downloads(downloaded_at DESC);
-
--- No RLS policies added; these tables are used via service-role only.
