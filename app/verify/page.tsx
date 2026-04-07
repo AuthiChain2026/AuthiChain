@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { Shield, Search, CheckCircle, XCircle, Loader2, Camera, Share2 } from "lucide-react"
+import { Shield, Search, CheckCircle, XCircle, Loader2, Camera, Share2, Bitcoin, ExternalLink, Clock } from "lucide-react"
 import { SocialShareCTA } from "@/components/SocialShareCTA"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -28,6 +28,13 @@ type VerifyResult = {
   verifiedAt: string
 }
 
+type BitcoinProof = {
+  inscriptionId: string | null
+  orderId: string | null
+  status: 'pending' | 'confirmed' | 'failed' | null
+  viewUrl: string | null
+} | null
+
 declare global {
   interface Window {
     BarcodeDetector?: new (options?: { formats: string[] }) => {
@@ -35,6 +42,98 @@ declare global {
     }
     jsQR?: (data: Uint8ClampedArray, width: number, height: number) => { data: string } | null
   }
+}
+
+// Bitcoin Ordinal proof panel
+function BitcoinProofPanel({ productId }: { productId: string }) {
+  const [btcProof, setBtcProof] = useState<BitcoinProof>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!productId) return
+    setLoading(true)
+    fetch(`https://bitcoin-auth-worker.authichain2026.workers.dev/verify?product_id=${encodeURIComponent(productId)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { setBtcProof(d?.btc || null); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [productId])
+
+  if (loading) {
+    return (
+      <div className="mt-4 p-4 rounded-lg border border-orange-500/30 bg-orange-500/5 flex items-center gap-3">
+        <Loader2 className="h-4 w-4 animate-spin text-orange-400" />
+        <span className="text-sm text-muted-foreground">Checking Bitcoin inscription…</span>
+      </div>
+    )
+  }
+
+  if (!btcProof) {
+    return (
+      <div className="mt-4 p-4 rounded-lg border border-muted bg-muted/20">
+        <div className="flex items-center gap-2 mb-1">
+          <Bitcoin className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium text-muted-foreground">Bitcoin L1 — Standard Tier</span>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Not inscribed on Bitcoin.{' '}
+          <a href="https://buy.stripe.com/dRm3cv0EV6BgeSKdLK1Nu1e" target="_blank" rel="noopener noreferrer"
+             className="text-orange-400 underline hover:text-orange-300">
+            Upgrade to Bitcoin-Grade Auth ($299) →
+          </a>
+        </p>
+      </div>
+    )
+  }
+
+  const isConfirmed = btcProof.status === 'confirmed'
+  const isPending = btcProof.status === 'pending'
+
+  return (
+    <div className={`mt-4 p-4 rounded-lg border ${isConfirmed ? 'border-orange-500/60 bg-orange-500/8' : 'border-orange-500/30 bg-orange-500/5'}`}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <Bitcoin className="h-4 w-4 text-orange-400" />
+          <span className="text-sm font-semibold text-orange-400">Bitcoin L1 Inscription</span>
+        </div>
+        {isConfirmed && (
+          <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/40 text-xs">
+            ₿ Confirmed
+          </Badge>
+        )}
+        {isPending && (
+          <Badge variant="secondary" className="text-xs">
+            <Clock className="h-3 w-3 mr-1" /> Inscribing…
+          </Badge>
+        )}
+      </div>
+
+      {isConfirmed && btcProof.inscriptionId && (
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground font-mono truncate">
+            {btcProof.inscriptionId}
+          </p>
+          <a
+            href={btcProof.viewUrl ?? `https://ordinals.com/inscription/${btcProof.inscriptionId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-orange-400 underline hover:text-orange-300"
+          >
+            View on ordinals.com <ExternalLink className="h-3 w-3" />
+          </a>
+        </div>
+      )}
+
+      {isPending && (
+        <p className="text-xs text-muted-foreground">
+          Inscription in progress — typically confirms within 30 minutes.
+        </p>
+      )}
+
+      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-orange-500/20">
+        Secured by Bitcoin — the world's most immutable ledger.
+      </p>
+    </div>
+  )
 }
 
 function SearchParamsHandler({ onIdFromParams }: { onIdFromParams: (id: string) => void }) {
@@ -358,6 +457,31 @@ function VerifyContent() {
                 <Label>Actions</Label>
                 <div className="flex flex-wrap gap-2 mt-2">{result.actions?.map((a: string) => <Badge key={a} variant="secondary">{a}</Badge>)}</div>
               </div>
+
+              {/* ─── Bitcoin Dual-Chain Proof Panel ─── */}
+              {result.authentic && result.qron_id && (
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Blockchain Proof</Label>
+
+                  {/* Polygon proof */}
+                  <div className="p-3 rounded-lg border border-purple-500/30 bg-purple-500/5 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 rounded-full bg-purple-500/80 flex items-center justify-center">
+                        <span className="text-[8px] font-bold text-white">P</span>
+                      </div>
+                      <span className="text-sm font-medium text-purple-400">Polygon L2 — Verified</span>
+                      <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/40 text-xs ml-auto">✓ On-chain</Badge>
+                    </div>
+                    {result.tokenId && (
+                      <p className="text-xs text-muted-foreground mt-1">Token ID: {result.tokenId}</p>
+                    )}
+                  </div>
+
+                  {/* Bitcoin proof */}
+                  <BitcoinProofPanel productId={result.qron_id} />
+                </div>
+              )}
+
               <div className="flex gap-3">
                 {result.authentic && (
                   <Button type="button" onClick={handleOpenShare}><Share2 className="mr-2 h-4 w-4" />Share Verified</Button>

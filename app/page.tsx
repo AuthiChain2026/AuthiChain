@@ -25,11 +25,22 @@ export default function Home() {
             <ThemeToggle />
             <Link href="/demos" className="hidden sm:block text-sm text-muted-foreground hover:text-[#e8c547] transition-colors">Demos</Link>
             <Link href="/pricing" className="hidden sm:block text-sm text-muted-foreground hover:text-[#e8c547] transition-colors">Pricing</Link>
+            <Link href="/solutions/eu-digital-product-passport" className="hidden md:flex items-center gap-1 text-xs font-bold text-[#C9A227] border border-[rgba(201,162,39,0.35)] rounded-lg px-2.5 py-1 hover:bg-[rgba(201,162,39,0.08)]">EU DPP ⚡</Link>
             <Link href="/login"><Button variant="ghost" className="hover:text-[#e8c547]">Login</Button></Link>
             <Link href="/signup"><Button className="btn-gold rounded-lg px-5">Get Started</Button></Link>
           </div>
         </div>
       </nav>
+
+      {/* EU DPP Urgency Banner */}
+      <div style={{background:"rgba(201,162,39,0.05)",borderBottom:"1px solid rgba(201,162,39,0.2)",padding:"8px 16px",textAlign:"center"}}>
+        <span style={{fontSize:13,color:"#C9A227",fontWeight:500}}>
+          ⚡ EU DPP registry launches July 19, 2026 · Battery mandate Feb 2027 · {""}
+        </span>
+        <Link href="/solutions/eu-digital-product-passport" style={{color:"#C9A227",fontWeight:700,fontSize:13}}>
+          Get compliant from 9 →
+        </Link>
+      </div>
 
       {/* Hero */}
       <section className="container mx-auto px-4 py-16 md:py-28">
@@ -75,7 +86,7 @@ export default function Home() {
             <div className="relative w-full max-w-lg">
               <div className="absolute inset-[-20%] rounded-full glow-gold opacity-20 blur-3xl pointer-events-none" />
               <Image
-                src="/images/hero-shield.png"
+                src="/images/hero-shield.svg"
                 alt="AuthiChain blockchain authentication shield"
                 width={800}
                 height={600}
@@ -91,7 +102,7 @@ export default function Home() {
       <section className="container mx-auto px-4 pb-16">
         <div className="max-w-6xl mx-auto overflow-hidden rounded-2xl protocol-card">
           <Image
-            src="/images/industries-banner.png"
+            src="/images/industries-banner.svg"
             alt="10 Industries served by AuthiChain Protocol"
             width={1200}
             height={150}
@@ -138,7 +149,7 @@ export default function Home() {
         </div>
         <div className="max-w-4xl mx-auto">
           <div className="protocol-card p-2">
-            <Image src="/images/how-it-works.png" alt="How AuthiChain works" width={900} height={280} className="w-full h-auto rounded-xl" />
+            <Image src="/images/how-it-works.svg" alt="How AuthiChain works" width={900} height={280} className="w-full h-auto rounded-xl" />
           </div>
         </div>
       </section>

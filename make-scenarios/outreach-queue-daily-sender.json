@@ -1,0 +1,33 @@
+{
+  "name": "Authentic Economy — Daily Outreach Queue Sender",
+  "description": "Triggers outreach-queue-worker daily at 9am UTC to send queued cold outreach emails via Resend. Covers EU DPP, QRON Genesis, and StrainChain dispensary campaigns.",
+  "schedule": {
+    "type": "cron",
+    "cron": "0 9 * * *",
+    "timezone": "UTC"
+  },
+  "modules": [
+    {
+      "id": 1,
+      "type": "http:makeRequest",
+      "name": "Trigger outreach queue send",
+      "config": {
+        "url": "https://outreach-queue-worker.authichain2026.workers.dev/send",
+        "method": "POST",
+        "headers": [
+          {"name": "x-api-key", "value": "{{env.INTERNAL_API_KEY}}"}
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "type": "http:makeRequest",
+      "name": "Log result to D1 via bitcoin-auth-worker health",
+      "config": {
+        "url": "https://bitcoin-auth-worker.authichain2026.workers.dev/health",
+        "method": "GET"
+      }
+    }
+  ],
+  "notes": "Activate in Make.com. Add INTERNAL_API_KEY env variable. Worker polls D1 outreach_queue for status=pending AND scheduled_at <= now(). Resend quota: 3000/day on free plan, resets midnight UTC."
+}

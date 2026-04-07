@@ -1,0 +1,48 @@
+name: AuthiChain Scheduled Operations
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+    - cron: '0 8 * * 1'
+    - cron: '0 6 1 * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Cron mode'
+        default: 'daily'
+        type: choice
+        options: [daily, weekly, monthly]
+
+jobs:
+  authichain-cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
+          elif [ "$(date +%d)" = "01" ]; then
+            echo "mode=monthly" >> $GITHUB_OUTPUT
+          elif [ "$(date +%u)" = "1" ] && [ "$(date +%H)" = "08" ]; then
+            echo "mode=weekly" >> $GITHUB_OUTPUT
+          else
+            echo "mode=daily" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run AuthiChain Cron Master
+        run: |
+          MODE="${{ steps.mode.outputs.mode }}"
+          echo "Running cron mode: $MODE"
+          ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oZG5remh0YWRma2tsdWl1bGhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3NzY0NjIsImV4cCI6MjA5MDM1MjQ2Mn0.OvZi-nZuNdmFHEH8tPbkq5lVZ4k2DyELOLgKZKGNkEE"
+          RESULT=$(curl -s \
+            "https://nhdnkzhtadfkkluiulhs.supabase.co/functions/v1/authichain-cron-master?mode=$MODE" \
+            -H "apikey: $ANON_KEY")
+          echo "Result: $RESULT"
+          echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Tasks: {d.get(\"tasks\",0)}, Passed: {d.get(\"passed\",0)}')" || true
+
+      - name: Run Watchdog
+        run: |
+          ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oZG5remh0YWRma2tsdWl1bGhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3NzY0NjIsImV4cCI6MjA5MDM1MjQ2Mn0.OvZi-nZuNdmFHEH8tPbkq5lVZ4k2DyELOLgKZKGNkEE"
+          curl -s "https://nhdnkzhtadfkkluiulhs.supabase.co/functions/v1/authichain-watchdog" \
+            -H "apikey: $ANON_KEY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Health: {d.get(\"health_score\")}% -- {d.get(\"status\")}')" || true

@@ -21,7 +21,7 @@ const STAKING_TIER_COUPONS: Record<string, string> = {
 }
 
 function getStripe(): Stripe {
-  return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' })
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' as any })
 }
 
 /**

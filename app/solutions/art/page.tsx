@@ -1,0 +1,15 @@
+export const metadata={title:'AuthiChain for Art \u2014 Artwork Provenance Authentication',description:'Blockchain provenance for fine art. Every masterpiece gets a verifiable ownership chain.'};
+export default function ArtPage(){
+  const stats=[{v:'$3.3B',l:'Art fraud annually'},{v:'30%',l:'Fine art with questionable provenance'},{v:'100%',l:'AuthiChain authenticity rate'},{v:'$QRON',l:'Collector rewards per scan'}];
+  const features=[{icon:'\ud83c\udfa8',t:'Provenance Chain',d:'Artist \u2192 studio \u2192 gallery \u2192 auction \u2192 collector. AUTHI-ART-* truemark anchored on Polygon. Complete ownership history forever.'},{icon:'\ud83d\udcf8',t:'Digital Certificate',d:'Blockchain certificate embedded in label/frame. Scan QRON art QR to verify authenticity instantly from any device.'},{icon:'\ud83d\udd0d',t:'Scout Monitoring',d:'Scout scans Sotheby\u2019s, Christie\u2019s, eBay for suspicious re-listings. Automatic alert to registered owner on anomaly.'},{icon:'\ud83c\udfc6',t:'Sotheby\u2019s Ready',d:'Authentication API for auction lot registration. Every lot: AUTHI-SOTH-ART-* truemark pre-sale.'},{icon:'\ud83c\udf0d',t:'Cross-Border Provenance',d:'Customs, gallery loans, private sales all create verified events. Archivist builds complete international ownership timeline.'},{icon:'\u26a1',t:'NFT Twin',d:'Physical artwork \u2192 blockchain certificate \u2192 NFT twin on Polygon. Living Art meets provenance.'}];
+  return(<div style={{maxWidth:900,margin:'0 auto',padding:'60px 20px',background:'#0a0a0a',color:'#e5e5e5',fontFamily:'sans-serif',minHeight:'100vh'}}>
+    <div style={{textAlign:'center',marginBottom:60}}>
+      <p style={{color:'#C9A227',fontWeight:700,letterSpacing:'.2em',fontSize:12,marginBottom:16}}>AUTHICHAIN \u00b7 ART</p>
+      <h1 style={{fontSize:48,fontWeight:800,color:'#fff',lineHeight:1.1,marginBottom:16}}>Every Masterpiece Deserves<br/>a Verifiable Paper Trail.</h1>
+      <p style={{fontSize:18,color:'#aaa',maxWidth:560,margin:'0 auto 32px'}}>Blockchain provenance for fine art, photography, sculpture, and collectibles. Sotheby\u2019s-ready. QRON art QR on every work.</p>
+      <a href="https://authichain.com/pricing" style={{display:'inline-block',padding:'14px 28px',background:'#C9A227',color:'#000',fontWeight:700,textDecoration:'none',borderRadius:8}}>Start Free \u2192</a>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginBottom:60}}>{stats.map((s,i)=><div key={i} style={{background:'#111',border:'1px solid #C9A22740',borderRadius:12,padding:24,textAlign:'center'}}><div style={{fontSize:24,fontWeight:800,color:'#C9A227',marginBottom:8}}>{s.v}</div><p style={{color:'#888',fontSize:13,margin:0}}>{s.l}</p></div>)}</div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:24}}>{features.map((f,i)=><div key={i} style={{background:'#111',border:'1px solid #ffffff10',borderRadius:12,padding:24}}><div style={{fontSize:28,marginBottom:12}}>{f.icon}</div><h3 style={{color:'#fff',marginBottom:8,fontSize:16}}>{f.t}</h3><p style={{color:'#888',fontSize:14,lineHeight:1.5}}>{f.d}</p></div>)}</div>
+  </div>);
+}

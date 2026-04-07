@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Price not configured' }, { status: 500 })
   }
 
-  const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' })
+  const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' as any })
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://authichain.com'
 
   const session = await stripe.checkout.sessions.create({

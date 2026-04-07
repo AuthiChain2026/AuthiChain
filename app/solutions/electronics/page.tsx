@@ -1,0 +1,18 @@
+export const metadata={title:'AuthiChain for Electronics — Serial Number & Parts Authentication',description:'Blockchain authentication for electronics. Serial number verification, counterfeit component detection, and warranty fraud prevention via 5-agent AI consensus.'};
+export default function ElectronicsPage(){
+  const stats=[{v:'$169B',l:'Counterfeit electronics market globally'},{v:'15%',l:'Electronic components purchased are counterfeit'},{v:'$6.3B',l:'Annual warranty fraud cost to OEMs'},{v:'<200ms',l:'AuthiChain verification time'}];
+  const features=[{icon:'🔌',t:'Component Authentication',d:'Each IC, capacitor, or PCB: AUTHI-ELEC-* truemark at manufacture. Guardian confirms component hash at assembly. Sentinel detects counterfeit component clusters.'},{icon:'📱',t:'Consumer Electronics',d:'AUTHI-AAPL-*, AUTHI-SMSG-* at factory. Consumer scans box QR: 5-agent verdict + Groq provenance story. Warranty registration on-chain.'},{icon:'🔧',t:'Repair Parts Verification',d:'Authorized repair technicians scan parts before install. AASP-verified components. Sentinel detects unauthorized parts attempting warranty claims.'},{icon:'🛡️',t:'Warranty Fraud Prevention',d:'Counterfeit parts cannot generate authentic AUTHI-* truemarks. Warranty claims cross-referenced against blockchain certificate. Fraudulent claims flagged automatically.'},{icon:'📊',t:'Supply Chain Visibility',d:'Archivist: component source → assembly line → QC → packaging → logistics. Full chain of custody from silicon to shelf.'},{icon:'⚡',t:'RoHS & REACH Compliance',d:'EU RoHS and REACH regulations require material traceability. AuthiChain anchors substance declarations on Polygon. DPP auto-generated per SKU.'}];
+  return(<div style={{maxWidth:900,margin:'0 auto',padding:'60px 20px',background:'#0a0a0a',color:'#e5e5e5',fontFamily:'sans-serif',minHeight:'100vh'}}>
+    <div style={{textAlign:'center',marginBottom:60}}>
+      <p style={{color:'#C9A227',fontWeight:700,letterSpacing:'.2em',fontSize:12,marginBottom:16}}>AUTHICHAIN · ELECTRONICS</p>
+      <h1 style={{fontSize:48,fontWeight:800,color:'#fff',lineHeight:1.1,marginBottom:16}}>Every Component,<br/>Every Scan, Verified.</h1>
+      <p style={{fontSize:18,color:'#aaa',maxWidth:560,margin:'0 auto 32px'}}>From IC to finished device: blockchain serial number authentication stopping counterfeit components before they reach your assembly line.</p>
+      <div style={{display:'flex',gap:16,justifyContent:'center',flexWrap:'wrap'}}>
+        <a href="https://authichain.com/pricing" style={{padding:'14px 28px',background:'#C9A227',color:'#000',fontWeight:700,textDecoration:'none',borderRadius:8}}>Start Free →</a>
+        <a href="https://authichain.com/verify/AUTHI-HERM-LUX-MVLN4NH023" style={{padding:'14px 28px',border:'1px solid #C9A22760',color:'#C9A227',textDecoration:'none',borderRadius:8}}>Live Demo</a>
+      </div>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginBottom:60}}>{stats.map((s,i)=><div key={i} style={{background:'#111',border:'1px solid #C9A22740',borderRadius:12,padding:24,textAlign:'center'}}><div style={{fontSize:24,fontWeight:800,color:'#C9A227',marginBottom:8}}>{s.v}</div><p style={{color:'#888',fontSize:13,margin:0}}>{s.l}</p></div>)}</div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:24}}>{features.map((f,i)=><div key={i} style={{background:'#111',border:'1px solid #ffffff10',borderRadius:12,padding:24}}><div style={{fontSize:28,marginBottom:12}}>{f.icon}</div><h3 style={{color:'#fff',marginBottom:8,fontSize:16}}>{f.t}</h3><p style={{color:'#888',fontSize:14,lineHeight:1.5}}>{f.d}</p></div>)}</div>
+  </div>);
+}

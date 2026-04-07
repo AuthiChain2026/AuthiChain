@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <defs>
+    <filter id="r-glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="r-soft">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="r-bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1a0e00"/>
+      <stop offset="100%" stop-color="#0d0800"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#r-bg)"/>
+  <g opacity="0.06" stroke="#b45309" stroke-width="0.5">
+    <line x1="0" y1="100" x2="600" y2="100"/><line x1="0" y1="200" x2="600" y2="200"/>
+    <line x1="0" y1="300" x2="600" y2="300"/><line x1="0" y1="400" x2="600" y2="400"/>
+    <line x1="0" y1="500" x2="600" y2="500"/>
+    <line x1="100" y1="0" x2="100" y2="600"/><line x1="200" y1="0" x2="200" y2="600"/>
+    <line x1="300" y1="0" x2="300" y2="600"/><line x1="400" y1="0" x2="400" y2="600"/>
+    <line x1="500" y1="0" x2="500" y2="600"/>
+  </g>
+  <!-- QR Finder - Top Left -->
+  <g filter="url(#r-glow)">
+    <rect x="30" y="30" width="120" height="120" rx="6" fill="none" stroke="#92400e" stroke-width="8"/>
+    <rect x="50" y="50" width="80" height="80" rx="4" fill="none" stroke="#b45309" stroke-width="6"/>
+    <rect x="68" y="68" width="44" height="44" rx="3" fill="#d97706"/>
+  </g>
+  <!-- QR Finder - Top Right -->
+  <g filter="url(#r-glow)">
+    <rect x="450" y="30" width="120" height="120" rx="6" fill="none" stroke="#92400e" stroke-width="8"/>
+    <rect x="470" y="50" width="80" height="80" rx="4" fill="none" stroke="#b45309" stroke-width="6"/>
+    <rect x="488" y="68" width="44" height="44" rx="3" fill="#d97706"/>
+  </g>
+  <!-- QR Finder - Bottom Left -->
+  <g filter="url(#r-glow)">
+    <rect x="30" y="450" width="120" height="120" rx="6" fill="none" stroke="#92400e" stroke-width="8"/>
+    <rect x="50" y="470" width="80" height="80" rx="4" fill="none" stroke="#b45309" stroke-width="6"/>
+    <rect x="68" y="488" width="44" height="44" rx="3" fill="#d97706"/>
+  </g>
+  <!-- Timing patterns -->
+  <g fill="#92400e" opacity="0.7">
+    <rect x="170" y="82" width="12" height="12" rx="2"/><rect x="198" y="82" width="12" height="12" rx="2"/>
+    <rect x="226" y="82" width="12" height="12" rx="2"/><rect x="254" y="82" width="12" height="12" rx="2"/>
+    <rect x="282" y="82" width="12" height="12" rx="2"/><rect x="310" y="82" width="12" height="12" rx="2"/>
+    <rect x="338" y="82" width="12" height="12" rx="2"/><rect x="366" y="82" width="12" height="12" rx="2"/>
+    <rect x="394" y="82" width="12" height="12" rx="2"/><rect x="422" y="82" width="12" height="12" rx="2"/>
+    <rect x="82" y="170" width="12" height="12" rx="2"/><rect x="82" y="198" width="12" height="12" rx="2"/>
+    <rect x="82" y="226" width="12" height="12" rx="2"/><rect x="82" y="254" width="12" height="12" rx="2"/>
+    <rect x="82" y="282" width="12" height="12" rx="2"/><rect x="82" y="310" width="12" height="12" rx="2"/>
+    <rect x="82" y="338" width="12" height="12" rx="2"/><rect x="82" y="366" width="12" height="12" rx="2"/>
+    <rect x="82" y="394" width="12" height="12" rx="2"/><rect x="82" y="422" width="12" height="12" rx="2"/>
+  </g>
+  <!-- Central coffee bean modules -->
+  <g filter="url(#r-soft)">
+    <ellipse cx="210" cy="210" rx="12" ry="8" fill="#d97706" opacity="0.9" transform="rotate(15,210,210)"/>
+    <ellipse cx="245" cy="218" rx="10" ry="7" fill="#b45309" opacity="0.85" transform="rotate(-10,245,218)"/>
+    <ellipse cx="280" cy="205" rx="13" ry="9" fill="#92400e" opacity="0.9" transform="rotate(20,280,205)"/>
+    <ellipse cx="315" cy="215" rx="11" ry="8" fill="#d97706" opacity="0.85" transform="rotate(-5,315,215)"/>
+    <ellipse cx="350" cy="208" rx="12" ry="7" fill="#b45309" opacity="0.9" transform="rotate(10,350,208)"/>
+    <ellipse cx="385" cy="212" rx="10" ry="7" fill="#d97706" opacity="0.8" transform="rotate(-20,385,212)"/>
+    <ellipse cx="200" cy="248" rx="9" ry="6" fill="#b45309" opacity="0.7" transform="rotate(22,200,248)"/>
+    <ellipse cx="230" cy="255" rx="13" ry="9" fill="#d97706" opacity="0.95" transform="rotate(-8,230,255)"/>
+    <ellipse cx="265" cy="245" rx="10" ry="7" fill="#92400e" opacity="0.85" transform="rotate(18,265,245)"/>
+    <ellipse cx="300" cy="258" rx="14" ry="10" fill="#d97706" opacity="1" transform="rotate(-12,300,258)"/>
+    <ellipse cx="335" cy="250" rx="11" ry="7" fill="#b45309" opacity="0.85" transform="rotate(8,335,250)"/>
+    <ellipse cx="370" cy="242" rx="12" ry="8" fill="#92400e" opacity="0.9" transform="rotate(-15,370,242)"/>
+    <ellipse cx="400" cy="255" rx="9" ry="6" fill="#d97706" opacity="0.8" transform="rotate(25,400,255)"/>
+    <ellipse cx="215" cy="290" rx="13" ry="9" fill="#d97706" opacity="0.9" transform="rotate(12,215,290)"/>
+    <ellipse cx="250" cy="295" rx="11" ry="8" fill="#b45309" opacity="0.85" transform="rotate(-18,250,295)"/>
+    <ellipse cx="285" cy="285" rx="14" ry="10" fill="#92400e" opacity="0.95" transform="rotate(5,285,285)"/>
+    <ellipse cx="320" cy="300" rx="12" ry="8" fill="#d97706" opacity="0.9" transform="rotate(-10,320,300)"/>
+    <ellipse cx="355" cy="288" rx="13" ry="9" fill="#b45309" opacity="0.9" transform="rotate(15,355,288)"/>
+    <ellipse cx="388" cy="292" rx="10" ry="7" fill="#d97706" opacity="0.85" transform="rotate(-22,388,292)"/>
+    <ellipse cx="205" cy="325" rx="11" ry="7" fill="#92400e" opacity="0.85" transform="rotate(25,205,325)"/>
+    <ellipse cx="238" cy="332" rx="14" ry="10" fill="#d97706" opacity="0.95" transform="rotate(-8,238,332)"/>
+    <ellipse cx="272" cy="322" rx="12" ry="8" fill="#b45309" opacity="0.9" transform="rotate(18,272,322)"/>
+    <ellipse cx="308" cy="335" rx="15" ry="10" fill="#d97706" opacity="1" transform="rotate(-5,308,335)"/>
+    <ellipse cx="342" cy="328" rx="13" ry="9" fill="#92400e" opacity="0.9" transform="rotate(12,342,328)"/>
+    <ellipse cx="375" cy="320" rx="11" ry="7" fill="#b45309" opacity="0.85" transform="rotate(-18,375,320)"/>
+    <ellipse cx="405" cy="330" rx="10" ry="7" fill="#d97706" opacity="0.8" transform="rotate(8,405,330)"/>
+    <ellipse cx="212" cy="365" rx="10" ry="7" fill="#b45309" opacity="0.8" transform="rotate(-12,212,365)"/>
+    <ellipse cx="248" cy="372" rx="13" ry="9" fill="#d97706" opacity="0.9" transform="rotate(22,248,372)"/>
+    <ellipse cx="282" cy="360" rx="11" ry="8" fill="#92400e" opacity="0.85" transform="rotate(-15,282,360)"/>
+    <ellipse cx="318" cy="368" rx="12" ry="8" fill="#b45309" opacity="0.9" transform="rotate(5,318,368)"/>
+    <ellipse cx="352" cy="375" rx="14" ry="10" fill="#d97706" opacity="0.95" transform="rotate(-10,352,375)"/>
+    <ellipse cx="385" cy="362" rx="10" ry="7" fill="#92400e" opacity="0.8" transform="rotate(16,385,362)"/>
+    <ellipse cx="225" cy="400" rx="11" ry="7" fill="#d97706" opacity="0.75" transform="rotate(-8,225,400)"/>
+    <ellipse cx="260" cy="408" rx="12" ry="8" fill="#b45309" opacity="0.85" transform="rotate(15,260,408)"/>
+    <ellipse cx="295" cy="398" rx="10" ry="7" fill="#92400e" opacity="0.8" transform="rotate(-20,295,398)"/>
+    <ellipse cx="330" cy="405" rx="11" ry="8" fill="#d97706" opacity="0.9" transform="rotate(10,330,405)"/>
+    <ellipse cx="365" cy="410" rx="9" ry="6" fill="#b45309" opacity="0.8" transform="rotate(-5,365,410)"/>
+    <ellipse cx="395" cy="400" rx="10" ry="7" fill="#d97706" opacity="0.7" transform="rotate(18,395,400)"/>
+  </g>
+  <!-- Scattered edge data modules -->
+  <g fill="#92400e" opacity="0.5">
+    <rect x="180" y="170" width="10" height="10" rx="2"/><rect x="420" y="175" width="10" height="10" rx="2"/>
+    <rect x="175" y="430" width="10" height="10" rx="2"/><rect x="425" y="435" width="10" height="10" rx="2"/>
+    <rect x="500" y="200" width="10" height="10" rx="2"/><rect x="515" y="235" width="10" height="10" rx="2"/>
+    <rect x="498" y="270" width="10" height="10" rx="2"/><rect x="522" y="305" width="10" height="10" rx="2"/>
+    <rect x="505" y="340" width="10" height="10" rx="2"/><rect x="518" y="375" width="10" height="10" rx="2"/>
+    <rect x="500" y="410" width="10" height="10" rx="2"/><rect x="525" y="445" width="10" height="10" rx="2"/>
+    <rect x="492" y="480" width="10" height="10" rx="2"/><rect x="512" y="510" width="10" height="10" rx="2"/>
+    <rect x="535" y="490" width="10" height="10" rx="2"/><rect x="200" y="508" width="10" height="10" rx="2"/>
+    <rect x="240" y="518" width="10" height="10" rx="2"/><rect x="280" y="500" width="10" height="10" rx="2"/>
+    <rect x="320" y="525" width="10" height="10" rx="2"/><rect x="360" y="510" width="10" height="10" rx="2"/>
+    <rect x="400" y="520" width="10" height="10" rx="2"/><rect x="440" y="498" width="10" height="10" rx="2"/>
+    <rect x="460" y="525" width="10" height="10" rx="2"/><rect x="540" y="545" width="10" height="10" rx="2"/>
+    <rect x="555" y="520" width="8" height="8" rx="2"/><rect x="535" y="555" width="8" height="8" rx="2"/>
+  </g>
+  <!-- Coffee steam wisps -->
+  <g stroke="#d97706" fill="none" stroke-width="1.5" opacity="0.12">
+    <path d="M280,185 Q290,160 280,135 Q270,110 280,85"/>
+    <path d="M310,190 Q320,165 310,140 Q300,115 310,90"/>
+    <path d="M340,185 Q350,160 340,135 Q330,110 340,85"/>
+  </g>
+  <!-- Alignment pattern -->
+  <g filter="url(#r-glow)">
+    <rect x="440" y="440" width="40" height="40" rx="3" fill="none" stroke="#92400e" stroke-width="4"/>
+    <rect x="452" y="452" width="16" height="16" rx="2" fill="#d97706"/>
+  </g>
+</svg>

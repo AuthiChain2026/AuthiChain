@@ -1,0 +1,17 @@
+export const metadata={title:'AuthiChain for Fashion — Apparel & Brand Authentication',description:'Blockchain authentication for fashion brands. Verify origin, combat grey market diversion, and earn consumer trust with QRON art QR and EU DPP compliance.'};
+export default function FashionPage(){
+  const stats=[{v:'$4.5B',l:'Counterfeit fashion market annually'},{v:'25%',l:'Luxury fashion sold via grey market'},{v:'2026',l:'EU DPP textiles mandate deadline'},{v:'3x',l:'Scan rate vs standard QR codes'}];
+  const features=[{icon:'👗',t:'Garment Authentication',d:'Every piece: AUTHI-BRAND-APP-* truemark at manufacture. Material composition, origin country, factory ID anchored on Polygon. EU DPP textiles auto-generated.'},{icon:'🏷️',t:'EU DPP Textiles',d:'EU Digital Product Passport textiles mandate 2026. AuthiChain generates compliant DPP per SKU: material, origin, repairability score, recycling instructions.'},{icon:'🔍',t:'Grey Market Scout',d:'Scout monitors StockX, Grailed, Vestiaire Collective, eBay for unauthorized distribution of your SKUs. Automatic brand alert on suspicious pricing patterns.'},{icon:'🎨',t:'QRON Art Labels',d:'Replace boring black QR squares with AI-generated fabric patterns, botanical prints, or brand-themed art. Scan rate 3x higher. Premium brand experience at point of sale.'},{icon:'♻️',t:'Sustainability Claims',d:'Organic cotton, Fair Trade, recycled fiber claims anchored on-chain. Archivist traces from farm to garment. Consumers verify ESG claims instantly.'},{icon:'⚡',t:'Season Drop Authentication',d:'Limited edition releases get AUTHI-* truemark at production. Sentinel detects velocity spikes around drop dates. Anti-bot and anti-flipper protection.'}];
+  return(<div style={{maxWidth:900,margin:'0 auto',padding:'60px 20px',background:'#0a0a0a',color:'#e5e5e5',fontFamily:'sans-serif',minHeight:'100vh'}}>
+    <div style={{textAlign:'center',marginBottom:60}}>
+      <p style={{color:'#C9A227',fontWeight:700,letterSpacing:'.2em',fontSize:12,marginBottom:16}}>AUTHICHAIN · FASHION</p>
+      <h1 style={{fontSize:48,fontWeight:800,color:'#fff',lineHeight:1.1,marginBottom:16}}>Every Stitch.<br/>Every Origin. Verified.</h1>
+      <p style={{fontSize:18,color:'#aaa',maxWidth:560,margin:'0 auto 32px'}}>Blockchain authentication for apparel and fashion brands. Combat counterfeiting, prove sustainability, and engage consumers with scan-to-earn rewards.</p>
+      <div style={{display:'flex',gap:16,justifyContent:'center',flexWrap:'wrap'}}>
+        <a href="https://authichain.com/pricing" style={{padding:'14px 28px',background:'#C9A227',color:'#000',fontWeight:700,textDecoration:'none',borderRadius:8}}>Start Free →</a>
+      </div>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginBottom:60}}>{stats.map((s,i)=><div key={i} style={{background:'#111',border:'1px solid #C9A22740',borderRadius:12,padding:24,textAlign:'center'}}><div style={{fontSize:24,fontWeight:800,color:'#C9A227',marginBottom:8}}>{s.v}</div><p style={{color:'#888',fontSize:13,margin:0}}>{s.l}</p></div>)}</div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:24}}>{features.map((f,i)=><div key={i} style={{background:'#111',border:'1px solid #ffffff10',borderRadius:12,padding:24}}><div style={{fontSize:28,marginBottom:12}}>{f.icon}</div><h3 style={{color:'#fff',marginBottom:8,fontSize:16}}>{f.t}</h3><p style={{color:'#888',fontSize:14,lineHeight:1.5}}>{f.d}</p></div>)}</div>
+  </div>);
+}

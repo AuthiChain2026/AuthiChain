@@ -1,0 +1,15 @@
+export const metadata={title:'AuthiChain for Fine Wine \u2014 Vineyard to Cellar Authentication',description:'Blockchain provenance for fine wine. Vintage claims verified, refill detection active, sommelier scan in <200ms.'};
+export default function WinePage(){
+  const stats=[{v:'$2.1B',l:'Counterfeit wine market'},{v:'5%',l:'All US wine is counterfeit'},{v:'6',l:'Provenance events per bottle'},{v:'$QRON',l:'Sommelier rewards per scan'}];
+  const features=[{icon:'\ud83c\udf77',t:'Vineyard Registration',d:'Every lot: harvest date, grape variety, vineyard GPS. AUTHI-WINE-* on Polygon at harvest. Archivist builds the complete story.'},{icon:'\ud83c\udff7\ufe0f',t:'Vintage Verification',d:'2019 Petrus claim verified via blockchain timestamp. No more fraudulent vintage claims at auction or restaurant.'},{icon:'\ud83d\udcf1',t:'Sommelier Scan',d:'Scan QRON art label before service. Guardian confirms authenticity in <200ms. Premium scan experience for luxury restaurants.'},{icon:'\ud83d\udee1\ufe0f',t:'Anti-Refill Detection',d:'Sentinel velocity tracking: same bottle scanned 10x in 30 days triggers refilling investigation.'},{icon:'\ud83c\udf0d',t:'Cellar Tracking',d:'Investor cellar inventory registered. Each bottle provenance visible at authichain.com/verify. Transfer of custody on-chain.'},{icon:'\u26a1',t:'EU Wine DPP',d:'EU Digital Product Passport mandate includes wine. AuthiChain auto-generates DPP: origin, additives, sustainability score.'}];
+  return(<div style={{maxWidth:900,margin:'0 auto',padding:'60px 20px',background:'#0a0a0a',color:'#e5e5e5',fontFamily:'sans-serif',minHeight:'100vh'}}>
+    <div style={{textAlign:'center',marginBottom:60}}>
+      <p style={{color:'#C9A227',fontWeight:700,letterSpacing:'.2em',fontSize:12,marginBottom:16}}>AUTHICHAIN \u00b7 FINE WINE</p>
+      <h1 style={{fontSize:48,fontWeight:800,color:'#fff',lineHeight:1.1,marginBottom:16}}>Every Bottle Tells a Story.<br/>Make It Verifiable.</h1>
+      <p style={{fontSize:18,color:'#aaa',maxWidth:560,margin:'0 auto 32px'}}>Blockchain provenance from vineyard to cellar. Vintage claims verified, refills detected, sommeliers rewarded.</p>
+      <a href="https://authichain.com/pricing" style={{display:'inline-block',padding:'14px 28px',background:'#C9A227',color:'#000',fontWeight:700,textDecoration:'none',borderRadius:8}}>Start Free \u2192</a>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginBottom:60}}>{stats.map((s,i)=><div key={i} style={{background:'#111',border:'1px solid #C9A22740',borderRadius:12,padding:24,textAlign:'center'}}><div style={{fontSize:24,fontWeight:800,color:'#C9A227',marginBottom:8}}>{s.v}</div><p style={{color:'#888',fontSize:13,margin:0}}>{s.l}</p></div>)}</div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:24}}>{features.map((f,i)=><div key={i} style={{background:'#111',border:'1px solid #ffffff10',borderRadius:12,padding:24}}><div style={{fontSize:28,marginBottom:12}}>{f.icon}</div><h3 style={{color:'#fff',marginBottom:8,fontSize:16}}>{f.t}</h3><p style={{color:'#888',fontSize:14,lineHeight:1.5}}>{f.d}</p></div>)}</div>
+  </div>);
+}

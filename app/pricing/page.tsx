@@ -68,7 +68,7 @@ const PLANS = [
 
 function PricingContent() {
   const [annual, setAnnual] = useState(false)
-  const [loading, setLoading] = useState(null)
+  const [loading, setLoading] = useState<string | null>(null)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const router = useRouter()
   const params = useSearchParams()

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Authentic Economy — Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#C9A227;--gold2:rgba(201,162,39,.15);--gold3:rgba(201,162,39,.07);--bg:#080808;--s1:#0e0e0e;--s2:#141414;--border:rgba(255,255,255,.05);--bGold:rgba(201,162,39,.2);--green:#1aab78;--red:#e24b4a;--blue:#378add;--amber:#f0a030;--purple:#8b7fd4;--text:#e0e0e0;--dim:#666;--mid:#999;--mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12px;min-height:100%;overflow-x:hidden}
+.hdr{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:16px 24px 12px;border-bottom:1px solid var(--bGold);background:var(--s1);position:sticky;top:0;z-index:100}
+.logo{font-family:var(--sans);font-size:11px;font-weight:900;letter-spacing:.25em;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.logo-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.hdr-center{text-align:center}
+.hdr-title{font-family:var(--sans);font-size:13px;font-weight:800;color:#fff;letter-spacing:.05em}
+.hdr-sub{font-size:9px;color:var(--dim);letter-spacing:.1em;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.status-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid rgba(26,171,120,.3);border-radius:2px;font-size:9px;font-weight:700;color:var(--green);letter-spacing:.1em}
+.pulse{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.clock{font-size:10px;color:var(--dim)}
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 24px;background:var(--s1);position:sticky;top:57px;z-index:99;overflow-x:auto}
+.tab{padding:10px 16px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s}
+.tab:hover{color:var(--mid)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--gold);color:#000;font-size:8px;margin-left:5px;font-weight:700}
+.badge.red{background:var(--red)}
+.badge.green{background:var(--green)}
+.badge.amber{background:var(--amber)}
+.main{padding:20px 24px;max-width:1400px;margin:0 auto}
+.kpi-row{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px}
+.kpi{background:var(--s1);border:1px solid var(--border);padding:14px 12px;position:relative;overflow:hidden}
+.kpi.gold{border-color:var(--bGold);background:var(--gold3)}
+.kpi.red{border-color:rgba(226,75,74,.25);background:rgba(226,75,74,.04)}
+.kpi.green{border-color:rgba(26,171,120,.25);background:rgba(26,171,120,.04)}
+.kpi-val{font-family:var(--sans);font-size:22px;font-weight:900;color:var(--gold);line-height:1;margin-bottom:4px}
+.kpi.red .kpi-val{color:var(--red)}
+.kpi.green .kpi-val{color:var(--green)}
+.kpi-lbl{font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em}
+.kpi-delta{position:absolute;top:10px;right:10px;font-size:8px;color:var(--green)}
+.section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.section-title{font-family:var(--sans);font-size:11px;font-weight:800;letter-spacing:.15em;color:var(--text);text-transform:uppercase}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.card{background:var(--s1);border:1px solid var(--border);padding:14px}
+.card.gold{border-color:var(--bGold)}
+.infra-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)}
+.infra-item:last-child{border:none}
+.ii-name{font-size:10px;color:var(--mid);display:flex;align-items:center;gap:8px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+.dot.amber{background:var(--amber)}
+.dot.red{background:var(--red)}
+.ii-val{font-size:11px;font-weight:700;color:var(--text)}
+.comp-item{background:var(--s2);border:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.comp-item.approved{border-color:rgba(26,171,120,.3);background:rgba(26,171,120,.04)}
+.comp-item.urgent{border-color:rgba(240,160,48,.3);background:rgba(240,160,48,.04)}
+.comp-days{font-family:var(--sans);font-size:20px;font-weight:900;min-width:40px;text-align:center}
+.comp-meta{flex:1}
+.comp-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px}
+.comp-prize{font-size:9px;color:var(--dim)}
+.comp-badge{font-size:8px;font-weight:700;padding:2px 7px;letter-spacing:.1em}
+.b-approved{background:rgba(26,171,120,.15);color:var(--green);border:1px solid rgba(26,171,120,.3)}
+.b-ready{background:rgba(201,162,39,.12);color:var(--gold);border:1px solid var(--bGold)}
+.blocker{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--s2);border:1px solid rgba(226,75,74,.2);margin-bottom:6px}
+.blocker.done{border-color:rgba(26,171,120,.2);opacity:.6}
+.bl-num{font-family:var(--sans);font-size:16px;font-weight:900;color:var(--red);min-width:24px}
+.blocker.done .bl-num{color:var(--green)}
+.bl-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px}
+.blocker.done .bl-title{text-decoration:line-through;color:var(--dim)}
+.bl-desc{font-size:9px;color:var(--dim);line-height:1.5}
+.bl-action{font-size:8px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.tier-item{margin-bottom:12px}
+.tier-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.tier-name{font-size:10px;font-weight:700;color:var(--mid)}
+.tier-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.tier-fill{height:100%;border-radius:2px;transition:width 1.2s ease;background:var(--green)}
+.rev-box{padding:20px;border:1px solid var(--bGold);background:var(--gold3);text-align:center;margin-bottom:16px}
+.hidden{display:none}
+@media(max-width:768px){.kpi-row{grid-template-columns:repeat(3,1fr)}.grid-2{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="logo"><span class="logo-dot"></span>AUTHENTIC ECONOMY</div>
+  <div class="hdr-center">
+    <div class="hdr-title">COMMAND CENTER</div>
+    <div class="hdr-sub">AuthiChain · QRON Space · StrainChain · Apr 2026</div>
+  </div>
+  <div class="hdr-right">
+    <div class="status-pill"><span class="pulse"></span>100% HEALTH</div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</div>
+<div class="tab-bar">
+  <div class="tab active" onclick="showTab('overview',this)">Overview</div>
+  <div class="tab" onclick="showTab('infra',this)">Infrastructure<span class="badge green">81</span></div>
+  <div class="tab" onclick="showTab('pipeline',this)">Pipeline<span class="badge">144</span></div>
+  <div class="tab" onclick="showTab('competitions',this)">Competitions<span class="badge amber">3</span></div>
+  <div class="tab" onclick="showTab('blockers',this)">Blockers<span class="badge red">3</span></div>
+  <div class="tab" onclick="showTab('freetier',this)">Free Tiers<span class="badge green">$0</span></div>
+</div>
+<div class="main">
+<div class="kpi-row">
+  <div class="kpi red"><div class="kpi-val">$0</div><div class="kpi-lbl">Revenue Collected</div></div>
+  <div class="kpi gold"><div class="kpi-val">$49M</div><div class="kpi-lbl">Pipeline ACV</div><div class="kpi-delta">144 deals</div></div>
+  <div class="kpi green"><div class="kpi-val">100%</div><div class="kpi-lbl">System Health</div><div class="kpi-delta">13/13</div></div>
+  <div class="kpi"><div class="kpi-val" style="color:#378add">81</div><div class="kpi-lbl">Edge Functions</div></div>
+  <div class="kpi"><div class="kpi-val" style="color:#8b7fd4">17</div><div class="kpi-lbl">SEO Pages</div></div>
+  <div class="kpi"><div class="kpi-val" style="color:#f0a030">16</div><div class="kpi-lbl">Competitions</div></div>
+  <div class="kpi gold"><div class="kpi-val">$0</div><div class="kpi-lbl">Monthly Spend</div></div>
+</div>
+
+<!-- OVERVIEW -->
+<div id="tab-overview">
+  <div class="rev-box">
+    <div style="font-family:Syne,sans-serif;font-size:48px;font-weight:900;color:var(--red)">$0</div>
+    <div style="font-size:10px;color:var(--dim);margin-top:6px">COLLECTED — STRIPE WEBHOOK NOW RESOLVED · EMAIL VIA RESEND RELAY</div>
+    <div style="font-family:Syne,sans-serif;font-size:24px;font-weight:900;color:var(--gold);margin-top:12px">$49M pipeline ready to convert</div>
+  </div>
+  <div class="grid-3">
+    <div class="card" style="border-color:var(--bGold)">
+      <div class="section-hdr"><div class="section-title">AuthiChain</div><div style="font-size:9px;color:var(--green)">authichain.com</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot"></span>Products Authenticated</div><div class="ii-val">12</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot"></span>Certificates Issued</div><div class="ii-val">16</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot"></span>Auth Rate</div><div class="ii-val" style="color:var(--green)">100%</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot"></span>QRON Rewarded</div><div class="ii-val">95 tokens</div></div>
+      <div class="infra-item" style="border:none"><div class="ii-name"><span class="dot"></span>Pricing</div><div class="ii-val">$299/$799/Custom</div></div>
+    </div>
+    <div class="card">
+      <div class="section-hdr"><div class="section-title">QRON Space</div><div style="font-size:9px;color:var(--green)">qron.space</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot"></span>AI QR Generator</div><div class="ii-val">FLUX.1+ControlNet</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot"></span>Pricing</div><div class="ii-val">$29/$49/$99</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot amber"></span>Storefront v4</div><div class="ii-val" style="color:var(--amber)">deploy pending</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot"></span>First Revenue</div><div class="ii-val">$127 (Dec 2025)</div></div>
+      <div class="infra-item" style="border:none"><div class="ii-name"><span class="dot"></span>Stripe Links</div><div class="ii-val">3 live</div></div>
+    </div>
+    <div class="card">
+      <div class="section-hdr"><div class="section-title">StrainChain</div><div style="font-size:9px;color:var(--green)">strainchain.io</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot"></span>METRC Bridge</div><div class="ii-val">ACTIVE</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot"></span>COA Anchoring</div><div class="ii-val">ACTIVE</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot"></span>Demo Product</div><div class="ii-val">OG Kush · Verified</div></div>
+      <div class="infra-item"><div class="ii-name"><span class="dot"></span>MSO Pipeline</div><div class="ii-val">Trulieve, Curaleaf</div></div>
+      <div class="infra-item" style="border:none"><div class="ii-name"><span class="dot"></span>Casa Verde Capital</div><div class="ii-val">$3M seed</div></div>
+    </div>
+  </div>
+  <div style="margin-top:16px">
+    <div class="section-hdr"><div class="section-title">5-Agent AI Consensus</div></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      ${[['GUARDIAN','35%','#C9A227'],['SENTINEL','25%','#378add'],['ARCHIVIST','20%','#8b7fd4'],['ARBITER','12%','#e24b4a'],['SCOUT','8%','#1aab78']].map(([n,w,c])=>`<div style="flex:1;min-width:100px;background:var(--s2);border:1px solid var(--border);padding:16px;text-align:center"><div style="font-size:24px;font-weight:900;font-family:Syne,sans-serif;color:${c}">${n[0]}</div><div style="font-size:10px;font-weight:700;color:var(--text);margin-top:6px">${n}</div><div style="font-size:9px;color:var(--dim)">${w} weight</div></div>`).join('')}
+    </div>
+  </div>
+</div>
+
+<!-- INFRA -->
+<div id="tab-infra" class="hidden">
+  <div class="grid-2">
+    <div>
+      <div class="section-hdr"><div class="section-title">Platform Stats</div></div>
+      <div class="card">
+        ${[['Edge Functions (Supabase)','81'],['DB Tables','108'],['CF Workers','36'],['Vercel Projects','11 (3 active)'],['GitHub Commits Today','20+'],['SEO Pages Live','17'],['HubSpot Deals','144'],['API Keys Active','1'],['System Health','100% — 13/13']].map(([k,v])=>`<div class="infra-item"><div class="ii-name"><span class="dot"></span>${k}</div><div class="ii-val">${v}</div></div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div class="section-hdr"><div class="section-title">Hosting — $0/month</div></div>
+      <div class="card gold">
+        ${[['authichain.com','Vercel Hobby + CF Worker','LIVE'],['qron.space','Vercel Hobby + CF Worker','LIVE'],['strainchain.io','CF Worker','LIVE'],['authichain-dashboard','GitHub Pages','NEW ✓'],['Supabase','Free tier — 500K invocations/mo','LIVE'],['Groq AI','Free tier — 14,400 req/day','LIVE'],['HubSpot CRM','Free tier — unlimited deals','LIVE'],['Resend Email','CF Worker relay — 3K/day free','LIVE ✓']].map(([s,d,st])=>`<div class="infra-item"><div class="ii-name"><span class="dot ${st.includes('NEW')||st.includes('✓')?'':''}"></span><span>${s}</span><span style="font-size:8px;color:var(--dim);margin-left:6px">${d}</span></div><div style="font-size:8px;font-weight:700;color:var(--green)">${st}</div></div>`).join('')}
+      </div>
+      <div class="section-hdr" style="margin-top:16px"><div class="section-title">Email Workaround — $0</div></div>
+      <div class="card" style="border-color:rgba(26,171,120,.3);background:rgba(26,171,120,.03)">
+        <div style="font-size:10px;color:var(--text);margin-bottom:8px">resend-relay CF Worker → Sends from <strong>z@authichain.com</strong></div>
+        <div style="font-size:9px;color:var(--dim);line-height:1.6">Bypasses Google Workspace billing completely.<br>CF Workers call Resend API directly — IPs not blocked.<br>3,000 emails/day free. SPF+DKIM+DMARC aligned.<br>Endpoint: resend-relay.undone-k.workers.dev</div>
+        <div style="margin-top:8px;font-size:9px;color:var(--green);font-weight:700">✓ LIVE — Outreach unblocked at $0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PIPELINE -->
+<div id="tab-pipeline" class="hidden">
+  <div class="rev-box" style="margin-bottom:16px;padding:16px">
+    <div style="font-family:Syne,sans-serif;font-size:36px;font-weight:900;color:var(--gold)">$49,175,000</div>
+    <div style="font-size:9px;color:var(--dim);margin-top:4px">Total ACV · 144 deals · HubSpot portal 245112265</div>
+  </div>
+  <div class="grid-2">
+    <div>
+      <div class="section-hdr"><div class="section-title">By Stage</div></div>
+      <div class="card">
+        ${[['Contract Sent','8','$10.4M','var(--gold)'],['Presentation Scheduled','28','$18.7M','var(--blue)'],['Appointment Scheduled','108','$20.1M','var(--purple)']].map(([s,c,a,col])=>`<div class="infra-item"><div style="flex:1"><div class="ii-name">${s}</div><div style="font-size:8px;color:var(--dim)">${a} ACV</div></div><div class="ii-val" style="color:${col}">${c}</div></div>`).join('')}
+      </div>
+      <div class="section-hdr" style="margin-top:16px"><div class="section-title">By Vertical</div></div>
+      <div class="card">
+        ${[['Government / Federal','$9.5M'],['Luxury / Fashion','$8.2M'],['Pharma / Medical','$5.8M'],['Cannabis / StrainChain','$5.1M'],['Automotive','$4.3M'],['Consumer Goods','$4.8M'],['Technology / SaaS','$4.2M'],['Spirits / Wine','$3.6M'],['Competitions','$2.8M']].map(([v,a])=>`<div class="infra-item"><div class="ii-name">${v}</div><div class="ii-val" style="color:var(--gold)">${a}</div></div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div class="section-hdr"><div class="section-title">Top Deals</div></div>
+      <div class="card" style="overflow-y:auto;max-height:500px">
+        ${[['CBP Import Auth','$3.5M'],['US DoD Military','$2.5M'],['State Dept ITAR','$2.2M'],['Pfizer DSCSA','$2.2M'],['Casa Verde Capital','$3M'],['Nike Brand Protection','$1.5M'],['Amazon Brand Registry','$1.1M'],['J&J MedTech','$1.5M'],['FDA DSCSA','$1.8M'],['US Navy Supply Chain','$1.8M'],['3M Industrial','$1.4M'],['LVMH Watches','$800K'],['DHS SVIP','$800K'],['Sotheby Art','$1.2M']].map(([n,v])=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:9px"><span style="color:var(--mid)">${n}</span><span style="color:var(--gold);font-weight:700">${v}</span></div>`).join('')}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPETITIONS -->
+<div id="tab-competitions" class="hidden">
+  <div class="grid-2">
+    <div>
+      <div class="section-hdr"><div class="section-title">🔴 Urgent — Submit This Week</div></div>
+      ${[['6d','YC S26','$500K + network','#e24b4a','approved'],['10d','Paris Blockchain Week','$10M+ prizes','#f0a030','approved'],['11d','WMF2026 Startup','€50K + Mainstage','#f0a030','approved']].map(([d,n,p,c,s])=>`<div class="comp-item approved"><div class="comp-days" style="color:${c}">${d}</div><div class="comp-meta"><div class="comp-name">${n}</div><div class="comp-prize">${p} · Gmail draft ready</div></div><div class="comp-badge b-approved">APPROVED</div></div>`).join('')}
+      <div class="section-hdr" style="margin-top:16px"><div class="section-title">🟡 Ready — No Deadline Pressure</div></div>
+      ${[['47d','Pepperdine MostFundable','Entrepreneur Magazine + $375M network','ready'],['50d','Databricks Built-On','$1M+ prizes','draft'],['67d','Hello Tomorrow Deep Tech','Amsterdam · June 11','ready'],['Rolling','Pitch by Deel','$1M SAFE','ready'],['Rolling','47Pitches ×3','Investor intros','ready'],['Rolling','Global Startup Awards','US champion','ready']].map(([d,n,p,s])=>`<div class="comp-item urgent"><div class="comp-days" style="color:var(--dim)">${d}</div><div class="comp-meta"><div class="comp-name">${n}</div><div class="comp-prize">${p}</div></div><div class="comp-badge b-ready">${s.toUpperCase()}</div></div>`).join('')}
+    </div>
+    <div>
+      <div class="section-hdr"><div class="section-title">Prize Pool Summary</div></div>
+      <div class="card gold">
+        <div style="text-align:center;padding:16px 0">
+          <div style="font-family:Syne,sans-serif;font-size:36px;font-weight:900;color:var(--gold)">$13M+</div>
+          <div style="font-size:9px;color:var(--dim)">Combined competition prizes + investment</div>
+        </div>
+        ${[['YC S26','$500K + network'],['Paris Blockchain Week','$10M+ prizes'],['WMF2026','€50K + Mainstage'],['Pitch by Deel','$1M SAFE'],['Databricks Built-On','$1M+'],['Pepperdine MostFundable','Entrepreneur Mag'],['47Pitches × 3','Investor intros'],['DHS SVIP','$800K contract']].map(([c,p])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border);font-size:9px"><span style="color:var(--mid)">${c}</span><span style="color:var(--gold);font-weight:700">${p}</span></div>`).join('')}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCKERS -->
+<div id="tab-blockers" class="hidden">
+  <div class="grid-2">
+    <div>
+      <div class="section-hdr"><div class="section-title">Resolved ✓</div></div>
+      <div class="blocker done"><div class="bl-num">✓</div><div><div class="bl-title">Email outreach — z@authichain.com</div><div class="bl-desc">resend-relay CF Worker bypasses GWS billing. Sends from z@authichain.com via Resend API. 3K/day free. SPF+DKIM+DMARC aligned.</div><div class="bl-action">✓ RESOLVED — resend-relay.undone-k.workers.dev</div></div></div>
+      <div class="blocker done"><div class="bl-num">✓</div><div><div class="bl-title">STRIPE_WEBHOOK_SECRET — qron-app</div><div class="bl-desc">Vault confirms whsec_sQckljzsDRH2KucfQK6Zdu1rX0inRybp added to Vercel qron-app on Apr 5. qron-app redeployed (commit 9e6f5b5).</div><div class="bl-action">✓ CONFIRMED IN NOTION VAULT</div></div></div>
+      <div class="section-hdr" style="margin-top:16px"><div class="section-title">Still Pending</div></div>
+      <div class="blocker"><div class="bl-num">1</div><div><div class="bl-title">STRIPE_WEBHOOK_SECRET — authi-chain</div><div class="bl-desc">Needs adding to authi-chain (prj_mw2itvdc2kRcPlCooSeUNozaPn5B) specifically — different from qron-app.<br>Key: STRIPE_WEBHOOK_SECRET | Value: whsec_sQckljzsDRH2KucfQK6Zdu1rX0inRybp</div><div class="bl-action">→ vercel.com → authi-chain → Settings → Env Vars → Add → Redeploy (2 min)</div></div></div>
+      <div class="blocker"><div class="bl-num">2</div><div><div class="bl-title">Record 2-min founder video</div><div class="bl-desc">Needed for: 47Pitches (×3) + Pitch by Deel ($1M SAFE). Script ready in Gmail drafts.</div><div class="bl-action">→ Film Loom · Upload to 47pitches.com + deel.com/pitch (60 min)</div></div></div>
+      <div class="blocker"><div class="bl-num">3</div><div><div class="bl-title">wrangler deploy qron-storefront-v4.js</div><div class="bl-desc">Run locally. Fixes pricing bug. Enables QRON self-serve checkout.</div><div class="bl-action">→ Terminal: wrangler deploy qron-storefront-v4.js (5 min)</div></div></div>
+    </div>
+    <div>
+      <div class="section-hdr"><div class="section-title">Dominance Checklist</div></div>
+      <div class="card">
+        ${[['✅','5-agent AI consensus live','Guardian·Archivist·Sentinel·Scout·Arbiter'],[true,'QRON art QR pipeline','FLUX.1+ControlNet, 3x scan rate'],[true,'$QRON scan-to-earn','95 tokens rewarded'],[true,'Multi-vertical (12)','17 SEO pages live'],[true,'EU DPP built-in','5 mandates covered'],[true,'Self-serve pricing','$299/mo at authichain.com'],[true,'Email unblocked','resend-relay CF Worker active'],[true,'YC S26 applied','Draft approved, Gmail ready'],[true,'Dashboard hosted','GitHub Pages live'],[false,'First paying customer','Needs authi-chain webhook secret'],[false,'Enterprise contract','Outreach now unblocked via resend-relay'],[false,'ProductHunt','Submit at producthunt.com'],[false,'47Pitches entered','Founder video needed']].map(([done,t,d])=>`<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);align-items:flex-start"><div style="font-size:14px">${done===true?'✅':done===false?'⬜':'✅'}</div><div><div style="font-size:10px;color:${done===false?'var(--text)':'var(--dim)'};${done===true?'text-decoration:line-through':''}">${t}</div><div style="font-size:8px;color:var(--dim)">${d}</div></div></div>`).join('')}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FREE TIERS -->
+<div id="tab-freetier" class="hidden">
+  <div class="grid-2">
+    <div>
+      <div class="section-hdr"><div class="section-title">Monthly Usage</div></div>
+      <div class="card">
+        ${[['Supabase Edge Functions','6K','500K','invocations',1.2],['Cloudflare Workers','1.5K','3M','requests',0.05],['Groq API','900','432K','calls',0.21],['Resend (via CF relay)','0','3K','emails/day',0],['GitHub Actions','20','∞','minutes (public)',0.001],['Vercel','500','100K','invocations',0.5],['HubSpot CRM','144','∞','deals',0.001]].map(([n,u,l,unit,p])=>`<div class="tier-item"><div class="tier-hdr"><div class="tier-name">${n}</div><div style="font-size:10px;color:var(--green)">${p}%</div></div><div style="font-size:9px;color:var(--dim);margin-bottom:4px">${u} / ${l} ${unit}</div><div class="tier-bar"><div class="tier-fill" style="width:${Math.max(p,.2)}%;background:${p<10?'var(--green)':p<50?'var(--amber)':'var(--red)'}"></div></div></div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div class="section-hdr"><div class="section-title">Monthly Spend</div></div>
+      <div class="card gold">
+        <div style="text-align:center;padding:20px 0">
+          <div style="font-family:Syne,sans-serif;font-size:64px;font-weight:900;color:var(--green)">$0</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:8px">Total monthly infrastructure</div>
+          <div style="font-size:9px;color:var(--dim)">vs $3K–$15K/mo industry avg</div>
+        </div>
+        ${[['Supabase','$0'],['Cloudflare Workers','$0'],['Vercel Hobby','$0'],['GitHub (public repo)','$0'],['HubSpot Free CRM','$0'],['Groq Free Tier','$0'],['Resend via CF Relay','$0'],['GitHub Actions','$0'],['Google Workspace','$0 (bypassed via resend-relay)']].map(([s,c])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border);font-size:9px"><span style="color:var(--mid)">${s}</span><span style="color:var(--green);font-weight:700">${c}</span></div>`).join('')}
+      </div>
+      <div class="section-hdr" style="margin-top:16px"><div class="section-title">Automation Schedule</div></div>
+      <div class="card">
+        ${[['Daily 06:00 UTC','GitHub Actions','watchdog + trial convert + anomaly + competition alerts'],['Weekly Mon 08:00','GitHub Actions','scout + storymode batch + reputation update'],['Monthly 1st 06:00','GitHub Actions','full audit + metrics snapshot'],['Per Session','Manual trigger','8 deals + 1 edge fn + 2 SEO pages + Notion log']].map(([t,s,tasks])=>`<div style="padding:9px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><div style="font-size:10px;font-weight:700">${t}</div><div style="font-size:8px;color:var(--blue)">${s}</div></div><div style="font-size:8px;color:var(--dim)">${tasks}</div></div>`).join('')}
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+function showTab(id,el){
+  document.querySelectorAll('[id^="tab-"]').forEach(t=>t.classList.add('hidden'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.remove('hidden');
+  if(el)el.classList.add('active');
+}
+function updateClock(){document.getElementById('clock').textContent=new Date().toUTCString().slice(17,25)+' UTC';}
+setInterval(updateClock,1000);updateClock();
+</script>
+</body>
+</html>

@@ -84,5 +84,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "wrangler": "4.78.0"
-  }
+  },
+  "_agentZ": "supabase-ssr-publishable-key-v1",
+  "_agentZ_img": "og-icons-fixed-v1"
 }
