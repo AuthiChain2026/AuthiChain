@@ -6,7 +6,8 @@
     "price": 1190,
     "product_id": "a1000001-0001-4000-a000-000000000011",
     "storymode_url": "https://authichain.com/storymode/viewer?product_id=a1000001-0001-4000-a000-000000000011",
-    "qron_theme": "Cinematic couture — soft gold accents, runway lighting, high-contrast silhouette"
+    "qron_image": "/qron/qron-fashion.png",
+    "qron_theme": "Gold art-deco fashion — runway couture, vintage elegance"
   },
   {
     "product_name": "Patek Philippe Nautilus 5711/1A",
@@ -15,7 +16,8 @@
     "price": 85000,
     "product_id": "a1000001-0001-4000-a000-000000000002",
     "storymode_url": "https://authichain.com/storymode/viewer?product_id=a1000001-0001-4000-a000-000000000002",
-    "qron_theme": "Emerald-gold Rolex/Patek hybrid — precision dial rings, brushed steel texture"
+    "qron_image": "/qron/qron-luxury.png",
+    "qron_theme": "Gold marble classical — museum grandeur, candlelit prestige"
   },
   {
     "product_name": "Kopi Luwak Heritage Reserve Coffee",
@@ -24,7 +26,8 @@
     "price": 289,
     "product_id": "a1000001-0001-4000-a000-000000000003",
     "storymode_url": "https://authichain.com/storymode/viewer?product_id=a1000001-0001-4000-a000-000000000003",
-    "qron_theme": "Artisanal craft — warm earth tones, botanical motifs, micro-engraved texture"
+    "qron_image": "/qron/qron-food.png",
+    "qron_theme": "Brown coffee beans — warm earth tones, artisanal craft"
   },
   {
     "product_name": "Sony WH-1000XM6 Headphones",
@@ -33,7 +36,8 @@
     "price": 449,
     "product_id": "a1000001-0001-4000-a000-000000000004",
     "storymode_url": "https://authichain.com/storymode/viewer?product_id=a1000001-0001-4000-a000-000000000004",
-    "qron_theme": "Futuristic audio — neon edges, waveform-inspired modules, dark tech aesthetic"
+    "qron_image": "/qron/qron-electronics.png",
+    "qron_theme": "Cyan circuit board — futuristic tech, neon data streams"
   },
   {
     "product_name": "NovaShield mRNA Booster Vial",
@@ -42,7 +46,8 @@
     "price": 42,
     "product_id": "a1000001-0001-4000-a000-000000000005",
     "storymode_url": "https://authichain.com/storymode/viewer?product_id=a1000001-0001-4000-a000-000000000005",
-    "qron_theme": "Clinical precision — sterile whites, micro-grid patterns, biotech luminescence"
+    "qron_image": "/qron/qron-pharma.png",
+    "qron_theme": "Teal clinical — sterile precision, biotech luminescence"
   },
   {
     "product_name": "Banksy 'Girl with Balloon' Print",
@@ -51,7 +56,8 @@
     "price": 320000,
     "product_id": "a1000001-0001-4000-a000-000000000006",
     "storymode_url": "https://authichain.com/storymode/viewer?product_id=a1000001-0001-4000-a000-000000000006",
-    "qron_theme": "Stencil-punk — distressed textures, spray-paint gradients, gallery-grade contrast"
+    "qron_image": "/qron/qron-art.png",
+    "qron_theme": "Blue glass architecture — gallery-grade, translucent depth"
   },
   {
     "product_name": "La Mer Creme de la Mer",
@@ -60,7 +66,8 @@
     "price": 380,
     "product_id": "a1000001-0001-4000-a000-000000000007",
     "storymode_url": "https://authichain.com/storymode/viewer?product_id=a1000001-0001-4000-a000-000000000007",
-    "qron_theme": "Oceanic luxury — teal gradients, pearl highlights, soft luminous edges"
+    "qron_image": "/qron/qron-cosmetics.png",
+    "qron_theme": "Pink neon nightlife — luminous beauty, urban glamour"
   },
   {
     "product_name": "Brembo GT-R Brake Caliper Set",
@@ -69,7 +76,8 @@
     "price": 4800,
     "product_id": "a1000001-0001-4000-a000-000000000008",
     "storymode_url": "https://authichain.com/storymode/viewer?product_id=a1000001-0001-4000-a000-000000000008",
-    "qron_theme": "Motorsport kinetic — red heat-flare accents, carbon fiber texture"
+    "qron_image": "/qron/qron-automotive.png",
+    "qron_theme": "Blue lightning supercar — electric velocity, kinetic power"
   },
   {
     "product_name": "Titleist Pro V1x Tour Edition",
@@ -78,7 +86,8 @@
     "price": 79.99,
     "product_id": "a1000001-0001-4000-a000-000000000009",
     "storymode_url": "https://authichain.com/storymode/viewer?product_id=a1000001-0001-4000-a000-000000000009",
-    "qron_theme": "Precision sport — clean white minimalism, micro-dimples, kinetic arcs"
+    "qron_image": "/qron/qron-sports.png",
+    "qron_theme": "Sports athletes — kinetic action, competitive precision"
   },
   {
     "product_name": "SKF Explorer Roller Bearing 22320",
