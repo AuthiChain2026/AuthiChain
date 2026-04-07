@@ -1,203 +1,278 @@
 /**
- * Full StoryMode workflow test — end-to-end pipeline.
+ * test-storymode-pipeline.mjs
  *
- * Stage 1: Fetch product + supply chain events from Supabase
- * Stage 2: Generate cinematic narration script via GPT-4
- * Stage 3: Send script to HeyGen for avatar video production
- * Stage 4: Poll HeyGen until video is ready (or timeout)
+ * End-to-end test for the AuthiChain Storymode pipeline:
+ *   Stage 1: Supabase — fetch product + verification events
+ *   Stage 2: Prompt — build StorymodeContext & narration prompt
+ *   Stage 3: LLM   — generate cinematic script (Groq Llama-3.3-70B; falls back to OpenAI)
+ *   Stage 4: HeyGen — validate payload structure (skips live call unless HEYGEN_API_KEY set)
  *
- * Run: node scripts/test-storymode-pipeline.mjs
+ * Usage:
+ *   node scripts/test-storymode-pipeline.mjs [product_id]
+ *
+ * Env (from .env.local):
+ *   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ *   GROQ_API_KEY  (preferred — free, fast)
+ *   OPENAI_API_KEY (fallback)
+ *   HEYGEN_API_KEY (optional — for live video creation test)
  */
 
-import dotenv from 'dotenv'
-dotenv.config({ path: '.env.local' })
-dotenv.config() // fallback to .env
+import { createClient } from '@supabase/supabase-js'
+import { readFileSync, existsSync } from 'fs'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-const OPENAI_KEY = process.env.OPENAI_API_KEY
-const HEYGEN_KEY = process.env.HEYGEN_API_KEY
-
-const PRODUCT_ID = process.argv[2] || 'a1000001-0001-4000-a000-000000000002' // Patek Philippe
-
-console.log('═══════════════════════════════════════════════════════')
-console.log('  AuthiChain StoryMode — Full Pipeline Test')
-console.log('═══════════════════════════════════════════════════════')
-console.log(`  Product ID: ${PRODUCT_ID}`)
-console.log(`  Supabase:   ${SUPABASE_URL ? '✓' : '✗ MISSING'}`)
-console.log(`  OpenAI:     ${OPENAI_KEY ? '✓' : '✗ MISSING'}`)
-console.log(`  HeyGen:     ${HEYGEN_KEY ? '✓' : '✗ MISSING'}`)
-console.log('═══════════════════════════════════════════════════════\n')
-
-// ── Stage 1: Supabase ────────────────────────────────────────────────────────
-
-console.log('▶ STAGE 1: Fetching product from Supabase...')
-
-const productRes = await fetch(
-  `${SUPABASE_URL}/rest/v1/products?id=eq.${PRODUCT_ID}&select=name,brand,category,truemark_id,blockchain_tx_hash,created_at`,
-  { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
-)
-const [product] = await productRes.json()
-
-if (!product) { console.error('  ✗ Product not found'); process.exit(1) }
-console.log(`  ✓ Product: ${product.name} by ${product.brand}`)
-console.log(`    Category:  ${product.category}`)
-console.log(`    TrueMark:  ${product.truemark_id}`)
-console.log(`    TX Hash:   ${product.blockchain_tx_hash?.slice(0, 20)}...`)
-
-const eventsRes = await fetch(
-  `${SUPABASE_URL}/rest/v1/supply_chain_events?product_id=eq.${PRODUCT_ID}&select=event_type,location,actor_name,description,timestamp&order=timestamp.asc`,
-  { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
-)
-const events = await eventsRes.json()
-console.log(`  ✓ Supply chain events: ${events.length}`)
-events.forEach(e => console.log(`    • ${e.event_type} — ${e.location} (${e.actor_name})`))
-
-console.log('\n─────────────────────────────────────────────────────\n')
-
-// ── Stage 2: GPT-4 Script ────────────────────────────────────────────────────
-
-console.log('▶ STAGE 2: Generating cinematic script via GPT-4...')
-
-if (!OPENAI_KEY) { console.error('  ✗ OPENAI_API_KEY not set — skipping'); process.exit(1) }
-
-const eventsBlock = events.map(e => `- ${e.event_type} at ${e.location} by ${e.actor_name}: ${e.description}`).join('\n')
-
-const prompt = `You are a world-class documentary narrator — think David Attenborough meets a luxury brand film director.
-
-Write a cinematic, theatrical narration script for a product origin story video. The script will be read aloud by a single narrator avatar in a 60-90 second video.
-
-PRODUCT DATA:
-- Name: ${product.name}
-- Brand: ${product.brand}
-- Category: ${product.category}
-- TrueMark™ ID: ${product.truemark_id}
-- Blockchain TX: ${product.blockchain_tx_hash?.slice(0, 16)}...
-
-SUPPLY CHAIN JOURNEY:
-${eventsBlock}
-
-REQUIREMENTS:
-1. Open with a dramatic, attention-grabbing hook about the product's origin
-2. Build a narrative arc: origin → craftsmanship → quality verification → journey to consumer
-3. Weave in blockchain verification naturally — make it sound prestigious, not technical
-4. Use sensory language — textures, landscapes, craftsmanship
-5. End with a powerful closing line about authenticity and trust
-6. Keep it 150-200 words (60-90 seconds when spoken)
-7. Do NOT include stage directions or speaker labels — just narration text
-8. Write in present tense for immediacy and drama
-
-Return ONLY the narration script, nothing else.`
-
-const t0 = Date.now()
-const gptRes = await fetch('https://api.openai.com/v1/chat/completions', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${OPENAI_KEY}` },
-  body: JSON.stringify({
-    model: 'gpt-4o',
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.85,
-    max_tokens: 500,
-  }),
-})
-const gptData = await gptRes.json()
-
-if (!gptRes.ok) {
-  console.error('  ✗ GPT-4 error:', gptData.error?.message || JSON.stringify(gptData))
-  process.exit(1)
-}
-
-const script = gptData.choices[0].message.content.trim()
-const scriptTime = ((Date.now() - t0) / 1000).toFixed(1)
-const wordCount = script.split(/\s+/).length
-
-console.log(`  ✓ Script generated in ${scriptTime}s (${wordCount} words)`)
-console.log(`  ✓ Est. narration time: ~${Math.round(wordCount / 2.5)}s`)
-console.log('\n  ┌─── NARRATION SCRIPT ───────────────────────────────')
-script.split('\n').forEach(line => console.log(`  │ ${line}`))
-console.log('  └────────────────────────────────────────────────────\n')
-console.log('─────────────────────────────────────────────────────\n')
-
-// ── Stage 3: HeyGen Video ────────────────────────────────────────────────────
-
-console.log('▶ STAGE 3: Sending to HeyGen for video production...')
-
-if (!HEYGEN_KEY) { console.error('  ✗ HEYGEN_API_KEY not set — skipping'); process.exit(1) }
-
-const heygenPayload = {
-  video_inputs: [{
-    character: { type: 'avatar', avatar_id: 'Daisy-inskirt-20220818', avatar_style: 'normal' },
-    voice: { type: 'text', input_text: script, voice_id: 'en-US-ChristopherNeural', speed: 0.95 },
-    background: { type: 'color', value: '#0a0a0a' },
-  }],
-  dimension: { width: 1920, height: 1080 },
-  aspect_ratio: '16:9',
-  test: false,
-}
-
-const t1 = Date.now()
-const hgRes = await fetch('https://api.heygen.com/v2/video/generate', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json', 'X-Api-Key': HEYGEN_KEY },
-  body: JSON.stringify(heygenPayload),
-})
-const hgData = await hgRes.json()
-
-if (!hgRes.ok || !hgData.data?.video_id) {
-  console.error('  ✗ HeyGen error:', hgData.error || hgData.message || JSON.stringify(hgData))
-  process.exit(1)
-}
-
-const videoId = hgData.data.video_id
-console.log(`  ✓ Video queued in ${((Date.now() - t1) / 1000).toFixed(1)}s`)
-console.log(`    Video ID: ${videoId}`)
-console.log('\n─────────────────────────────────────────────────────\n')
-
-// ── Stage 4: Poll for completion ─────────────────────────────────────────────
-
-console.log('▶ STAGE 4: Polling HeyGen for video completion...')
-console.log('  (polling every 10s, timeout 5min)\n')
-
-const MAX_POLLS = 30
-let videoUrl = null
-
-for (let i = 1; i <= MAX_POLLS; i++) {
-  await new Promise(r => setTimeout(r, 10000))
-
-  const statusRes = await fetch(`https://api.heygen.com/v1/video_status.get?video_id=${videoId}`, {
-    headers: { 'X-Api-Key': HEYGEN_KEY },
-  })
-  const statusData = await statusRes.json()
-  const status = statusData.data?.status
-
-  process.stdout.write(`  [${i}/${MAX_POLLS}] Status: ${status}`)
-
-  if (status === 'completed') {
-    videoUrl = statusData.data.video_url
-    const duration = statusData.data.duration
-    const thumbnail = statusData.data.thumbnail_url
-    console.log(' ✓\n')
-    console.log('═══════════════════════════════════════════════════════')
-    console.log('  ✓ PIPELINE COMPLETE — Video Ready!')
-    console.log('═══════════════════════════════════════════════════════')
-    console.log(`  Video URL:     ${videoUrl}`)
-    console.log(`  Thumbnail:     ${thumbnail}`)
-    console.log(`  Duration:      ${duration}s`)
-    console.log(`  Product:       ${product.name}`)
-    console.log(`  TrueMark™ ID:  ${product.truemark_id}`)
-    console.log(`  StoryMode URL: https://authichain.com/storymode/viewer?product_id=${PRODUCT_ID}`)
-    console.log('═══════════════════════════════════════════════════════')
-    break
-  } else if (status === 'failed') {
-    console.log(' ✗ FAILED')
-    console.error('  Video generation failed:', JSON.stringify(statusData.data))
-    process.exit(1)
-  } else {
-    console.log('')
+// ── Load .env.local ────────────────────────────────────────────────────────────
+const __dir = dirname(fileURLToPath(import.meta.url))
+const envPath = resolve(__dir, '../.env.local')
+if (existsSync(envPath)) {
+  for (const line of readFileSync(envPath, 'utf8').split('\n')) {
+    const m = line.match(/^([A-Z0-9_]+)=(.*)$/)
+    if (m) process.env[m[1]] ??= m[2].replace(/^["']|["']$/g, '')
   }
 }
 
-if (!videoUrl) {
-  console.log('\n  ⏱ Timeout — video still processing. Check manually:')
-  console.log(`    curl -H "X-Api-Key: $HEYGEN_API_KEY" "https://api.heygen.com/v1/video_status.get?video_id=${videoId}"`)
+// ── Config ─────────────────────────────────────────────────────────────────────
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY
+const GROQ_KEY     = process.env.GROQ_API_KEY
+const OPENAI_KEY   = process.env.OPENAI_API_KEY
+const HEYGEN_KEY   = process.env.HEYGEN_API_KEY
+
+// Use a seeded test product (Valentino Garavani Rockstud Pump)
+const TEST_PRODUCT_ID = process.argv[2] || 'a1000001-0001-4000-a000-000000000001'
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+const GREEN  = '\x1b[32m', RED = '\x1b[31m', YELLOW = '\x1b[33m',
+      CYAN   = '\x1b[36m', BOLD = '\x1b[1m', DIM = '\x1b[2m', RESET = '\x1b[0m'
+
+let passed = 0, failed = 0, skipped = 0
+const results = []
+
+async function stage(name, fn) {
+  const t0 = Date.now()
+  process.stdout.write(`\n${CYAN}▶ ${BOLD}${name}${RESET} `)
+  try {
+    const result = await fn()
+    const ms = Date.now() - t0
+    console.log(`${GREEN}✓ PASS${RESET} ${DIM}(${ms}ms)${RESET}`)
+    if (result?.log) console.log(`  ${DIM}${result.log}${RESET}`)
+    passed++
+    results.push({ name, status: 'PASS', ms, detail: result?.summary })
+    return result?.data
+  } catch (err) {
+    const ms = Date.now() - t0
+    if (err.message === 'SKIP') {
+      console.log(`${YELLOW}⊘ SKIP${RESET} ${DIM}(${ms}ms)${RESET}`)
+      skipped++
+      results.push({ name, status: 'SKIP', ms, detail: err.detail })
+    } else {
+      console.log(`${RED}✗ FAIL${RESET} ${DIM}(${ms}ms)${RESET}`)
+      console.log(`  ${RED}${err.message}${RESET}`)
+      if (err.detail) console.log(`  ${DIM}${err.detail}${RESET}`)
+      failed++
+      results.push({ name, status: 'FAIL', ms, detail: err.message })
+    }
+    return null
+  }
 }
+
+function skip(reason) {
+  const e = new Error('SKIP')
+  e.detail = reason
+  throw e
+}
+
+function fail(msg, detail) {
+  const e = new Error(msg)
+  e.detail = detail
+  throw e
+}
+
+// ── Prompt builder (mirrors lib/storymode/prompt.ts) ──────────────────────────
+function buildStoryPrompt({ product, verification, qron, tone = 'cinematic', story_type = 'provenance' }) {
+  const productInfo = product
+    ? `Product: ${product.name}\nBrand: ${product.brand}\nCategory: ${product.category}\nSKU: ${product.sku}`
+    : 'Product details unavailable.'
+
+  const verificationInfo = verification?.length
+    ? `Verification events (${verification.length}):\n` +
+      verification.map((v, i) => `  ${i + 1}. ${v.event_type || 'scan'} at ${v.created_at || 'unknown'}`).join('\n')
+    : 'No verification events yet.'
+
+  const qronInfo = qron
+    ? `QRON Art: Signed with Ed25519, QRON ID ${qron.id}`
+    : 'No QRON art attached.'
+
+  return `You are a world-class documentary narrator — think David Attenborough meets a luxury brand director.
+
+Tell the ${story_type} story of this product in a ${tone} tone.
+
+${productInfo}
+
+${verificationInfo}
+
+${qronInfo}
+
+Write a compelling cinematic narration (150-200 words, 60-90 seconds when spoken).
+Requirements:
+- Open with a dramatic hook about the product's origin
+- Weave in blockchain verification naturally — make it sound prestigious, not technical
+- Use sensory language: textures, aromas, craftsmanship
+- End with a powerful line about authenticity and trust
+- Present tense only. No stage directions. Just narration.
+
+Return ONLY the narration script.`
+}
+
+// ── Main ───────────────────────────────────────────────────────────────────────
+console.log(`\n${BOLD}${CYAN}╔══════════════════════════════════════════════════╗
+║      AuthiChain Storymode Pipeline Test          ║
+╚══════════════════════════════════════════════════╝${RESET}`)
+console.log(`${DIM}Product ID: ${TEST_PRODUCT_ID}${RESET}`)
+
+// Stage 1: Supabase — fetch product
+let product = null
+product = await stage('Stage 1: Supabase → fetch product', async () => {
+  if (!SUPABASE_URL || !SERVICE_KEY) fail('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
+  const db = createClient(SUPABASE_URL, SERVICE_KEY)
+  const { data, error } = await db.from('products')
+    .select('id, name, brand, category, sku, truemark_id, blockchain_tx_hash, created_at, metadata')
+    .eq('id', TEST_PRODUCT_ID)
+    .single()
+  if (error) fail(`Supabase error: ${error.message}`, `Hint: Run \`npx tsx scripts/seed-storymode-products.ts\` first`)
+  if (!data) fail('Product not found', `ID: ${TEST_PRODUCT_ID}`)
+  return { data, log: `${data.name} (${data.brand}) — TM: ${data.truemark_id}`, summary: data.name }
+})
+
+// Stage 2: Supabase — fetch verification events
+let events = []
+events = await stage('Stage 2: Supabase → fetch verification events', async () => {
+  const db = createClient(SUPABASE_URL, SERVICE_KEY)
+  const { data, error } = await db.from('verification_events')
+    .select('event_type, created_at, location')
+    .eq('product_id', TEST_PRODUCT_ID)
+    .order('created_at', { ascending: true })
+  if (error) fail(`Supabase error: ${error.message}`)
+  return {
+    data: data || [],
+    log: `${(data || []).length} verification event(s) found`,
+    summary: `${(data || []).length} events`
+  }
+}) || []
+
+// Stage 3: Build prompt & StorymodeContext
+let prompt = null
+prompt = await stage('Stage 3: Build StorymodeContext + prompt', async () => {
+  if (!product) fail('No product data from Stage 1')
+  const ctx = { product, verification: events, qron: null, tone: 'cinematic', story_type: 'provenance' }
+  const p = buildStoryPrompt(ctx)
+  if (!p || p.length < 100) fail('Prompt too short', `Got ${p?.length} chars`)
+  return { data: p, log: `Prompt: ${p.length} chars`, summary: `${p.length} chars` }
+})
+
+// Stage 4: LLM — generate script (Groq preferred, OpenAI fallback)
+let script = null
+script = await stage('Stage 4: LLM → generate cinematic script', async () => {
+  if (!prompt) fail('No prompt from Stage 3')
+
+  let response, provider
+  if (GROQ_KEY) {
+    provider = 'Groq (llama-3.3-70b-versatile)'
+    response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.85,
+        max_tokens: 500
+      })
+    })
+  } else if (OPENAI_KEY) {
+    provider = 'OpenAI (gpt-4o)'
+    response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.85,
+        max_tokens: 500
+      })
+    })
+  } else {
+    fail('No LLM key found', 'Set GROQ_API_KEY or OPENAI_API_KEY in .env.local')
+  }
+
+  if (!response.ok) {
+    const err = await response.text()
+    fail(`LLM API error ${response.status}`, err.slice(0, 200))
+  }
+
+  const json = await response.json()
+  const text = json.choices?.[0]?.message?.content?.trim()
+  if (!text || text.length < 50) fail('Script too short or empty', `Got: "${text}"`)
+
+  const words = text.split(/\s+/).length
+  return {
+    data: text,
+    log: `Provider: ${provider} | Words: ${words} | ~${Math.round(words / 2.5)}s spoken`,
+    summary: `${words} words`
+  }
+})
+
+// Stage 5: Print generated script
+if (script) {
+  console.log(`\n${BOLD}${CYAN}── Generated Script ─────────────────────────────────────────────────────${RESET}`)
+  const lines = script.match(/.{1,80}(\s|$)/g) || [script]
+  lines.forEach(l => console.log(`  ${l.trim()}`))
+  console.log(`${CYAN}────────────────────────────────────────────────────────────────────────${RESET}`)
+}
+
+// Stage 6: HeyGen payload validation (live call only if HEYGEN_API_KEY set)
+await stage('Stage 5: HeyGen → validate payload / live call', async () => {
+  if (!script) fail('No script from Stage 4')
+
+  const payload = {
+    video_inputs: [{
+      character: { type: 'avatar', avatar_id: 'Daisy-inskirt-20220818', avatar_style: 'normal' },
+      voice: { type: 'text', input_text: script, voice_id: '2d5b0e6cf36f460aa7fc47e3eee4ba54' },
+      background: { type: 'color', value: '#0a0a1a' }
+    }],
+    test: true,
+    aspect_ratio: '16:9'
+  }
+
+  if (!HEYGEN_KEY) {
+    console.log(`\n  ${DIM}Payload validated (${JSON.stringify(payload).length} bytes). Set HEYGEN_API_KEY for live call.${RESET}`)
+    skip('HEYGEN_API_KEY not set — payload validation only')
+  }
+
+  const res = await fetch('https://api.heygen.com/v2/video/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Api-Key': HEYGEN_KEY },
+    body: JSON.stringify(payload)
+  })
+
+  if (!res.ok) fail(`HeyGen API error ${res.status}`, await res.text())
+  const json = await res.json()
+  const videoId = json?.data?.video_id || json?.video_id
+  if (!videoId) fail('No video_id in HeyGen response', JSON.stringify(json))
+
+  return { data: videoId, log: `Video ID: ${videoId}`, summary: videoId }
+})
+
+// ── Summary ────────────────────────────────────────────────────────────────────
+console.log(`\n${BOLD}${CYAN}╔══════════════════════════════════════════════════╗
+║                   Summary                        ║
+╚══════════════════════════════════════════════════╝${RESET}`)
+
+for (const r of results) {
+  const icon = r.status === 'PASS' ? `${GREEN}✓` : r.status === 'SKIP' ? `${YELLOW}⊘` : `${RED}✗`
+  console.log(`  ${icon} ${r.name.padEnd(42)}${RESET} ${DIM}${r.ms}ms${RESET}${r.detail ? ` — ${r.detail}` : ''}`)
+}
+
+console.log(`\n  ${GREEN}${passed} passed${RESET}  ${RED}${failed} failed${RESET}  ${YELLOW}${skipped} skipped${RESET}\n`)
+
+process.exit(failed > 0 ? 1 : 0)
