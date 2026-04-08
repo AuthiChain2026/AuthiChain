@@ -1,257 +1,290 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
 
-/* ─── SCENES ─────────────────────────────────────────────────── */
-const SCENES = [
+/* ── USE CASES ─────────────────────────────────────────────────────── */
+const USE_CASES = [
   {
-    id:"problem", duration:11, phase:"PROBLEM",
-    title:"The $500B Problem",
-    narration:"Every year, over 500 billion dollars in counterfeit goods flow through global supply chains. Paper certificates are forged in minutes. Barcodes are trivially cloned. No cryptographic truth layer exists for physical products — until now.",
-    visual:"STAT",
-    accent:"#e06060",
+    id:"autoflow", phase:"AUTOFLOW", accent:"#7c3aed",
+    title:"AutoFlow — AI Product Classification",
+    narration:"AutoFlow is the intelligent intake engine of the Authentic Economy. It ingests a product description and returns a fully classified, standardized identity — category, brand, HS tariff code, EUPC, counterfeit risk score, and EU DPP mandate status. In under three seconds, any product in the world becomes machine-readable and authentication-ready.",
+    duration:17,
+    steps:[
+      {t:300,  label:"INPUT",     text:'Product: "Hermès Birkin 30, Togo leather, Noir"'},
+      {t:900,  label:"AUTOFLOW",  text:"Routing to classification engine…"},
+      {t:1500, label:"AI",        text:"Embedding product vector → 1,536 dimensions"},
+      {t:2300, label:"CATEGORY",  text:"Luxury Goods › Leather Goods › Handbags › Hermès"},
+      {t:3100, label:"HS CODE",   text:"4202.21.90  (leather handbag, outer surface)"},
+      {t:3900, label:"EUPC",      text:"3700294892341  (Global Trade Item Number)"},
+      {t:4700, label:"RISK",      text:"Counterfeit prevalence: 67% of market  ⚠ HIGH"},
+      {t:5500, label:"DPP",       text:"EU DPP: MANDATORY  (leather goods >€400, ESPR Art.4)"},
+      {t:6300, label:"OUTPUT",    text:"Classification complete ✓  |  Confidence: 99.1%"},
+      {t:7000, label:"NEXT",      text:"Routing to TRUmark authentication…"},
+    ],
   },
   {
-    id:"economy", duration:14, phase:"VISION",
-    title:"The Authentic Economy",
-    narration:"The Authentic Economy is a unified trust infrastructure built on three interconnected platforms. AuthiChain anchors every product to the blockchain. QRON delivers that truth as beautiful, scannable art. StrainChain enforces compliance in regulated markets. Together they form the proof-of-origin rails for the physical world.",
-    visual:"ECOSYSTEM",
-    accent:"#c9a227",
+    id:"trumark", phase:"TRUMARK", accent:"#c9a227",
+    title:"TRUmark — 5-Agent Authentication Consensus",
+    narration:"TRUmark is AuthiChain's multi-agent authentication layer. Five specialized AI agents simultaneously analyze the product — Guardian validates brand signatures, Archivist cross-references provenance records, Sentinel runs anomaly detection, Scout scans live market listings, and Arbiter adjudicates the consensus. The result is a cryptographically-anchored authenticity verdict with a quantified confidence score.",
+    duration:20,
+    agents:[
+      {name:"Guardian",  role:"Brand signature validation",    weight:35, color:"#c9a227", steps:["Loading brand DNA…","Stitching pattern: MATCH","Hardware hallmarks: MATCH","Authenticity signal: 94%"]},
+      {name:"Archivist", role:"Provenance records",            weight:20, color:"#a78bfa", steps:["Querying ledger…","Batch AC-2024-H-7291: FOUND","Chain of custody: INTACT","Provenance: VERIFIED"]},
+      {name:"Sentinel",  role:"Anomaly detection",             weight:25, color:"#ef4444", steps:["Scanning for anomalies…","Price deviation: +2.1%","Listing age: normal","Flags detected: ZERO"]},
+      {name:"Scout",     role:"Market listing scan",           weight:8,  color:"#22c55e", steps:["Scanning 14 platforms…","1 active listing: MATCH","Seller reputation: 98/100","Listing: LEGITIMATE"]},
+      {name:"Arbiter",   role:"Consensus adjudication",        weight:12, color:"#378ADD", steps:["Collecting agent claims…","Weighted consensus: 97.3%","Threshold: 85% ✓","Verdict: AUTHENTIC"]},
+    ],
+    verdict:"AUTHENTIC",
+    confidence:97.3,
+    trumark:"TM-HERMES-2026-04-08-9291",
+    duration:20,
   },
   {
-    id:"authichain-home", duration:16, phase:"AUTHICHAIN",
-    title:"AuthiChain — The Blockchain Layer",
-    url:"https://authichain.com",
-    narration:"AuthiChain is the root of the Authentic Economy. Manufacturers register product batches via REST API. An ERC-721 NFT is minted on the Polygon blockchain — immutable, permanent, cryptographically unforgeable. This is the truth anchor that makes everything else possible.",
-    visual:"IFRAME",
-    accent:"#c9a227",
+    id:"mint", phase:"BLOCKCHAIN", accent:"#a78bfa",
+    title:"NFT Mint — Collectable + Secondary Market",
+    narration:"Every authenticated product can be minted as an ERC-721 NFT on Polygon, creating a tradeable, verifiable collectable. The NFT carries the full provenance history, brand certificate, and authenticity proof. It can be listed on secondary markets immediately — and each subsequent scan or ownership transfer is recorded immutably on-chain, making provenance self-perpetuating.",
+    duration:18,
+    steps:[
+      {t:400,  label:"TRIGGER",   text:"TRUmark verdict AUTHENTIC → initiating mint"},
+      {t:1200, label:"POLYGON",   text:"Connecting to Polygon mainnet (chain ID: 137)"},
+      {t:2000, label:"CONTRACT",  text:"ERC-721 contract: 0x7a45f8cE9b3D2a4891Fc"},
+      {t:2800, label:"METADATA",  text:"Pinning to IPFS: ipfs://QmX9k3R…7pT2"},
+      {t:3600, label:"MINT",      text:"Minting token #8291… tx: 0xf3c9d8…a214"},
+      {t:4800, label:"CONFIRMED", text:"Block 54,892,341  |  Gas: $0.004  |  Time: 2.1s"},
+      {t:5600, label:"COLLECTABLE",text:"Edition: 1 of 1  |  Category: Luxury Heritage"},
+      {t:6400, label:"OPENSEA",   text:"Listing created → OpenSea: $47,500 USD"},
+      {t:7200, label:"ROYALTY",   text:"Creator royalty: 5% on all secondary sales"},
+      {t:8000, label:"LIVE",      text:"Secondary market: ACTIVE  |  NFT tradeable ✓"},
+    ],
   },
   {
-    id:"authichain-verify", duration:16, phase:"AUTHICHAIN",
-    title:"Live Verification in 2.1 Seconds",
-    url:"https://authichain.com/verify/AC-1829577CED8F6BFBB0BC667CDE33DF0E",
-    narration:"This is a live blockchain certificate. Scan any product QR code and this page loads in 2.1 seconds — on any smartphone, no app, no hardware. Green means authentic. The certificate ID, manufacturer, batch, and timestamp are immutable on Polygon. No one can alter them.",
-    visual:"IFRAME",
-    accent:"#22c55e",
+    id:"qron", phase:"QRON", accent:"#ec4899",
+    title:"Dynamic QRON → StoryMode",
+    narration:"QRON transforms every blockchain certificate into a living, scannable QR code that resolves to StoryMode — a cinematic, brand-narrated origin story. Unlike static QR codes, QRON codes are dynamic: they update their destination based on scan context, location, and ownership state. Each scan logs a Truth Network vote. The QR art is beautiful enough that brands want it on their packaging.",
+    duration:17,
+    qron:{
+      style:"Nebula Silk",
+      shortUrl:"qron.space/s/H8K2J9QA",
+      resolves:"StoryMode — Origin Narrative",
+      story:"Born in the Faubourg Saint-Honoré atelier, 1984. Hand-stitched by a single artisan over 48 hours. Togo leather sourced from a single tannery in the Loire Valley. This Birkin has passed through three owners — each verified, each recorded.",
+      scans:1,
+    },
+    duration:17,
   },
   {
-    id:"qron-home", duration:15, phase:"QRON",
-    title:"QRON — The Delivery Layer",
-    url:"https://qron.space",
-    narration:"QRON is how AuthiChain certificates reach the physical world. Every blockchain certificate is delivered as a beautiful, scannable QR code — AI-generated in eleven styles. QRON transforms the authentication token from a technical artifact into something brands actually want on their packaging.",
-    visual:"IFRAME",
-    accent:"#a78bfa",
+    id:"ledger", phase:"LEDGER", accent:"#f59e0b",
+    title:"Immutable Ledger + BTC Ordinal",
+    narration:"The AuthiChain SaaS ledger is an append-only record of every authentication event, ownership transfer, and scan verdict. For the highest-value assets, this ledger entry can be inscribed as a Bitcoin Ordinal — anchoring the provenance proof permanently to the world's most secure blockchain. No server, no cloud, no authority can alter or delete it.",
+    duration:17,
+    steps:[
+      {t:500,  label:"LEDGER",    text:"Creating immutable ledger entry…"},
+      {t:1300, label:"ENTRY",     text:"ID: LDG-20260408-7829"},
+      {t:2100, label:"HASH",      text:"sha256: 9f3bc4d8e2a1f7c6b5d4e3a2f1c0b9a8"},
+      {t:2900, label:"TIMESTAMP", text:"2026-04-08T03:45:22.841Z  |  signed ✓"},
+      {t:3700, label:"CHAIN",     text:"Anchored on Polygon block 54,892,341"},
+      {t:4500, label:"BTC",       text:"Inscribing Bitcoin Ordinal…"},
+      {t:5300, label:"ORDINAL",   text:"Ordinal #84,291,003  |  Sat: 1,923,847,291"},
+      {t:6100, label:"BLOCK",     text:"Bitcoin block 841,923  |  Inscribed forever"},
+      {t:6900, label:"URI",       text:"authichain://LDG-20260408-7829"},
+      {t:7700, label:"STATUS",    text:"IMMUTABLE  |  Cannot be altered by any party ✓"},
+    ],
   },
   {
-    id:"qron-order", duration:13, phase:"QRON",
-    title:"QRON — AI Art, $9 to $49",
-    url:"https://qron.space/order",
-    narration:"Nine dollars per design. Forty-nine dollars for a full brand kit. White-label API for agencies. Every QRON code carries an AuthiChain certificate hash — the QR art and the blockchain proof are inseparable. This is the consumer interface of the Authentic Economy.",
-    visual:"IFRAME",
-    accent:"#a78bfa",
-  },
-  {
-    id:"strainchain", duration:15, phase:"STRAINCHAIN",
-    title:"StrainChain — The Compliance Layer",
-    url:"https://strainchain.io",
-    narration:"StrainChain is AuthiChain applied to the most regulated supply chain in North America — cannabis. Seed to sale tracking, state compliance reporting, batch authentication, and QRON-generated QR codes on every package. StrainChain proves the Authentic Economy protocol works in the hardest possible environment.",
-    visual:"IFRAME",
-    accent:"#22c55e",
-  },
-  {
-    id:"flow", duration:16, phase:"FLOW",
-    title:"How the Three Platforms Connect",
-    narration:"Here is how the three platforms work as one. A manufacturer registers a batch in AuthiChain. QRON generates the QR art carrying the certificate. The QR code is printed on the physical product. A consumer, regulator, or customs agent scans it. The Truth Network records the verdict. The Authentic Economy self-enforces.",
-    visual:"FLOW",
-    accent:"#c9a227",
-  },
-  {
-    id:"dpp", duration:12, phase:"MANDATE",
-    title:"EU Digital Product Passport — 2026",
-    url:"https://authichain.com/compliance",
-    narration:"The EU Digital Product Passport mandate requires blockchain provenance for every product sold in Europe by 2026 — luxury, pharma, automotive, electronics. 400 billion dollars in annual EU imports will legally require exactly what we have already built.",
-    visual:"IFRAME",
-    accent:"#378ADD",
-  },
-  {
-    id:"traction", duration:13, phase:"TRACTION",
-    title:"Built Solo. Zero Capital. Six Months.",
-    narration:"Three platforms. Forty Cloudflare Workers. Ninety-nine point nine percent uptime. Over a thousand blockchain certificates on Polygon mainnet. 47 million dollar enterprise pipeline across 172 deals — LVMH, Hermès, Moderna, BMW, L'Oréal. DHS SVIP grant application submitted. DoD APEX Accelerators enrolled.",
-    visual:"METRICS",
-    accent:"#c9a227",
-  },
-  {
-    id:"ask", duration:11, phase:"ASK",
-    title:"The Ask",
-    narration:"The Authentic Economy — AuthiChain, QRON, and StrainChain — built by one founder, zero capital, six months. The EU DPP mandate creates forced adoption in 2026. We are the infrastructure layer. We are applying to Y Combinator to move from pre-revenue to first enterprise contract.",
-    visual:"CLOSE",
-    accent:"#c9a227",
+    id:"dpp", phase:"EU DPP", accent:"#3b82f6",
+    title:"Instant EU DPP Compliance",
+    narration:"The European Union Digital Product Passport mandate requires seven specific data fields for every product sold in Europe. AuthiChain generates full compliance instantly — because every field is a byproduct of the authentication flow. No additional work. No new systems. The product is registered, authenticated, minted, QRONed, and ledgered — and all seven EU DPP requirements are satisfied automatically.",
+    duration:16,
+    requirements:[
+      {label:"Unique product identifier",       value:"ERC-721 token #8291 on Polygon",                 done:false},
+      {label:"Tamper-proof digital record",     value:"Immutable blockchain — Polygon + BTC Ordinal",   done:false},
+      {label:"Supply chain provenance",         value:"Manufacturer → Distributor → Owner (on-chain)",  done:false},
+      {label:"Consumer-accessible verification",value:"QR scan → QRON → 2.1 second result",            done:false},
+      {label:"Machine-readable format",         value:"REST API, OpenAPI 3.0, JSON-LD, W3C DID",       done:false},
+      {label:"Long-term auditability",          value:"Blockchain: permanent, no expiration",           done:false},
+      {label:"GDPR compatibility",              value:"Hashes only on-chain — zero personal data",      done:false},
+    ],
+    cert:"DPP-EU-2026-HERMES-8291",
+    duration:16,
   },
 ];
 
-const TOTAL = SCENES.reduce((s,x)=>s+x.duration,0);
+const TOTAL = USE_CASES.reduce((s,u)=>s+u.duration,0);
 function pad(n:number){return String(Math.floor(n)).padStart(2,"0")}
 function fmt(s:number){return `${Math.floor(s/60)}:${pad(s%60)}`}
 
-const PHASE_COLORS:Record<string,string> = {
-  PROBLEM:"#e06060", VISION:"#c9a227", AUTHICHAIN:"#c9a227",
-  QRON:"#a78bfa", STRAINCHAIN:"#22c55e", FLOW:"#c9a227",
-  MANDATE:"#378ADD", TRACTION:"#c9a227", ASK:"#c9a227",
-};
-
-/* ─── ECOSYSTEM DIAGRAM ───────────────────────────────────────── */
-function EcosystemVisual({running}:{running:boolean}) {
-  const [tick,setTick]=useState(0);
+/* ── TERMINAL STEP VISUALIZER ─────────────────────────────────────── */
+function Terminal({steps, running, accent}:{steps:{t:number,label:string,text:string}[], running:boolean, accent:string}){
+  const [shown,setShown]=useState<number[]>([]);
+  const startRef=useRef<number|null>(null);
   useEffect(()=>{
-    if(!running)return;
-    const id=setInterval(()=>setTick(t=>t+1),1200);
-    return()=>clearInterval(id);
+    if(!running){setShown([]);startRef.current=null;return;}
+    startRef.current=Date.now();
+    const timers=steps.map((s,i)=>setTimeout(()=>setShown(p=>[...p,i]),s.t));
+    return()=>timers.forEach(clearTimeout);
   },[running]);
-
-  const pulse=(n:number)=>tick%3===n&&running;
-
-  const platforms=[
-    {x:160,y:90, label:"AuthiChain", sub:"Blockchain layer",color:"#c9a227",bg:"rgba(201,162,39,.12)",url:"authichain.com"},
-    {x:400,y:90, label:"QRON",       sub:"QR art delivery", color:"#a78bfa",bg:"rgba(167,139,250,.12)",url:"qron.space"},
-    {x:280,y:230,label:"StrainChain",sub:"Compliance layer", color:"#22c55e",bg:"rgba(34,197,94,.12)",url:"strainchain.io"},
-  ];
-
-  const connectors=[
-    {x1:230,y1:105,x2:345,y2:105, label:"certificate → QR", color:"#c9a227", pulsing:pulse(0)},
-    {x1:185,y1:128,x2:255,y2:218, label:"protocol",          color:"#22c55e", pulsing:pulse(1)},
-    {x1:400,y1:128,x2:325,y2:218, label:"QR art",            color:"#a78bfa", pulsing:pulse(2)},
-  ];
-
-  const nodes=[
-    {x:280,y:52, label:"Manufacturer",color:"rgba(255,255,255,.12)",text:"rgba(255,255,255,.6)"},
-    {x:530,y:160,label:"Consumer",    color:"rgba(255,255,255,.08)",text:"rgba(255,255,255,.4)"},
-    {x:20, y:160,label:"Regulator",   color:"rgba(255,255,255,.08)",text:"rgba(255,255,255,.4)"},
-    {x:280,y:310,label:"Truth Network",color:"rgba(201,162,39,.1)",text:"rgba(201,162,39,.6)"},
-  ];
-
   return(
-    <div style={{width:"100%",maxWidth:580,position:"relative"}}>
-      <svg viewBox="0 0 560 360" style={{width:"100%",overflow:"visible"}}>
-        <defs>
-          <marker id="arr" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,.25)"/>
-          </marker>
-          {connectors.map((c,i)=>(
-            <marker key={i} id={`arr${i}`} viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill={c.color}/>
-            </marker>
-          ))}
-        </defs>
-
-        {/* Outer flow arrows */}
-        <line x1="280" y1="68" x2="175" y2="85" stroke="rgba(255,255,255,.15)" strokeWidth="1" markerEnd="url(#arr)"/>
-        <line x1="460" y1="110" x2="525" y2="145" stroke="rgba(255,255,255,.12)" strokeWidth="1" markerEnd="url(#arr)"/>
-        <line x1="85"  y1="110" x2="38" y2="145" stroke="rgba(255,255,255,.12)" strokeWidth="1" markerEnd="url(#arr)"/>
-        <line x1="280" y1="255" x2="280" y2="300" stroke="rgba(201,162,39,.3)" strokeWidth="1.5" markerEnd="url(#arr)"/>
-
-        {/* Connectors between platforms */}
-        {connectors.map((c,i)=>(
-          <g key={i}>
-            <line x1={c.x1} y1={c.y1} x2={c.x2} y2={c.y2}
-              stroke={c.pulsing?c.color:"rgba(255,255,255,.12)"}
-              strokeWidth={c.pulsing?2:1}
-              strokeDasharray={c.pulsing?"none":"4 4"}
-              markerEnd={`url(#arr${i})`}
-              style={{transition:"all .3s"}}
-            />
-            <text x={(c.x1+c.x2)/2} y={(c.y1+c.y2)/2-6} fill={c.pulsing?c.color:"rgba(255,255,255,.25)"}
-              fontSize="8" textAnchor="middle" style={{transition:"fill .3s"}}>{c.label}</text>
-          </g>
-        ))}
-
-        {/* Outer nodes */}
-        {nodes.map((n,i)=>(
-          <g key={i}>
-            <rect x={n.x-45} y={n.y-14} width={90} height={28} rx="6" fill={n.color} stroke="rgba(255,255,255,.08)" strokeWidth=".5"/>
-            <text x={n.x} y={n.y+5} fill={n.text} fontSize="9.5" textAnchor="middle" fontWeight="500">{n.label}</text>
-          </g>
-        ))}
-
-        {/* Platform nodes */}
-        {platforms.map((p,i)=>(
-          <g key={i}>
-            <rect x={p.x-70} y={p.y-30} width={140} height={60} rx="10"
-              fill={p.bg}
-              stroke={p.color}
-              strokeWidth={pulse(i)?1.8:.8}
-              style={{filter:pulse(i)?`drop-shadow(0 0 8px ${p.color}40)`:""}}
-            />
-            <text x={p.x} y={p.y-8}  fill={p.color}   fontSize="12" textAnchor="middle" fontWeight="700">{p.label}</text>
-            <text x={p.x} y={p.y+8}  fill="rgba(255,255,255,.45)" fontSize="9"  textAnchor="middle">{p.sub}</text>
-            <text x={p.x} y={p.y+22} fill={p.color}   fontSize="8.5"textAnchor="middle" opacity=".6">{p.url}</text>
-          </g>
-        ))}
-      </svg>
-      <div style={{textAlign:"center",marginTop:12,fontSize:11,color:"rgba(255,255,255,.25)",letterSpacing:".06em",textTransform:"uppercase"}}>
-        The Authentic Economy — three platforms, one protocol
-      </div>
+    <div style={{background:"#0a0a0a",border:`1px solid ${accent}20`,borderRadius:12,padding:"18px 20px",fontFamily:"monospace",fontSize:13,lineHeight:1.8,minHeight:260,overflowY:"auto"}}>
+      {steps.map((s,i)=>shown.includes(i)&&(
+        <div key={i} style={{display:"flex",gap:12,marginBottom:2,opacity:shown[shown.length-1]===i?1:.7,transition:"opacity .3s"}}>
+          <span style={{color:accent,fontWeight:700,minWidth:90,fontSize:11,paddingTop:1}}>[{s.label}]</span>
+          <span style={{color:shown[shown.length-1]===i?"#e5e5e5":"#666"}}>{s.text}</span>
+        </div>
+      ))}
+      {running&&shown.length<steps.length&&(
+        <div style={{display:"flex",gap:12,marginBottom:2}}>
+          <span style={{color:accent,fontWeight:700,minWidth:90,fontSize:11,paddingTop:1}}>[···]</span>
+          <span style={{color:"#444"}}>processing<span style={{animation:"none"}}>{"▌"}</span></span>
+        </div>
+      )}
     </div>
   );
 }
 
-/* ─── FLOW DIAGRAM ────────────────────────────────────────────── */
-function FlowVisual() {
-  const steps=[
-    {icon:"🏭",label:"Manufacturer",sub:"registers batch",color:"#888"},
-    {icon:"◆", label:"AuthiChain",  sub:"mints NFT on Polygon",color:"#c9a227"},
-    {icon:"⬡", label:"QRON",        sub:"generates QR art",color:"#a78bfa"},
-    {icon:"📦",label:"Product",     sub:"QR on label",color:"#888"},
-    {icon:"📱",label:"Scan",        sub:"any smartphone",color:"#888"},
-    {icon:"✓", label:"Authentic",   sub:"Truth recorded",color:"#22c55e"},
-  ];
+/* ── AGENT PANEL ──────────────────────────────────────────────────── */
+function AgentPanel({uc, running}:{uc:typeof USE_CASES[1], running:boolean}){
+  const [agentStep,setAgentStep]=useState<number[]>([0,0,0,0,0]);
+  const [progress,setProgress]=useState<number[]>([0,0,0,0,0]);
+  const [verdict,setVerdict]=useState(false);
+  useEffect(()=>{
+    if(!running){setAgentStep([0,0,0,0,0]);setProgress([0,0,0,0,0]);setVerdict(false);return;}
+    const timers:ReturnType<typeof setTimeout>[]=[];
+    uc.agents.forEach((agent,ai)=>{
+      agent.steps.forEach((_,si)=>{
+        timers.push(setTimeout(()=>{
+          setAgentStep(p=>{const n=[...p];n[ai]=si+1;return n;});
+          setProgress(p=>{const n=[...p];n[ai]=Math.round((si+1)/agent.steps.length*100);return n;});
+        }, ai*800+si*1200));
+      });
+    });
+    timers.push(setTimeout(()=>setVerdict(true), uc.agents.length*800+uc.agents[0].steps.length*1200));
+    return()=>timers.forEach(clearTimeout);
+  },[running]);
   return(
-    <div style={{width:"100%",maxWidth:700}}>
-      <div style={{display:"flex",alignItems:"flex-start",justifyContent:"center",flexWrap:"wrap",gap:0}}>
-        {steps.map((s,i)=>(
-          <div key={i} style={{display:"flex",alignItems:"center"}}>
-            <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
-              <div style={{
-                width:64,height:64,borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,
-                background:i===1?"rgba(201,162,39,.12)":i===2?"rgba(167,139,250,.12)":i===5?"rgba(34,197,94,.12)":"rgba(255,255,255,.05)",
-                border:`1.5px solid ${s.color === "#888"?"rgba(255,255,255,.1)":s.color}`,
-              }}>{s.icon}</div>
-              <div style={{textAlign:"center",maxWidth:72}}>
-                <div style={{fontSize:10.5,fontWeight:700,color:s.color==="888"?"#e5e5e5":s.color,lineHeight:1.2}}>{s.label}</div>
-                <div style={{fontSize:9,color:"rgba(255,255,255,.3)",marginTop:2}}>{s.sub}</div>
-              </div>
-            </div>
-            {i<steps.length-1&&(
-              <div style={{
-                width:28,color:"rgba(255,255,255,.2)",textAlign:"center",fontSize:18,
-                paddingBottom:24,flexShrink:0
-              }}>→</div>
-            )}
+    <div style={{display:"flex",flexDirection:"column",gap:10,width:"100%"}}>
+      {uc.agents.map((a,i)=>(
+        <div key={i} style={{background:"#0d0d0d",border:`1px solid ${a.color}20`,borderRadius:10,padding:"10px 14px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+            <div style={{width:6,height:6,borderRadius:"50%",background:progress[i]===100?a.color:"#333",transition:"background .3s"}}/>
+            <div style={{fontWeight:700,fontSize:12,color:progress[i]===100?a.color:"rgba(255,255,255,.5)",flex:1,transition:"color .3s"}}>{a.name} <span style={{fontWeight:400,color:"rgba(255,255,255,.25)",fontSize:10}}>({a.weight}%)</span></div>
+            <div style={{fontFamily:"monospace",fontSize:11,color:a.color}}>{progress[i]}%</div>
           </div>
-        ))}
-      </div>
+          <div style={{height:3,background:"rgba(255,255,255,.05)",borderRadius:2,overflow:"hidden",marginBottom:6}}>
+            <div style={{height:"100%",width:`${progress[i]}%`,background:a.color,transition:"width .4s",borderRadius:2}}/>
+          </div>
+          <div style={{fontSize:11,color:"rgba(255,255,255,.35)",fontFamily:"monospace"}}>
+            {agentStep[i]>0?a.steps[agentStep[i]-1]:"waiting…"}
+          </div>
+        </div>
+      ))}
+      {verdict&&(
+        <div style={{background:"rgba(34,197,94,.08)",border:"2px solid #22c55e",borderRadius:12,padding:"14px 18px",textAlign:"center",marginTop:4}}>
+          <div style={{fontSize:22,fontWeight:900,color:"#22c55e",letterSpacing:".06em"}}>✓ AUTHENTIC</div>
+          <div style={{fontSize:11,color:"rgba(255,255,255,.5)",marginTop:4}}>TRUmark {uc.trumark} · Confidence {uc.confidence}%</div>
+        </div>
+      )}
+    </div>
+  );
+}
 
-      {/* StrainChain callout */}
-      <div style={{marginTop:28,display:"flex",gap:12,justifyContent:"center"}}>
-        <div style={{background:"rgba(34,197,94,.08)",border:"1px solid rgba(34,197,94,.2)",borderRadius:10,padding:"10px 18px",textAlign:"center"}}>
-          <div style={{fontSize:11,fontWeight:700,color:"#22c55e",marginBottom:2}}>StrainChain</div>
-          <div style={{fontSize:10,color:"rgba(255,255,255,.35)"}}>AuthiChain + QRON for cannabis compliance</div>
-        </div>
-        <div style={{background:"rgba(55,138,221,.08)",border:"1px solid rgba(55,138,221,.2)",borderRadius:10,padding:"10px 18px",textAlign:"center"}}>
-          <div style={{fontSize:11,fontWeight:700,color:"#378ADD",marginBottom:2}}>Truth Network</div>
-          <div style={{fontSize:10,color:"rgba(255,255,255,.35)"}}>Consumer validators earn $QRON per scan</div>
-        </div>
-        <div style={{background:"rgba(201,162,39,.08)",border:"1px solid rgba(201,162,39,.2)",borderRadius:10,padding:"10px 18px",textAlign:"center"}}>
-          <div style={{fontSize:11,fontWeight:700,color:"#c9a227",marginBottom:2}}>EU DPP</div>
-          <div style={{fontSize:10,color:"rgba(255,255,255,.35)"}}>All 7 requirements. Live today.</div>
-        </div>
+/* ── QRON VISUAL ──────────────────────────────────────────────────── */
+function QRONPanel({uc, running, accent}:{uc:typeof USE_CASES[3], running:boolean, accent:string}){
+  const [step,setStep]=useState(0);
+  const [scans,setScans]=useState(0);
+  useEffect(()=>{
+    if(!running){setStep(0);setScans(0);return;}
+    const t1=setTimeout(()=>setStep(1),800);
+    const t2=setTimeout(()=>setStep(2),2400);
+    const t3=setTimeout(()=>setStep(3),4200);
+    const t4=setTimeout(()=>setStep(4),6000);
+    const t5=setTimeout(()=>{setScans(s=>s+1);},7500);
+    return()=>[t1,t2,t3,t4,t5].forEach(clearTimeout);
+  },[running]);
+  const q=uc.qron;
+  return(
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,width:"100%"}}>
+      {/* QR panel */}
+      <div style={{background:"#0d0d0d",border:`1px solid ${accent}20`,borderRadius:12,padding:"16px",textAlign:"center"}}>
+        <div style={{fontSize:10,color:"rgba(255,255,255,.3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:12}}>QRON Generator</div>
+        {step===0&&<div style={{color:"rgba(255,255,255,.2)",fontSize:12,padding:"40px 0"}}>Awaiting TRUmark verdict…</div>}
+        {step>=1&&(
+          <>
+            <div style={{width:120,height:120,margin:"0 auto 12px",background:`linear-gradient(135deg,${accent}20,transparent)`,border:`2px solid ${accent}40`,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
+              {/* Simulated QR grid */}
+              <svg viewBox="0 0 10 10" width="90" height="90">
+                {Array.from({length:100},(_,k)=>{
+                  const x=k%10, y=Math.floor(k/10);
+                  const corner=(x<3&&y<3)||(x>6&&y<3)||(x<3&&y>6);
+                  const dark=corner||Math.random()>.5;
+                  return dark?<rect key={k} x={x} y={y} width={1} height={1} fill={accent}/> : null;
+                })}
+              </svg>
+              {step>=2&&<div style={{position:"absolute",bottom:-8,right:-8,background:"#22c55e",borderRadius:4,padding:"2px 6px",fontSize:8,fontWeight:700,color:"#000"}}>LIVE</div>}
+            </div>
+            <div style={{fontSize:11,color:accent,fontFamily:"monospace"}}>{q.shortUrl}</div>
+            <div style={{fontSize:10,color:"rgba(255,255,255,.3)",marginTop:4}}>Style: {q.style}</div>
+          </>
+        )}
+      </div>
+      {/* StoryMode panel */}
+      <div style={{background:"#0d0d0d",border:`1px solid ${accent}20`,borderRadius:12,padding:"16px"}}>
+        <div style={{fontSize:10,color:"rgba(255,255,255,.3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:12}}>StoryMode Destination</div>
+        {step<2&&<div style={{color:"rgba(255,255,255,.2)",fontSize:12,padding:"32px 0 0",textAlign:"center"}}>Resolving…</div>}
+        {step>=2&&(
+          <>
+            <div style={{fontSize:11,fontWeight:700,color:accent,marginBottom:8}}>◆ Origin Story</div>
+            <div style={{fontSize:11,color:"rgba(255,255,255,.55)",lineHeight:1.7,fontStyle:"italic"}}>"{q.story}"</div>
+            {step>=3&&<div style={{marginTop:10,fontSize:10,color:"rgba(255,255,255,.3)"}}>→ Dynamic: updates on ownership transfer</div>}
+            {step>=4&&(
+              <div style={{marginTop:10,background:"rgba(34,197,94,.08)",border:"1px solid rgba(34,197,94,.2)",borderRadius:8,padding:"8px 10px",fontSize:11}}>
+                <span style={{color:"#22c55e",fontWeight:700}}>Truth Network: </span>
+                <span style={{color:"rgba(255,255,255,.5)"}}>{scans+1} scan vote recorded</span>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-/* ─── MAIN PAGE ───────────────────────────────────────────────── */
-export default function DemoVideoPage(){
-  const [scene,setScene]=useState(0);
-  const [sElapsed,setSElapsed]=useState(0);
+/* ── DPP CHECKLIST ────────────────────────────────────────────────── */
+function DPPPanel({uc, running, accent}:{uc:typeof USE_CASES[5], running:boolean, accent:string}){
+  const [done,setDone]=useState<boolean[]>(uc.requirements.map(()=>false));
+  const [cert,setCert]=useState(false);
+  useEffect(()=>{
+    if(!running){setDone(uc.requirements.map(()=>false));setCert(false);return;}
+    const timers=uc.requirements.map((_,i)=>setTimeout(()=>setDone(p=>{const n=[...p];n[i]=true;return n;}), 800+i*900));
+    timers.push(setTimeout(()=>setCert(true), 800+uc.requirements.length*900+400));
+    return()=>timers.forEach(clearTimeout);
+  },[running]);
+  return(
+    <div style={{width:"100%"}}>
+      {uc.requirements.map((r,i)=>(
+        <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"8px 12px",borderRadius:8,marginBottom:4,
+          background:done[i]?"rgba(59,130,246,.06)":"rgba(255,255,255,.02)",transition:"background .4s"}}>
+          <div style={{width:20,height:20,borderRadius:"50%",border:`1.5px solid ${done[i]?accent:"rgba(255,255,255,.15)"}`,
+            display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:done[i]?accent:"transparent",
+            flexShrink:0,marginTop:1,transition:"all .3s"}}>✓</div>
+          <div>
+            <div style={{fontSize:12,fontWeight:500,color:done[i]?"#e5e5e5":"rgba(255,255,255,.3)",transition:"color .3s"}}>{r.label}</div>
+            {done[i]&&<div style={{fontSize:10,color:"rgba(255,255,255,.35)",marginTop:2,fontFamily:"monospace"}}>{r.value}</div>}
+          </div>
+        </div>
+      ))}
+      {cert&&(
+        <div style={{marginTop:12,background:`${accent}10`,border:`2px solid ${accent}`,borderRadius:12,padding:"14px 18px",textAlign:"center"}}>
+          <div style={{fontSize:11,color:"rgba(255,255,255,.4)",marginBottom:4,textTransform:"uppercase",letterSpacing:".08em"}}>EU DPP Certificate Issued</div>
+          <div style={{fontSize:14,fontWeight:900,color:accent,fontFamily:"monospace"}}>{uc.cert}</div>
+          <div style={{fontSize:10,color:"rgba(255,255,255,.3)",marginTop:4}}>All 7 requirements satisfied automatically ✓</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── MAIN PAGE ────────────────────────────────────────────────────── */
+export default function DemoPage(){
+  const [uc,setUc]=useState(0);
+  const [ucElapsed,setUcElapsed]=useState(0);
   const [running,setRunning]=useState(false);
   const [voiceName,setVoiceName]=useState("Loading…");
   const [voiceReady,setVoiceReady]=useState(false);
@@ -259,46 +292,44 @@ export default function DemoVideoPage(){
   const [caption,setCaption]=useState<string[]>([]);
   const [wordIdx,setWordIdx]=useState(-1);
   const [fade,setFade]=useState(true);
-  const [counters,setCounters]=useState([0,0,0,0,0,0]);
   const timerRef=useRef<ReturnType<typeof setInterval>|null>(null);
   const synthRef=useRef<SpeechSynthesis|null>(null);
   const voiceRef=useRef<SpeechSynthesisVoice|null>(null);
   const prevRef=useRef(-1);
-
-  const sc=SCENES[scene];
-  const totalElapsed=SCENES.slice(0,scene).reduce((s,x)=>s+x.duration,0)+sElapsed;
+  const scene=USE_CASES[uc];
+  const totalElapsed=USE_CASES.slice(0,uc).reduce((s,u)=>s+u.duration,0)+ucElapsed;
   const pct=Math.min(100,(totalElapsed/TOTAL)*100);
-  const scenePct=sc.duration>0?(sElapsed/sc.duration)*100:0;
-  const accent=sc.accent||"#c9a227";
+  const scenePct=scene.duration>0?(ucElapsed/scene.duration)*100:0;
+  const accent=scene.accent;
 
   const pickVoice=useCallback(()=>{
-    const s=window.speechSynthesis; synthRef.current=s;
-    const vs=s.getVoices(); if(!vs.length)return;
+    const s=window.speechSynthesis;synthRef.current=s;
+    const vs=s.getVoices();if(!vs.length)return;
     const p=["Google UK English Male","Microsoft David","Microsoft Guy","Microsoft Christopher","Daniel","Aaron","Alex","Fred"];
     let c:SpeechSynthesisVoice|null=null;
     for(const n of p){c=vs.find(v=>v.name.toLowerCase().includes(n.toLowerCase()))??null;if(c)break;}
     if(!c)c=vs.find(v=>v.lang.startsWith("en")&&/male|david|guy|aaron|alex|daniel|fred|chris/i.test(v.name))??null;
     if(!c)c=vs.find(v=>v.lang.startsWith("en"))??vs[0]??null;
-    voiceRef.current=c; setVoiceName(c?.name??"Default"); setVoiceReady(true);
+    voiceRef.current=c;setVoiceName(c?.name??"Default");setVoiceReady(true);
   },[]);
 
   useEffect(()=>{
     if(typeof window==="undefined")return;
-    const s=window.speechSynthesis; synthRef.current=s;
+    const s=window.speechSynthesis;synthRef.current=s;
     if(s.getVoices().length)pickVoice();
     else s.addEventListener("voiceschanged",pickVoice,{once:true});
     return()=>{s.cancel();s.removeEventListener("voiceschanged",pickVoice);};
   },[pickVoice]);
 
   const narrate=useCallback((text:string)=>{
-    const s=synthRef.current; if(!s||muted)return;
+    const s=synthRef.current;if(!s||muted)return;
     s.cancel();
-    const words=text.split(/\s+/); setCaption(words); setWordIdx(-1);
+    const words=text.split(/\s+/);setCaption(words);setWordIdx(-1);
     const u=new SpeechSynthesisUtterance(text);
     if(voiceRef.current)u.voice=voiceRef.current;
-    u.rate=0.9;u.pitch=0.82;u.volume=1;
+    u.rate=0.88;u.pitch=0.8;u.volume=1;
     u.onboundary=(e:SpeechSynthesisEvent)=>{
-      if(e.name==="word"){const spoken=text.slice(0,e.charIndex+e.charLength);setWordIdx(spoken.trim().split(/\s+/).length-1);}
+      if(e.name==="word"){const sp=text.slice(0,e.charIndex+e.charLength);setWordIdx(sp.trim().split(/\s+/).length-1);}
     };
     u.onend=()=>setWordIdx(-1);
     s.speak(u);
@@ -307,275 +338,174 @@ export default function DemoVideoPage(){
   useEffect(()=>{
     if(running){
       timerRef.current=setInterval(()=>{
-        setSElapsed(p=>{
+        setUcElapsed(p=>{
           const n=p+1;
-          if(n>=SCENES[scene].duration){
-            setScene(s=>{
-              if(s<SCENES.length-1){setFade(false);setTimeout(()=>setFade(true),100);setSElapsed(0);return s+1;}
-              setRunning(false);return s;
+          if(n>=USE_CASES[uc].duration){
+            setUc(u=>{
+              if(u<USE_CASES.length-1){setFade(false);setTimeout(()=>setFade(true),100);setUcElapsed(0);return u+1;}
+              setRunning(false);return u;
             });return 0;
           }return n;
         });
       },1000);
     }else{if(timerRef.current)clearInterval(timerRef.current);}
     return()=>{if(timerRef.current)clearInterval(timerRef.current);};
-  },[running,scene]);
+  },[running,uc]);
 
   useEffect(()=>{
-    if(running&&scene!==prevRef.current){
-      prevRef.current=scene;setCaption([]);setWordIdx(-1);
-      setTimeout(()=>narrate(SCENES[scene].narration),300);
+    if(running&&uc!==prevRef.current){
+      prevRef.current=uc;setCaption([]);setWordIdx(-1);
+      setTimeout(()=>narrate(USE_CASES[uc].narration),300);
     }
-  },[scene,running,narrate]);
+  },[uc,running,narrate]);
 
-  useEffect(()=>{
-    if(sc.visual==="METRICS"&&running){
-      const t=[47,172,1023,0,40,6];const dur=2200;const s0=Date.now();
-      const tick=()=>{const r=Math.min(1,(Date.now()-s0)/dur);const e=1-Math.pow(1-r,3);setCounters(t.map(v=>Math.round(v*e)));if(r<1)requestAnimationFrame(tick);};
-      if(running)requestAnimationFrame(tick);
-    }
-  },[sc.visual,running]);
-
-  function start(){
-    setScene(0);setSElapsed(0);prevRef.current=-1;setFade(false);
-    setTimeout(()=>setFade(true),80);setRunning(true);
-    setTimeout(()=>narrate(SCENES[0].narration),300);
-  }
+  function start(){setUc(0);setUcElapsed(0);prevRef.current=-1;setFade(false);setTimeout(()=>setFade(true),80);setRunning(true);setTimeout(()=>narrate(USE_CASES[0].narration),300);}
   function pause(){setRunning(false);synthRef.current?.pause();}
-  function resume(){setRunning(true);if(!synthRef.current?.speaking)narrate(sc.narration);else synthRef.current?.resume();}
-  function reset(){setRunning(false);setScene(0);setSElapsed(0);prevRef.current=-1;synthRef.current?.cancel();setCaption([]);setWordIdx(-1);}
-  function jumpTo(i:number){
-    setScene(i);setSElapsed(0);prevRef.current=-1;setFade(false);
-    setTimeout(()=>setFade(true),80);synthRef.current?.cancel();setCaption([]);setWordIdx(-1);setRunning(false);
-  }
-  function toggleMute(){setMuted(m=>{if(!m)synthRef.current?.cancel();return!m;});}
-
-  /* phase groups for tab display */
-  const phases=[...new Set(SCENES.map(s=>s.phase))];
-  const phaseOfScene=SCENES[scene].phase;
-
-  /* captions */
-  function Captions(){
-    if(!caption.length)return null;
-    return(
-      <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"8px 16px 12px",background:"linear-gradient(transparent,rgba(0,0,0,.88))",textAlign:"center",pointerEvents:"none"}}>
-        <div style={{fontSize:14.5,lineHeight:1.75,fontWeight:500}}>
-          {caption.map((w,i)=>(
-            <span key={i} style={{
-              color:i===wordIdx?accent:i<wordIdx?"rgba(255,255,255,.4)":"rgba(255,255,255,.8)",
-              fontWeight:i===wordIdx?700:400,transition:"color .1s",marginRight:"0.3em",display:"inline-block"
-            }}>{w}</span>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  function StatVisual(){
-    const [n,setN]=useState(0);
-    useEffect(()=>{
-      const d=1800,s0=Date.now();
-      const t=()=>{const r=Math.min(1,(Date.now()-s0)/d);setN(Math.round(500*r));if(r<1)requestAnimationFrame(t);};
-      if(running)requestAnimationFrame(t);else setN(500);
-    },[]);
-    return(
-      <div style={{textAlign:"center"}}>
-        <div style={{fontSize:"clamp(64px,12vw,108px)",fontWeight:900,color:"#e06060",lineHeight:1,textShadow:"0 0 60px rgba(224,96,96,.3)"}}>
-          ${n}B+
-        </div>
-        <div style={{fontSize:13,color:"rgba(255,255,255,.4)",marginTop:12,textTransform:"uppercase",letterSpacing:".08em"}}>in counterfeit goods every year</div>
-        <div style={{display:"flex",gap:24,justifyContent:"center",marginTop:44,flexWrap:"wrap"}}>
-          {[["Paper certs","forged in minutes"],["Barcodes","trivially cloned"],["RFID","$0.50+ per tag, hardware required"]].map(([t,s],i)=>(
-            <div key={i} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"13px 20px",textAlign:"center"}}>
-              <div style={{fontSize:13,fontWeight:600,color:"#e06060",marginBottom:5}}>{t}</div>
-              <div style={{fontSize:11,color:"rgba(255,255,255,.3)"}}>{s}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  function MetricsVisual(){
-    const items=[
-      {val:"$"+counters[0]+"M",label:"ACV pipeline"},
-      {val:counters[1]+"",label:"enterprise deals"},
-      {val:counters[2].toLocaleString(),label:"certs on-chain"},
-      {val:"$0",label:"capital raised"},
-      {val:counters[4]+"+",label:"CF workers"},
-      {val:counters[5]+" mo",label:"solo build"},
-    ];
-    return(
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,width:"100%",maxWidth:580}}>
-        {items.map((m,i)=>(
-          <div key={i} style={{background:"rgba(201,162,39,.07)",border:"1px solid rgba(201,162,39,.18)",borderRadius:12,padding:"18px 10px",textAlign:"center"}}>
-            <div style={{fontSize:28,fontWeight:900,color:"#c9a227",lineHeight:1}}>{m.val}</div>
-            <div style={{fontSize:10,color:"rgba(255,255,255,.4)",marginTop:6,textTransform:"uppercase",letterSpacing:".07em"}}>{m.label}</div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  function CloseVisual(){
-    return(
-      <div style={{textAlign:"center",width:"100%"}}>
-        <div style={{fontSize:"clamp(36px,7vw,64px)",fontWeight:900,color:"#c9a227",letterSpacing:".05em",marginBottom:16,textShadow:"0 0 80px rgba(201,162,39,.35)"}}>
-          AUTHENTIC ECONOMY
-        </div>
-        <div style={{color:"rgba(255,255,255,.4)",fontSize:14,marginBottom:40,letterSpacing:".03em"}}>
-          Objects have authenticity. People have authenticity reputation.<br/>AI agents enforce authenticity.
-        </div>
-        <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
-          {[
-            {d:"authichain.com",c:"#c9a227"},
-            {d:"qron.space",c:"#a78bfa"},
-            {d:"strainchain.io",c:"#22c55e"},
-          ].map(({d,c})=>(
-            <div key={d} style={{background:`${c}12`,border:`1px solid ${c}40`,borderRadius:10,padding:"12px 22px",color:c,fontSize:14,letterSpacing:".03em"}}>{d}</div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  function resume(){setRunning(true);if(!synthRef.current?.speaking)narrate(scene.narration);else synthRef.current?.resume();}
+  function reset(){setRunning(false);setUc(0);setUcElapsed(0);prevRef.current=-1;synthRef.current?.cancel();setCaption([]);setWordIdx(-1);}
+  function jumpTo(i:number){setUc(i);setUcElapsed(0);prevRef.current=-1;setFade(false);setTimeout(()=>setFade(true),80);synthRef.current?.cancel();setCaption([]);setWordIdx(-1);setRunning(false);}
 
   return(
-    <div style={{background:"#080808",minHeight:"100vh",color:"#e5e5e5",fontFamily:"system-ui,sans-serif",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+    <div style={{background:"#070707",minHeight:"100vh",color:"#e5e5e5",fontFamily:"system-ui,sans-serif",display:"flex",flexDirection:"column",overflow:"hidden"}}>
 
-      {/* Ambient glow — color shifts with scene */}
-      <div style={{position:"fixed",top:0,left:"50%",transform:"translateX(-50%)",width:700,height:220,
-        background:`radial-gradient(ellipse,${accent}0d 0%,transparent 70%)`,
-        pointerEvents:"none",zIndex:0,transition:"background 1s"}}/>
+      {/* Ambient */}
+      <div style={{position:"fixed",top:0,left:"50%",transform:"translateX(-50%)",width:800,height:250,
+        background:`radial-gradient(ellipse,${accent}0d 0%,transparent 70%)`,pointerEvents:"none",zIndex:0,transition:"background 1.2s"}}/>
 
-      {/* ── TOP BAR ── */}
-      <div style={{position:"relative",zIndex:10,padding:"10px 20px",display:"flex",alignItems:"center",gap:14,borderBottom:"0.5px solid rgba(255,255,255,.07)",background:"rgba(8,8,8,.95)",flexWrap:"wrap"}}>
-        <a href="/" style={{color:accent,fontWeight:900,fontSize:"1rem",letterSpacing:".12em",textDecoration:"none",flexShrink:0,transition:"color .5s"}}>◆ AUTHENTIC ECONOMY</a>
-        <div style={{flex:1,minWidth:120,height:4,background:"rgba(255,255,255,.06)",borderRadius:2,overflow:"hidden"}}>
-          <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${accent},${accent}cc)`,borderRadius:2,transition:"width .9s linear"}}/>
+      {/* ── TOPBAR ── */}
+      <div style={{position:"relative",zIndex:20,padding:"10px 18px",display:"flex",alignItems:"center",gap:12,borderBottom:"0.5px solid rgba(255,255,255,.07)",background:"rgba(7,7,7,.96)",flexWrap:"wrap"}}>
+        <a href="/" style={{color:accent,fontWeight:900,fontSize:".95rem",letterSpacing:".12em",textDecoration:"none",flexShrink:0,transition:"color .8s"}}>◆ AUTHENTIC ECONOMY</a>
+        <div style={{flex:1,minWidth:100,height:4,background:"rgba(255,255,255,.05)",borderRadius:2,overflow:"hidden"}}>
+          <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${accent},${accent}bb)`,borderRadius:2,transition:"width .9s linear,background 1.2s"}}/>
         </div>
-        <div style={{fontFamily:"monospace",fontSize:12,color:"rgba(255,255,255,.3)"}}>{fmt(Math.round(totalElapsed))} / {fmt(TOTAL)}</div>
-        <div style={{display:"flex",gap:8,flexShrink:0}}>
+        <div style={{fontFamily:"monospace",fontSize:11,color:"rgba(255,255,255,.28)"}}>{fmt(Math.round(totalElapsed))} / {fmt(TOTAL)}</div>
+        <div style={{display:"flex",gap:7,flexShrink:0}}>
           {!running
-            ?<button onClick={scene===0&&sElapsed===0?start:resume} disabled={!voiceReady}
-                style={{background:accent,color:"#000",border:"none",borderRadius:8,padding:"8px 20px",fontWeight:700,cursor:voiceReady?"pointer":"not-allowed",fontSize:13,opacity:voiceReady?1:.5,transition:"background .5s"}}>
-                {scene===0&&sElapsed===0?"▶  Start":"▶  Resume"}
+            ?<button onClick={uc===0&&ucElapsed===0?start:resume} disabled={!voiceReady}
+                style={{background:accent,color:"#000",border:"none",borderRadius:8,padding:"7px 18px",fontWeight:700,cursor:voiceReady?"pointer":"not-allowed",fontSize:12,opacity:voiceReady?1:.5,transition:"background .8s"}}>
+                {uc===0&&ucElapsed===0?"▶  Start":"▶  Resume"}
               </button>
-            :<button onClick={pause} style={{background:"rgba(255,255,255,.06)",color:"rgba(255,255,255,.7)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:8,padding:"8px 16px",cursor:"pointer",fontSize:13}}>⏸  Pause</button>
+            :<button onClick={pause} style={{background:"rgba(255,255,255,.06)",color:"rgba(255,255,255,.6)",border:"0.5px solid rgba(255,255,255,.1)",borderRadius:8,padding:"7px 14px",cursor:"pointer",fontSize:12}}>⏸</button>
           }
-          <button onClick={toggleMute} style={{background:"transparent",color:muted?accent:"rgba(255,255,255,.3)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:8,padding:"8px 10px",cursor:"pointer",fontSize:14}}>{muted?"🔇":"🔊"}</button>
-          <button onClick={reset} style={{background:"transparent",color:"rgba(255,255,255,.2)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:8,padding:"8px 10px",cursor:"pointer",fontSize:13}}>↺</button>
+          <button onClick={()=>setMuted(m=>{if(!m)synthRef.current?.cancel();return!m;})}
+            style={{background:"transparent",color:muted?accent:"rgba(255,255,255,.3)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:8,padding:"7px 9px",cursor:"pointer",fontSize:13}}>{muted?"🔇":"🔊"}</button>
+          <button onClick={reset} style={{background:"transparent",color:"rgba(255,255,255,.2)",border:"0.5px solid rgba(255,255,255,.06)",borderRadius:8,padding:"7px 9px",cursor:"pointer",fontSize:12}}>↺</button>
         </div>
-        <div style={{fontSize:10,color:"rgba(255,255,255,.18)",flexShrink:0}}>🎙 {voiceName}</div>
+        <div style={{fontSize:9,color:"rgba(255,255,255,.17)",flexShrink:0}}>🎙 {voiceName}</div>
       </div>
 
-      {/* ── SCENE TABS ── */}
-      <div style={{position:"relative",zIndex:10,display:"flex",padding:"0 16px",borderBottom:"0.5px solid rgba(255,255,255,.06)",background:"rgba(8,8,8,.9)",overflowX:"auto",flexShrink:0}}>
-        {SCENES.map((s,i)=>{
-          const isActive=i===scene;
-          const isDone=i<scene;
-          const c=PHASE_COLORS[s.phase]||"#c9a227";
-          return(
-            <button key={i} onClick={()=>jumpTo(i)}
-              style={{padding:"8px 12px",background:"transparent",border:"none",
-                borderBottom:isActive?`1.5px solid ${c}`:"1.5px solid transparent",
-                color:isActive?c:isDone?"rgba(34,197,94,.55)":"rgba(255,255,255,.22)",
-                cursor:"pointer",fontSize:11,whiteSpace:"nowrap",fontWeight:isActive?700:400,
-                transition:"color .2s,border-color .2s"
-              }}>
-              {isDone?"✓ ":""}{i+1}. {s.title}
-            </button>
-          );
-        })}
-        <div style={{position:"absolute",bottom:0,left:0,height:"1.5px",background:`${accent}30`,
-          width:`${(scene/SCENES.length+scenePct/100/SCENES.length)*100}%`,transition:"width 1s linear, background .5s"}}/>
+      {/* ── USE CASE TABS ── */}
+      <div style={{position:"relative",zIndex:20,display:"flex",borderBottom:"0.5px solid rgba(255,255,255,.05)",background:"rgba(7,7,7,.93)",overflowX:"auto",flexShrink:0}}>
+        {USE_CASES.map((u,i)=>(
+          <button key={i} onClick={()=>jumpTo(i)}
+            style={{padding:"8px 14px",background:"transparent",border:"none",
+              borderBottom:i===uc?`2px solid ${u.accent}`:"2px solid transparent",
+              color:i===uc?u.accent:i<uc?"rgba(34,197,94,.5)":"rgba(255,255,255,.22)",
+              cursor:"pointer",fontSize:11,whiteSpace:"nowrap",fontWeight:i===uc?700:400,transition:"color .2s"}}>
+            {i<uc?"✓ ":""}{i+1}. {u.title.split(" — ")[0]}
+          </button>
+        ))}
+        <div style={{position:"absolute",bottom:0,left:0,height:"2px",width:`${(uc/USE_CASES.length+scenePct/100/USE_CASES.length)*100}%`,background:`${accent}30`,transition:"width 1s linear,background 1.2s"}}/>
       </div>
 
-      {/* ── SPLIT ── */}
-      <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 340px",minHeight:0}}>
+      {/* ── MAIN SPLIT ── */}
+      <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 320px",minHeight:0}}>
 
-        {/* Visual */}
-        <div style={{position:"relative",background:sc.visual==="IFRAME"?"#0d1117":"#080808",
-          display:"flex",alignItems:"center",justifyContent:"center",padding:sc.visual==="IFRAME"?0:28,overflow:"hidden",transition:"background .4s"}}>
-          <div style={{opacity:fade?1:0,transition:"opacity .25s",width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            {sc.visual==="IFRAME"&&sc.url&&<iframe src={sc.url} style={{width:"100%",height:"100%",minHeight:440,border:"none"}} title={sc.title}/>}
-            {sc.visual==="STAT"&&<StatVisual/>}
-            {sc.visual==="ECOSYSTEM"&&<EcosystemVisual running={running}/>}
-            {sc.visual==="FLOW"&&<FlowVisual/>}
-            {sc.visual==="METRICS"&&<MetricsVisual/>}
-            {sc.visual==="CLOSE"&&<CloseVisual/>}
-          </div>
+        {/* ── DEMO PANEL ── */}
+        <div style={{position:"relative",background:"#070707",display:"flex",flexDirection:"column",padding:"18px 20px 14px",gap:14,overflow:"hidden"}}>
 
-          {/* Phase badge */}
-          <div style={{position:"absolute",top:14,left:14,background:`${accent}18`,border:`1px solid ${accent}40`,borderRadius:6,padding:"3px 10px",fontSize:9,color:accent,fontWeight:700,textTransform:"uppercase",letterSpacing:".1em",transition:"all .5s"}}>
-            {sc.phase}
-          </div>
-
-          {/* Countdown ring */}
-          <div style={{position:"absolute",top:12,right:14,zIndex:5}}>
-            <svg width="44" height="44" viewBox="0 0 44 44">
-              <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,.06)" strokeWidth="2.5"/>
-              <circle cx="22" cy="22" r="18" fill="none" stroke={accent} strokeWidth="2.5"
-                strokeDasharray={`${2*Math.PI*18}`}
-                strokeDashoffset={`${2*Math.PI*18*(1-scenePct/100)}`}
-                strokeLinecap="round" transform="rotate(-90 22 22)"
-                style={{transition:"stroke-dashoffset 1s linear, stroke .5s",filter:`drop-shadow(0 0 4px ${accent}60)`}}/>
-              <text x="22" y="27" textAnchor="middle" fill="rgba(255,255,255,.4)" fontSize="11" fontFamily="monospace">{Math.max(0,sc.duration-sElapsed)}</text>
-            </svg>
-          </div>
-
-          <Captions/>
-        </div>
-
-        {/* Script panel */}
-        <div style={{background:"rgba(10,10,10,.98)",borderLeft:"0.5px solid rgba(255,255,255,.06)",display:"flex",flexDirection:"column"}}>
-          <div style={{padding:"14px 18px",borderBottom:"0.5px solid rgba(255,255,255,.06)"}}>
-            <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:".1em",color:"rgba(255,255,255,.2)",marginBottom:5}}>
-              {sc.phase} · Scene {scene+1}/{SCENES.length} · {sc.duration}s
+          {/* Scene header */}
+          <div style={{display:"flex",alignItems:"center",gap:12,flexShrink:0}}>
+            <div style={{background:`${accent}18`,border:`1px solid ${accent}40`,borderRadius:6,padding:"3px 10px",fontSize:9,fontWeight:700,color:accent,textTransform:"uppercase",letterSpacing:".1em"}}>{scene.phase}</div>
+            <div style={{fontSize:15,fontWeight:700,color:"#e5e5e5",opacity:fade?1:0,transition:"opacity .25s"}}>{scene.title}</div>
+            {/* Countdown ring */}
+            <div style={{marginLeft:"auto",flexShrink:0}}>
+              <svg width="38" height="38" viewBox="0 0 38 38">
+                <circle cx="19" cy="19" r="15" fill="none" stroke="rgba(255,255,255,.05)" strokeWidth="2"/>
+                <circle cx="19" cy="19" r="15" fill="none" stroke={accent} strokeWidth="2"
+                  strokeDasharray={`${2*Math.PI*15}`} strokeDashoffset={`${2*Math.PI*15*(1-scenePct/100)}`}
+                  strokeLinecap="round" transform="rotate(-90 19 19)"
+                  style={{transition:"stroke-dashoffset 1s linear,stroke 1.2s",filter:`drop-shadow(0 0 3px ${accent}60)`}}/>
+                <text x="19" y="24" textAnchor="middle" fill="rgba(255,255,255,.4)" fontSize="10" fontFamily="monospace">{Math.max(0,scene.duration-ucElapsed)}</text>
+              </svg>
             </div>
-            <div style={{fontWeight:600,color:"#e5e5e5",fontSize:14}}>{sc.title}</div>
-            {sc.url&&<div style={{fontFamily:"monospace",fontSize:9.5,color:`${accent}90`,marginTop:5,wordBreak:"break-all"}}>{sc.url}</div>}
-            {/* dots */}
-            <div style={{display:"flex",gap:4,marginTop:10}}>
-              {SCENES.map((_,i)=>(
-                <div key={i} onClick={()=>jumpTo(i)}
-                  style={{height:3,flex:1,borderRadius:2,cursor:"pointer",transition:"background .3s",
-                    background:i<scene?"#22c55e":i===scene?accent:"rgba(255,255,255,.08)"}}/>
+          </div>
+
+          {/* Visual area */}
+          <div style={{flex:1,opacity:fade?1:0,transition:"opacity .25s",overflowY:"auto"}}>
+            {scene.id==="autoflow"&&<Terminal steps={(scene as typeof USE_CASES[0]).steps} running={running} accent={accent}/>}
+            {scene.id==="trumark"&&<AgentPanel uc={scene as typeof USE_CASES[1]} running={running}/>}
+            {scene.id==="mint"&&<Terminal steps={(scene as typeof USE_CASES[2]).steps} running={running} accent={accent}/>}
+            {scene.id==="qron"&&<QRONPanel uc={scene as typeof USE_CASES[3]} running={running} accent={accent}/>}
+            {scene.id==="ledger"&&<Terminal steps={(scene as typeof USE_CASES[4]).steps} running={running} accent={accent}/>}
+            {scene.id==="dpp"&&<DPPPanel uc={scene as typeof USE_CASES[5]} running={running} accent={accent}/>}
+          </div>
+
+          {/* Caption bar */}
+          {caption.length>0&&(
+            <div style={{flexShrink:0,padding:"6px 10px 4px",background:"rgba(0,0,0,.7)",borderRadius:8,borderTop:`1px solid ${accent}20`}}>
+              <div style={{fontSize:12,lineHeight:1.7,textAlign:"center"}}>
+                {caption.map((w,i)=>(
+                  <span key={i} style={{color:i===wordIdx?accent:i<wordIdx?"rgba(255,255,255,.35)":"rgba(255,255,255,.75)",fontWeight:i===wordIdx?700:400,transition:"color .08s",marginRight:"0.28em"}}>{w}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── SCRIPT PANEL ── */}
+        <div style={{background:"rgba(10,10,10,.98)",borderLeft:"0.5px solid rgba(255,255,255,.05)",display:"flex",flexDirection:"column"}}>
+          <div style={{padding:"13px 16px",borderBottom:"0.5px solid rgba(255,255,255,.05)"}}>
+            <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:".1em",color:"rgba(255,255,255,.18)",marginBottom:5}}>{scene.phase} · {uc+1}/{USE_CASES.length} · {scene.duration}s</div>
+            <div style={{fontWeight:600,color:"#e5e5e5",fontSize:13,lineHeight:1.3}}>{scene.title}</div>
+            <div style={{display:"flex",gap:4,marginTop:9}}>
+              {USE_CASES.map((_,i)=>(
+                <div key={i} onClick={()=>jumpTo(i)} style={{height:3,flex:1,borderRadius:2,cursor:"pointer",
+                  background:i<uc?"#22c55e":i===uc?accent:"rgba(255,255,255,.07)",transition:"background .3s"}}/>
               ))}
             </div>
           </div>
 
-          <div style={{flex:1,padding:"14px 18px",overflowY:"auto"}}>
-            <div style={{fontSize:10,color:"rgba(255,255,255,.2)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Narration</div>
-            <div style={{fontSize:13.5,lineHeight:1.9,background:`${accent}08`,border:`1px solid ${accent}12`,borderRadius:8,padding:"12px 14px"}}>
+          <div style={{flex:1,padding:"13px 16px",overflowY:"auto"}}>
+            <div style={{fontSize:9,color:"rgba(255,255,255,.18)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Narration</div>
+            <div style={{fontSize:12.5,lineHeight:1.95,background:`${accent}07`,border:`1px solid ${accent}10`,borderRadius:8,padding:"11px 13px"}}>
               {caption.length>0
-                ?caption.map((w,i)=>(
-                    <span key={i} style={{
-                      color:i===wordIdx?accent:i<wordIdx?"rgba(255,255,255,.35)":"rgba(255,255,255,.7)",
-                      fontWeight:i===wordIdx?700:400,transition:"color .1s",marginRight:"0.3em",
-                    }}>{w}</span>
-                  ))
-                :<span style={{color:"rgba(255,255,255,.5)"}}>{sc.narration}</span>
-              }
+                ?caption.map((w,i)=>(<span key={i} style={{color:i===wordIdx?accent:i<wordIdx?"rgba(255,255,255,.3)":"rgba(255,255,255,.65)",fontWeight:i===wordIdx?700:400,transition:"color .08s",marginRight:"0.3em"}}>{w}</span>))
+                :<span style={{color:"rgba(255,255,255,.45)"}}>{scene.narration}</span>}
+            </div>
+
+            {/* Platform indicator */}
+            <div style={{marginTop:14,display:"flex",gap:8,flexWrap:"wrap"}}>
+              {["autoflow","trumark","mint","ledger"].includes(scene.id)&&(
+                <div style={{background:"rgba(201,162,39,.08)",border:"1px solid rgba(201,162,39,.2)",borderRadius:6,padding:"4px 10px",fontSize:9,color:"#c9a227",fontWeight:600}}>⚙ AuthiChain</div>
+              )}
+              {["qron"].includes(scene.id)&&(
+                <div style={{background:"rgba(236,72,153,.08)",border:"1px solid rgba(236,72,153,.2)",borderRadius:6,padding:"4px 10px",fontSize:9,color:"#ec4899",fontWeight:600}}>⬡ QRON</div>
+              )}
+              {["dpp"].includes(scene.id)&&(
+                <div style={{background:"rgba(59,130,246,.08)",border:"1px solid rgba(59,130,246,.2)",borderRadius:6,padding:"4px 10px",fontSize:9,color:"#3b82f6",fontWeight:600}}>🇪🇺 EU DPP</div>
+              )}
+              {["ledger"].includes(scene.id)&&(
+                <div style={{background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.2)",borderRadius:6,padding:"4px 10px",fontSize:9,color:"#f59e0b",fontWeight:600}}>₿ Bitcoin</div>
+              )}
             </div>
           </div>
 
-          <div style={{padding:"12px 18px",borderTop:"0.5px solid rgba(255,255,255,.06)",display:"flex",gap:8}}>
-            <button onClick={()=>jumpTo(Math.max(0,scene-1))} disabled={scene===0}
-              style={{flex:1,padding:"8px",background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:8,color:scene===0?"rgba(255,255,255,.12)":"rgba(255,255,255,.5)",cursor:scene===0?"default":"pointer",fontSize:12}}>← Prev</button>
-            <button onClick={()=>jumpTo(Math.min(SCENES.length-1,scene+1))} disabled={scene===SCENES.length-1}
-              style={{flex:1,padding:"8px",background:accent,border:"none",borderRadius:8,color:"#000",cursor:"pointer",fontWeight:700,fontSize:12,opacity:scene===SCENES.length-1?.4:1,transition:"background .5s"}}>Next →</button>
+          <div style={{padding:"11px 16px",borderTop:"0.5px solid rgba(255,255,255,.05)",display:"flex",gap:7}}>
+            <button onClick={()=>jumpTo(Math.max(0,uc-1))} disabled={uc===0}
+              style={{flex:1,padding:"7px",background:"rgba(255,255,255,.03)",border:"0.5px solid rgba(255,255,255,.07)",borderRadius:8,color:uc===0?"rgba(255,255,255,.1)":"rgba(255,255,255,.45)",cursor:uc===0?"default":"pointer",fontSize:11}}>← Prev</button>
+            <button onClick={()=>jumpTo(Math.min(USE_CASES.length-1,uc+1))} disabled={uc===USE_CASES.length-1}
+              style={{flex:1,padding:"7px",background:accent,border:"none",borderRadius:8,color:"#000",cursor:"pointer",fontWeight:700,fontSize:11,opacity:uc===USE_CASES.length-1?.35:1,transition:"background .8s"}}>Next →</button>
           </div>
         </div>
       </div>
 
       {/* ── FOOTER ── */}
-      <div style={{position:"relative",zIndex:10,padding:"7px 20px",background:"rgba(8,8,8,.95)",borderTop:"0.5px solid rgba(255,255,255,.05)",display:"flex",alignItems:"center",gap:20,flexWrap:"wrap",flexShrink:0}}>
-        <div style={{fontSize:11,color:"rgba(255,255,255,.18)"}}>Loom → Screen + Camera → <strong style={{color:"rgba(255,255,255,.35)"}}>▶ Start</strong> → voice narrates automatically</div>
-        <div style={{fontSize:11,color:"rgba(255,255,255,.12)"}}>{fmt(TOTAL)} total · {SCENES.length} scenes</div>
-        <div style={{marginLeft:"auto",display:"flex",gap:12}}>
-          {[{label:"authichain.com",c:"#c9a227"},{label:"qron.space",c:"#a78bfa"},{label:"strainchain.io",c:"#22c55e"}].map(({label,c})=>(
-            <a key={label} href={`https://${label}`} target="_blank" rel="noreferrer"
-              style={{fontSize:10,color:c,opacity:.5,textDecoration:"none"}}>{label} ↗</a>
+      <div style={{position:"relative",zIndex:20,padding:"6px 18px",background:"rgba(7,7,7,.95)",borderTop:"0.5px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",gap:16,flexWrap:"wrap",flexShrink:0}}>
+        <div style={{fontSize:10,color:"rgba(255,255,255,.15)"}}>Loom → Screen + Camera → <strong style={{color:"rgba(255,255,255,.3)"}}>▶ Start</strong> → voice narrates, interactions simulate automatically</div>
+        <div style={{marginLeft:"auto",display:"flex",gap:10}}>
+          {[{l:"authichain.com",c:"#c9a227"},{l:"qron.space",c:"#ec4899"},{l:"strainchain.io",c:"#22c55e"}].map(({l,c})=>(
+            <a key={l} href={`https://${l}`} target="_blank" rel="noreferrer" style={{fontSize:10,color:c,opacity:.4,textDecoration:"none"}}>{l} ↗</a>
           ))}
         </div>
       </div>
