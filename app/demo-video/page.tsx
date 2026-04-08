@@ -197,14 +197,34 @@ function useVoice(muted: boolean, onSpeechEnd: () => void) {
     u.rate   = 0.92;
     u.pitch  = 1.0;
     u.volume = 1;
+
+    // Track when speech actually starts (guards against Chrome's immediate-onend bug)
+    let speechStarted = false;
+    let startTime = 0;
+    u.onstart = () => { speechStarted = true; startTime = Date.now(); };
+
     u.onboundary = (e: SpeechSynthesisEvent) => {
       if (e.name === "word") {
         const spoken = text.slice(0, e.charIndex + e.charLength);
         setWordIdx(spoken.trim().split(/\s+/).length - 1);
       }
     };
-    u.onend  = () => { setWordIdx(-1); onEndRef.current(); };
-    u.onerror = () => { onEndRef.current(); };
+    u.onend = () => {
+      // Chrome bug: if onend fires before onstart or within 600ms, it's a false fire
+      // (caused by synth.cancel() propagating to the new utterance)
+      if (!speechStarted || (Date.now() - startTime) < 600) {
+        // Retry: re-speak after a short pause
+        setTimeout(() => { if (synthRef.current) synthRef.current.speak(u); }, 300);
+        return;
+      }
+      setWordIdx(-1);
+      onEndRef.current();
+    };
+    u.onerror = (e: SpeechSynthesisErrorEvent) => {
+      // "interrupted" means cancel() was called — not a real error, don't advance
+      if (e.error === "interrupted" || e.error === "canceled") return;
+      onEndRef.current();
+    };
     s.speak(u);
   }, [muted]);
 
@@ -752,18 +772,21 @@ export default function DemoPage() {
   const [sceneIdx, setSceneIdx] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
+  // Keep a ref so speech callbacks can check running without stale closures
   const [muted, setMuted] = useState(false);
   const [fade, setFade] = useState(true);
   const [textPhase, setTextPhase] = useState(0);
-  const [speechDone, setSpeechDone] = useState(false);
 
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null); // kept for pause/resume use
   const prevRef  = useRef(-1);
 
-  // Called when narration finishes — advance scene
+  // Called when narration finishes — advance scene directly (no intermediate state)
+  // Using ref to avoid stale sceneIdx in callback
+  const runningRef = useRef(false);
   const handleSpeechEnd = useCallback(() => {
-    setSpeechDone(true);
-  }, []);
+    if (runningRef.current) advanceScene();
+  }, [advanceScene]);
 
   const { voiceName, allVoices, selectVoice, testVoice, ready, caption, wordIdx, speak, stop, pause, resume, synth } = useVoice(muted, handleSpeechEnd);
 
@@ -772,52 +795,53 @@ export default function DemoPage() {
   const pct  = Math.min(100, (totalElapsed / TOTAL) * 100);
   const sPct = sc.duration > 0 ? (elapsed / sc.duration) * 100 : 0;
 
-  // Advance scene: triggered by speechDone OR when elapsed hits duration (safety net)
+  // Advance scene: triggered by speech onend (primary) or safety timer (fallback)
   const advanceScene = useCallback(() => {
-    setSpeechDone(false);
-    setSceneIdx(s => {
-      if (s < SCENES.length - 1) {
+    setElapsed(0);
+    setSceneIdx(prev => {
+      const next = prev + 1;
+      if (next < SCENES.length) {
+        // Transition to next scene
         setFade(false); setTextPhase(0);
-        setTimeout(() => { setFade(true); setTimeout(() => setTextPhase(1), 350); setTimeout(() => setTextPhase(2), 950); }, 200);
-        setElapsed(0);
-        return s + 1;
+        setTimeout(() => {
+          setFade(true);
+          setTimeout(() => setTextPhase(1), 300);
+          setTimeout(() => setTextPhase(2), 800);
+        }, 150);
+        return next;
       }
+      // Last scene done — stop cleanly
       setRunning(false);
-      return s;
+      return prev; // stay on last scene, don't loop
     });
   }, []);
 
-  // speechDone triggers advance (primary path)
-  useEffect(() => {
-    if (speechDone && running) advanceScene();
-  }, [speechDone, running, advanceScene]);
+  // Keep runningRef in sync (used by speech callbacks to avoid stale state)
+  useEffect(() => { runningRef.current = running; }, [running]);
 
-  // Safety timer: if voice never fires onend (browser bug), advance after duration + 3s
+  // Elapsed counter (for progress ring display only — NOT used to advance scenes)
   useEffect(() => {
-    if (running) {
-      timerRef.current = setInterval(() => {
-        setElapsed(p => {
-          const n = p + 1;
-          if (n >= SCENES[sceneIdx].duration + 3) {
-            // Safety: advance if narration somehow never ended
-            advanceScene();
-            return 0;
-          }
-          return n;
-        });
-      }, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    if (!running) return;
+    const ticker = setInterval(() => setElapsed(p => p + 1), 1000);
+    return () => clearInterval(ticker);
+  }, [running, sceneIdx]);
+
+  // Safety timer: single setTimeout per scene — fires ONCE if onend never comes
+  // Uses a ref so it doesn't create stale closures via sceneIdx in state
+  useEffect(() => {
+    if (!running) return;
+    const safetyMs = (SCENES[sceneIdx].duration + 6) * 1000;
+    const safetyTimer = setTimeout(() => {
+      advanceScene();
+    }, safetyMs);
+    return () => clearTimeout(safetyTimer);
   }, [running, sceneIdx, advanceScene]);
 
   // Narrate on scene change
   useEffect(() => {
     if (running && sceneIdx !== prevRef.current) {
       prevRef.current = sceneIdx;
-      setSpeechDone(false);
-      setElapsed(0);
+        setElapsed(0);
       setTimeout(() => speak(SCENES[sceneIdx].narration), 350);
     }
   }, [sceneIdx, running, speak]);
