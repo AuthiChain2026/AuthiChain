@@ -3,71 +3,74 @@ export default function CollectionPage(){
   return(
     <div dangerouslySetInnerHTML={{__html:`<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Voyage Bloom × NFT Collection</title>
+<title>Voyage Bloom × NFT Collection — Buy</title>
 <style>
-:root{--gold:#FFD700;--dark:#070707;--mid:#111;--border:rgba(255,255,255,.07)}
+:root{--gold:#FFD700;--dark:#080808;--border:rgba(255,255,255,.07)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--dark);color:#e5e5e5;font-family:system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+body{background:var(--dark);color:#e5e5e5;font-family:system-ui,sans-serif;min-height:100vh}
 
 /* HEADER */
-.header{padding:40px 24px 32px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
-.header::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:200px;background:radial-gradient(ellipse,rgba(255,215,0,.12) 0%,transparent 70%);pointer-events:none}
-.coll-label{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.3);margin-bottom:10px}
-.coll-title{font-size:clamp(22px,5vw,44px);font-weight:900;color:var(--gold);letter-spacing:.06em;text-shadow:0 0 40px rgba(255,215,0,.3);margin-bottom:6px}
-.coll-sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:24px}
-.stats{display:flex;gap:28px;justify-content:center;flex-wrap:wrap}
-.stat{text-align:center}.stat-v{font-size:18px;font-weight:700;color:var(--gold)}.stat-l{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.hdr{padding:48px 24px 36px;text-align:center;border-bottom:1px solid var(--border);position:relative}
+.hdr::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:700px;height:220px;background:radial-gradient(ellipse,rgba(255,215,0,.1) 0%,transparent 70%);pointer-events:none}
+.coll-eye{font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:rgba(255,255,255,.28);margin-bottom:10px}
+.coll-h1{font-size:clamp(24px,6vw,52px);font-weight:900;color:var(--gold);letter-spacing:.06em;text-shadow:0 0 50px rgba(255,215,0,.25);margin-bottom:6px}
+.coll-sub{font-size:13px;color:rgba(255,255,255,.38);margin-bottom:28px}
+.stats{display:flex;gap:32px;justify-content:center;flex-wrap:wrap}
+.stat .v{font-size:20px;font-weight:700;color:var(--gold)}
+.stat .l{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
 
 /* GRID */
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;padding:28px;max-width:1400px;margin:0 auto}
-@media(min-width:900px){
-  .grid{grid-template-columns:repeat(3,1fr)}
-  .featured{grid-column:span 2;grid-row:span 1}
-}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;padding:28px;max-width:1380px;margin:0 auto}
 
 /* CARD */
-.card{background:var(--bg,#111);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;cursor:pointer}
-.card:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 30px var(--accent,rgba(255,215,0,.2));border-color:var(--accent,rgba(255,215,0,.3))}
-.card-art{position:relative;overflow:hidden;background:#000;aspect-ratio:1/1}
-.featured .card-art{aspect-ratio:auto;height:440px}
+.card{background:#0d0d0d;border:1px solid rgba(255,255,255,.07);border-radius:18px;overflow:hidden;transition:transform .22s,box-shadow .22s,border-color .22s;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-5px);box-shadow:0 18px 52px rgba(0,0,0,.55),0 0 28px var(--accent,rgba(255,215,0,.2));border-color:var(--accent)}
+
+/* ART */
+.art{position:relative;aspect-ratio:1/1;overflow:hidden;background:#000}
 .svg-wrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
 .svg-wrap svg{width:100%;height:100%;display:block}
-.card-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.75);border:1px solid var(--accent,#FFD700);color:var(--accent,#FFD700);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:3px 9px;border-radius:4px;backdrop-filter:blur(4px)}
-.art-score{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.7);color:#ec4899;font-size:8px;font-weight:700;letter-spacing:.06em;padding:3px 8px;border-radius:4px;border:1px solid rgba(236,72,153,.3)}
+.rar-badge{position:absolute;top:11px;left:11px;border:1px solid;font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:3px 10px;border-radius:4px}
+.art-score{position:absolute;top:11px;right:11px;background:rgba(0,0,0,.72);color:#ec4899;font-size:8.5px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:4px;border:1px solid rgba(236,72,153,.3)}
 
-/* META */
-.card-meta{padding:14px 16px}
-.card-name{font-size:14px;font-weight:800;color:#e5e5e5;letter-spacing:.05em;margin-bottom:2px}
-.card-edition{font-size:10px;color:rgba(255,255,255,.35);font-family:monospace;margin-bottom:6px}
-.card-origin{font-size:10px;color:var(--accent,#FFD700);margin-bottom:6px;font-weight:600}
-.card-attrs{font-size:10px;color:rgba(255,255,255,.4);margin-bottom:6px;line-height:1.5}
-.card-slogan{font-size:10px;font-style:italic;color:rgba(255,255,255,.3);margin-bottom:10px;line-height:1.5}
-.card-footer{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.card-rarity{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 9px;border-radius:4px;border:1px solid}
-.card-floor{font-size:14px;font-weight:900;color:var(--gold)}
-.sc-badge{font-size:9px;color:rgba(34,197,94,.6);font-weight:600}
+/* INFO */
+.info{padding:16px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
+.nft-name{font-size:15px;font-weight:800;color:#e5e5e5;letter-spacing:.04em}
+.nft-sub{font-family:monospace;font-size:10px;color:rgba(255,255,255,.32)}
+.nft-origin{font-size:10.5px;color:var(--accent);font-weight:600}
+.nft-attrs{font-size:10px;color:rgba(255,255,255,.38)}
+.nft-slogan{font-size:10px;font-style:italic;color:rgba(255,255,255,.28);line-height:1.55}
+.justify{font-size:10px;color:rgba(255,255,255,.42);line-height:1.65;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:7px;border-left:2px solid var(--rc)}
+
+/* PRICE + BUY */
+.price-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px}
+.price-label{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em}
+.price-val{font-size:22px;font-weight:900;color:var(--gold)}
+.buy-btn{display:inline-block;background:var(--accent);color:#000;font-weight:800;font-size:12px;padding:10px 18px;border-radius:10px;text-decoration:none;white-space:nowrap;letter-spacing:.02em;transition:opacity .15s,transform .1s;flex-shrink:0}
+.buy-btn:hover{opacity:.88;transform:scale(1.03)}
+.sc-verify{font-size:9px;color:rgba(34,197,94,.5);font-weight:600;padding-top:4px}
 
 /* FOOTER */
-.footer{text-align:center;padding:28px;color:rgba(255,255,255,.15);font-size:11px;border-top:1px solid var(--border)}
-.footer a{color:rgba(255,215,0,.4);text-decoration:none}
+footer{text-align:center;padding:24px;color:rgba(255,255,255,.15);font-size:11px;border-top:1px solid var(--border)}
+footer a{color:rgba(255,215,0,.35);text-decoration:none}
 </style>
-</head>
-<body>
-<div class="header">
-  <div class="coll-label">Voyage Bloom × Dr. Dankenstein</div>
-  <div class="coll-title">BAGIEZ / MYLES HIGH</div>
-  <div class="coll-sub">Cannabis NFT Art Collection · StrainChain Verified · Polygon Mainnet</div>
+</head><body>
+
+<div class="hdr">
+  <div class="coll-eye">Voyage Bloom × Dr. Dankenstein · Bagiez / Myles High Collection</div>
+  <div class="coll-h1">CANNABIS NFT ART</div>
+  <div class="coll-sub">5 original pieces · StrainChain verified · Polygon mainnet · BTC Ordinal anchored</div>
   <div class="stats">
-    <div class="stat"><div class="stat-v">5</div><div class="stat-l">Pieces</div></div>
-    <div class="stat"><div class="stat-v">$3,820</div><div class="stat-l">Total Floor</div></div>
-    <div class="stat"><div class="stat-v">89</div><div class="stat-l">Avg Art Score</div></div>
-    <div class="stat"><div class="stat-v">Polygon</div><div class="stat-l">Chain</div></div>
-    <div class="stat"><div class="stat-v">100%</div><div class="stat-l">SC Verified</div></div>
+    <div class="stat"><div class="v">5</div><div class="l">Unique Pieces</div></div>
+    <div class="stat"><div class="v">$3,820</div><div class="l">Total Floor</div></div>
+    <div class="stat"><div class="v">89/100</div><div class="l">Avg ArtGuard</div></div>
+    <div class="stat"><div class="v">1 of 1</div><div class="l">Each Edition</div></div>
   </div>
 </div>
+
 <div class="grid">
-<div class="card  featured" style="--accent:#3DF5B3;--bg:#0A1E2E;" data-idx="0">
-  <div class="card-art">
+<div class="card" style="--accent:#3DF5B3;--rc:#FFD700;">
+  <div class="art">
     <div class="svg-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
   
   <defs>
@@ -183,24 +186,263 @@ body{background:var(--dark);color:#e5e5e5;font-family:system-ui,sans-serif;min-h
     <text x="10" y="25" font-family="Courier, monospace" font-size="14" fill="#3DF5B3">MINT: 0x42F...</text>
   </g>
 </svg></div>
-    <div class="card-badge">LEGENDARY</div>
+    <div class="rar-badge" style="border-color:#FFD70040;color:#FFD700;background:#FFD70014">LEGENDARY</div>
     <div class="art-score">ArtGuard 94/100</div>
   </div>
-  <div class="card-meta">
-    <div class="card-name">COSMIC COOKIE</div>
-    <div class="card-edition">Collector #042</div>
-    <div class="card-origin">Exotic Genetix</div>
-    <div class="card-attrs">Cookies · Mint · Chocolate</div>
-    <div class="card-slogan">"Out of this world."</div>
-    <div class="card-footer">
-      <div class="card-rarity" style="color:#FFD700;border-color:#FFD70040;background:#FFD70012">LEGENDARY</div>
-      <div class="card-floor">$1200</div>
+  <div class="info">
+    <div class="nft-name">COSMIC COOKIE</div>
+    <div class="nft-sub">Collector #042</div>
+    <div class="nft-origin">Exotic Genetix</div>
+    <div class="nft-attrs">Cookies · Mint · Chocolate</div>
+    <div class="nft-slogan">"Out of this world."</div>
+    <div class="justify">LEGENDARY rarity. Only 1 of 1 in the Voyage Bloom series. Exotic Genetix is one of the most sought-after cannabis genetics houses. Animated star field + UFO beam — the most technically sophisticated piece in the collection. ArtGuard 94/100.</div>
+    <div class="price-row">
+      <div class="price-block">
+        <div class="price-label">Floor Price</div>
+        <div class="price-val">$1,200</div>
+      </div>
+      <a href="https://buy.stripe.com/14A4gzfzPf7MfWO8rq1Nu1u" class="buy-btn" target="_blank" rel="noreferrer">
+        Buy Now — $1,200
+      </a>
     </div>
-    <div class="sc-badge">🌿 StrainChain Verified</div>
+    <div class="sc-verify">🌿 StrainChain Verified · Polygon Mainnet · BTC Ordinal Anchored</div>
   </div>
 </div>
-<div class="card" style="--accent:#71d16e;--bg:#1a2e1a;" data-idx="1">
-  <div class="card-art">
+<div class="card" style="--accent:#f48fb1;--rc:#a78bfa;">
+  <div class="art">
+    <div class="svg-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  
+  <defs>
+    <linearGradient id="jr-bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9575cd;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7e57c2;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="jr-jellyGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#f48fb1;stop-opacity:0.7" />
+      <stop offset="100%" style="stop-color:#f48fb1;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  
+  
+  <rect width="800" height="800" fill="url(#jr-bgGradient)"/>
+  
+  
+  <circle cx="400" cy="400" r="200" fill="url(#jr-jellyGlow)">
+    <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" repeatCount="indefinite" />
+  </circle>
+  
+  
+  <path d="M300 250 L300 550 C300 600 500 600 500 550 L500 250 Z" fill="#e8eaf6" opacity="0.7" stroke="#7986cb" stroke-width="5"/>
+  
+  
+  <path d="M290 250 L510 250 L510 230 L290 230 Z" fill="#ef5350" stroke="#c62828" stroke-width="3"/>
+  <ellipse cx="400" cy="230" rx="110" ry="15" fill="#ef5350" stroke="#c62828" stroke-width="3"/>
+  
+  
+  <path d="M320 270 L320 520 C320 560 480 560 480 520 L480 270 Z" fill="#f48fb1" opacity="0.9">
+    <animate attributeName="d" 
+             values="M320 270 L320 520 C320 560 480 560 480 520 L480 270 Z;
+                     M320 270 L320 520 C320 565 480 565 480 520 L480 270 Z;
+                     M320 270 L320 520 C320 560 480 560 480 520 L480 270 Z" 
+             dur="6s" 
+             repeatCount="indefinite"/>
+  </path>
+  
+  
+  <circle cx="360" cy="350" r="15" fill="#aed581" opacity="0.9" />
+  <circle cx="420" cy="380" r="20" fill="#aed581" opacity="0.9" />
+  <circle cx="380" cy="450" r="18" fill="#aed581" opacity="0.9" />
+  <circle cx="440" cy="470" r="12" fill="#aed581" opacity="0.9" />
+  <circle cx="350" cy="420" r="10" fill="#aed581" opacity="0.9" />
+  
+  
+  <ellipse cx="370" cy="380" rx="20" ry="25" fill="white" stroke="#7986cb" stroke-width="2">
+    <animate attributeName="ry" values="25;20;25" dur="5s" repeatCount="indefinite" />
+  </ellipse>
+  <ellipse cx="430" cy="380" rx="20" ry="25" fill="white" stroke="#7986cb" stroke-width="2">
+    <animate attributeName="ry" values="25;20;25" dur="5s" repeatCount="indefinite" />
+  </ellipse>
+  
+  
+  <circle cx="370" cy="380" r="8" fill="#333">
+    <animate attributeName="cy" values="380;375;380" dur="5s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="430" cy="380" r="8" fill="#333">
+    <animate attributeName="cy" values="380;375;380" dur="5s" repeatCount="indefinite" />
+  </circle>
+  
+  
+  <circle cx="345" cy="415" r="15" fill="#e91e63" opacity="0.5" />
+  <circle cx="455" cy="415" r="15" fill="#e91e63" opacity="0.5" />
+  
+  
+  <path d="M370 440 Q400 470 430 440" fill="none" stroke="#333" stroke-width="5" stroke-linecap="round">
+    <animate attributeName="d" 
+             values="M370 440 Q400 470 430 440;
+                     M370 445 Q400 480 430 445;
+                     M370 440 Q400 470 430 440" 
+             dur="6s" 
+             repeatCount="indefinite"/>
+  </path>
+  
+  <rect x="385" y="440" width="10" height="10" fill="white" rx="2" ry="2" />
+  <rect x="405" y="440" width="10" height="10" fill="white" rx="2" ry="2" />
+  
+  
+  <circle cx="330" cy="300" r="4" fill="#f8bbd0" opacity="0.8">
+    <animate attributeName="cy" values="300;310;300" dur="4s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="470" cy="330" r="5" fill="#f8bbd0" opacity="0.8">
+    <animate attributeName="cy" values="330;340;330" dur="5s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="360" cy="500" r="6" fill="#f8bbd0" opacity="0.8">
+    <animate attributeName="cy" values="500;510;500" dur="6s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="440" cy="510" r="3" fill="#f8bbd0" opacity="0.8">
+    <animate attributeName="cy" values="510;520;510" dur="3.5s" repeatCount="indefinite" />
+  </circle>
+  
+  
+  <text x="400" y="630" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">JARED #001</text>
+  
+  
+  <text x="400" y="670" font-family="Arial, sans-serif" font-size="18" fill="#e0e0e0" text-anchor="middle">ATTRIBUTES: GRAPE JELLO, KIWI, AND TIRES</text>
+  <text x="400" y="700" font-family="Arial, sans-serif" font-size="18" fill="#e0e0e0" text-anchor="middle">ORIGIN: HUMBOLDT SEED COMPANY</text>
+  
+  
+  <text x="400" y="130" font-family="Arial, sans-serif" font-size="24" font-style="italic" fill="white" text-anchor="middle">"ROLL WITH THE BEST–YOU CAN'T SQUASH THIS VIBE."</text>
+</svg></div>
+    <div class="rar-badge" style="border-color:#a78bfa40;color:#a78bfa;background:#a78bfa14">EPIC</div>
+    <div class="art-score">ArtGuard 91/100</div>
+  </div>
+  <div class="info">
+    <div class="nft-name">JARED</div>
+    <div class="nft-sub">#001 of Series</div>
+    <div class="nft-origin">Humboldt Seed Company</div>
+    <div class="nft-attrs">Grape Jello · Kiwi · Tires</div>
+    <div class="nft-slogan">"Roll with the best — you can't squash this vibe."</div>
+    <div class="justify">EPIC rarity. Fully animated — the only piece in the collection with blinking eyes, breathing jello, and floating inclusions. Humboldt Seed Company provenance commands a premium. First edition #001.</div>
+    <div class="price-row">
+      <div class="price-block">
+        <div class="price-label">Floor Price</div>
+        <div class="price-val">$840</div>
+      </div>
+      <a href="https://buy.stripe.com/8x2bJ173j7FkfWOazy1Nu1v" class="buy-btn" target="_blank" rel="noreferrer">
+        Buy Now — $840
+      </a>
+    </div>
+    <div class="sc-verify">🌿 StrainChain Verified · Polygon Mainnet · BTC Ordinal Anchored</div>
+  </div>
+</div>
+<div class="card" style="--accent:#90caf9;--rc:#a78bfa;">
+  <div class="art">
+    <div class="svg-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  
+  <defs>
+    <linearGradient id="bb-bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#213355" />
+      <stop offset="100%" stop-color="#14213d" />
+    </linearGradient>
+    
+    
+    <linearGradient id="bb-diamondGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f7fa" />
+      <stop offset="20%" stop-color="#bbdefb" />
+      <stop offset="40%" stop-color="#90caf9" />
+      <stop offset="60%" stop-color="#81d4fa" />
+      <stop offset="80%" stop-color="#b3e5fc" />
+      <stop offset="100%" stop-color="#e1f5fe" />
+    </linearGradient>
+    
+    
+    <filter id="bb-smoke" x="-50%" y="-50%" width="200%" height="200%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </defs>
+  
+  
+  <rect width="800" height="800" fill="url(#bb-bgGradient)" />
+  
+  
+  <circle cx="400" cy="400" r="300" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3" />
+  <circle cx="400" cy="400" r="250" fill="none" stroke="#FFD700" stroke-width="1" opacity="0.2" />
+  
+  
+  <path d="M0 650 L150 550 L300 620 L450 520 L600 600 L750 530 L800 550 L800 800 L0 800 Z" fill="#5D4037" opacity="0.7" />
+  
+  
+  <circle cx="200" cy="650" r="30" fill="#3F51B5" opacity="0.7" />
+  <circle cx="250" cy="670" r="25" fill="#3F51B5" opacity="0.8" />
+  <circle cx="180" cy="690" r="20" fill="#3F51B5" opacity="0.6" />
+  
+  
+  <g transform="translate(400, 350)">
+    
+    <path d="M0 -150 L120 0 L0 150 L-120 0 Z" fill="url(#bb-diamondGradient)" stroke="#FFFFFF" stroke-width="3" />
+    <path d="M0 -150 L120 0 L0 0 Z" fill="#FFFFFF" opacity="0.6" />
+    <path d="M0 0 L-120 0 L0 150 Z" fill="#FFFFFF" opacity="0.3" />
+    <path d="M0 0 L120 0 L0 150 Z" fill="#90CAF9" opacity="0.5" />
+    
+    
+    <circle cx="-40" cy="-20" r="15" fill="#000000" />
+    <circle cx="40" cy="-20" r="15" fill="#000000" />
+    <circle cx="-40" cy="-20" r="5" fill="#FFFFFF" />
+    <circle cx="40" cy="-20" r="5" fill="#FFFFFF" />
+    
+    
+    <path d="M-50 30 Q0 80 50 30" fill="none" stroke="#000000" stroke-width="8" stroke-linecap="round" />
+  </g>
+  
+  
+  <g filter="url(#bb-smoke)" opacity="0.3">
+    <path d="M300 300 Q400 200 500 300 T700 300" fill="none" stroke="#FFFFFF" stroke-width="10" />
+    <path d="M300 320 Q400 220 500 320 T700 320" fill="none" stroke="#FFFFFF" stroke-width="8" />
+    <path d="M300 340 Q400 240 500 340 T700 340" fill="none" stroke="#FFFFFF" stroke-width="6" />
+  </g>
+  
+  
+  <circle cx="600" cy="650" r="20" fill="#F06292" />
+  <circle cx="650" cy="670" r="15" fill="#BA68C8" />
+  <circle cx="630" cy="620" r="18" fill="#4CAF50" />
+  
+  
+  <text x="400" y="550" font-family="Arial, sans-serif" font-weight="bold" font-size="40" fill="#FFFFFF" text-anchor="middle">BLING BLAOW</text>
+  
+  
+  <text x="400" y="600" font-family="Arial, sans-serif" font-size="20" fill="#FFD700" text-anchor="middle">DIESEL · BLUEBERRIES · CANDY</text>
+  
+  
+  <text x="400" y="650" font-family="Arial, sans-serif" font-style="italic" font-size="24" fill="#FFFFFF" text-anchor="middle">"PUFF, PUFF, FACET"</text>
+  
+  
+  <text x="400" y="720" font-family="Arial, sans-serif" font-size="16" fill="#CCCCCC" text-anchor="middle">ORIGIN: COMPOUND GENETICS</text>
+  <text x="400" y="750" font-family="Arial, sans-serif" font-size="16" fill="#CCCCCC" text-anchor="middle">A VOYAGE BLOOM EXCLUSIVE</text>
+</svg></div>
+    <div class="rar-badge" style="border-color:#a78bfa40;color:#a78bfa;background:#a78bfa14">EPIC</div>
+    <div class="art-score">ArtGuard 89/100</div>
+  </div>
+  <div class="info">
+    <div class="nft-name">BLING BLAOW</div>
+    <div class="nft-sub">Voyage Bloom Exclusive</div>
+    <div class="nft-origin">Compound Genetics</div>
+    <div class="nft-attrs">Diesel · Blueberries · Candy</div>
+    <div class="nft-slogan">"Puff, puff, facet."</div>
+    <div class="justify">EPIC rarity. Compound Genetics is a top-tier genetics house. Diamond character concept is culturally resonant with collectors. Premium navy-on-blue aesthetic is the most refined dark composition in the collection.</div>
+    <div class="price-row">
+      <div class="price-block">
+        <div class="price-label">Floor Price</div>
+        <div class="price-val">$720</div>
+      </div>
+      <a href="https://buy.stripe.com/28E28rdrHcZEeSK9vu1Nu1w" class="buy-btn" target="_blank" rel="noreferrer">
+        Buy Now — $720
+      </a>
+    </div>
+    <div class="sc-verify">🌿 StrainChain Verified · Polygon Mainnet · BTC Ordinal Anchored</div>
+  </div>
+</div>
+<div class="card" style="--accent:#71d16e;--rc:#22c55e;">
+  <div class="art">
     <div class="svg-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
   
   <defs>
@@ -304,245 +546,30 @@ body{background:var(--dark);color:#e5e5e5;font-family:system-ui,sans-serif;min-h
     <circle cx="-65" cy="-80" r="5" fill="none" stroke="#444444" stroke-width="1" />
   </g>
 </svg></div>
-    <div class="card-badge">RARE</div>
+    <div class="rar-badge" style="border-color:#22c55e40;color:#22c55e;background:#22c55e14">RARE</div>
     <div class="art-score">ArtGuard 87/100</div>
   </div>
-  <div class="card-meta">
-    <div class="card-name">WATERMELON ZMARTINI</div>
-    <div class="card-edition">#000665</div>
-    <div class="card-origin">Dr. Dankenstein × Voyage Bloom</div>
-    <div class="card-attrs">Smarties · Sour Patch Watermelon · Irish Spring</div>
-    <div class="card-slogan">"In the end, we're all just looking for a spark."</div>
-    <div class="card-footer">
-      <div class="card-rarity" style="color:#22c55e;border-color:#22c55e40;background:#22c55e12">RARE</div>
-      <div class="card-floor">$580</div>
+  <div class="info">
+    <div class="nft-name">WATERMELON ZMARTINI</div>
+    <div class="nft-sub">#000665</div>
+    <div class="nft-origin">Dr. Dankenstein × Voyage Bloom</div>
+    <div class="nft-attrs">Smarties · Sour Patch Watermelon · Irish Spring</div>
+    <div class="nft-slogan">"In the end, we're all just looking for a spark."</div>
+    <div class="justify">RARE. The only Dr. Dankenstein collab in the series — a named artist collaboration adds collectability. Dual-character composition (watermelon + flask) is the most narrative piece. Low edition number #000665 signals early-series rarity.</div>
+    <div class="price-row">
+      <div class="price-block">
+        <div class="price-label">Floor Price</div>
+        <div class="price-val">$580</div>
+      </div>
+      <a href="https://buy.stripe.com/00w5kDevL6Bgh0SdLK1Nu1x" class="buy-btn" target="_blank" rel="noreferrer">
+        Buy Now — $580
+      </a>
     </div>
-    <div class="sc-badge">🌿 StrainChain Verified</div>
+    <div class="sc-verify">🌿 StrainChain Verified · Polygon Mainnet · BTC Ordinal Anchored</div>
   </div>
 </div>
-<div class="card" style="--accent:#f48fb1;--bg:#2a1040;" data-idx="2">
-  <div class="card-art">
-    <div class="svg-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
-  
-  <defs>
-    <linearGradient id="jr-bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#9575cd;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#7e57c2;stop-opacity:1" />
-    </linearGradient>
-    <radialGradient id="jr-jellyGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-      <stop offset="0%" style="stop-color:#f48fb1;stop-opacity:0.7" />
-      <stop offset="100%" style="stop-color:#f48fb1;stop-opacity:0" />
-    </radialGradient>
-  </defs>
-  
-  
-  <rect width="800" height="800" fill="url(#jr-bgGradient)"/>
-  
-  
-  <circle cx="400" cy="400" r="200" fill="url(#jr-jellyGlow)">
-    <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" repeatCount="indefinite" />
-  </circle>
-  
-  
-  <path d="M300 250 L300 550 C300 600 500 600 500 550 L500 250 Z" fill="#e8eaf6" opacity="0.7" stroke="#7986cb" stroke-width="5"/>
-  
-  
-  <path d="M290 250 L510 250 L510 230 L290 230 Z" fill="#ef5350" stroke="#c62828" stroke-width="3"/>
-  <ellipse cx="400" cy="230" rx="110" ry="15" fill="#ef5350" stroke="#c62828" stroke-width="3"/>
-  
-  
-  <path d="M320 270 L320 520 C320 560 480 560 480 520 L480 270 Z" fill="#f48fb1" opacity="0.9">
-    <animate attributeName="d" 
-             values="M320 270 L320 520 C320 560 480 560 480 520 L480 270 Z;
-                     M320 270 L320 520 C320 565 480 565 480 520 L480 270 Z;
-                     M320 270 L320 520 C320 560 480 560 480 520 L480 270 Z" 
-             dur="6s" 
-             repeatCount="indefinite"/>
-  </path>
-  
-  
-  <circle cx="360" cy="350" r="15" fill="#aed581" opacity="0.9" />
-  <circle cx="420" cy="380" r="20" fill="#aed581" opacity="0.9" />
-  <circle cx="380" cy="450" r="18" fill="#aed581" opacity="0.9" />
-  <circle cx="440" cy="470" r="12" fill="#aed581" opacity="0.9" />
-  <circle cx="350" cy="420" r="10" fill="#aed581" opacity="0.9" />
-  
-  
-  <ellipse cx="370" cy="380" rx="20" ry="25" fill="white" stroke="#7986cb" stroke-width="2">
-    <animate attributeName="ry" values="25;20;25" dur="5s" repeatCount="indefinite" />
-  </ellipse>
-  <ellipse cx="430" cy="380" rx="20" ry="25" fill="white" stroke="#7986cb" stroke-width="2">
-    <animate attributeName="ry" values="25;20;25" dur="5s" repeatCount="indefinite" />
-  </ellipse>
-  
-  
-  <circle cx="370" cy="380" r="8" fill="#333">
-    <animate attributeName="cy" values="380;375;380" dur="5s" repeatCount="indefinite" />
-  </circle>
-  <circle cx="430" cy="380" r="8" fill="#333">
-    <animate attributeName="cy" values="380;375;380" dur="5s" repeatCount="indefinite" />
-  </circle>
-  
-  
-  <circle cx="345" cy="415" r="15" fill="#e91e63" opacity="0.5" />
-  <circle cx="455" cy="415" r="15" fill="#e91e63" opacity="0.5" />
-  
-  
-  <path d="M370 440 Q400 470 430 440" fill="none" stroke="#333" stroke-width="5" stroke-linecap="round">
-    <animate attributeName="d" 
-             values="M370 440 Q400 470 430 440;
-                     M370 445 Q400 480 430 445;
-                     M370 440 Q400 470 430 440" 
-             dur="6s" 
-             repeatCount="indefinite"/>
-  </path>
-  
-  <rect x="385" y="440" width="10" height="10" fill="white" rx="2" ry="2" />
-  <rect x="405" y="440" width="10" height="10" fill="white" rx="2" ry="2" />
-  
-  
-  <circle cx="330" cy="300" r="4" fill="#f8bbd0" opacity="0.8">
-    <animate attributeName="cy" values="300;310;300" dur="4s" repeatCount="indefinite" />
-  </circle>
-  <circle cx="470" cy="330" r="5" fill="#f8bbd0" opacity="0.8">
-    <animate attributeName="cy" values="330;340;330" dur="5s" repeatCount="indefinite" />
-  </circle>
-  <circle cx="360" cy="500" r="6" fill="#f8bbd0" opacity="0.8">
-    <animate attributeName="cy" values="500;510;500" dur="6s" repeatCount="indefinite" />
-  </circle>
-  <circle cx="440" cy="510" r="3" fill="#f8bbd0" opacity="0.8">
-    <animate attributeName="cy" values="510;520;510" dur="3.5s" repeatCount="indefinite" />
-  </circle>
-  
-  
-  <text x="400" y="630" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">JARED #001</text>
-  
-  
-  <text x="400" y="670" font-family="Arial, sans-serif" font-size="18" fill="#e0e0e0" text-anchor="middle">ATTRIBUTES: GRAPE JELLO, KIWI, AND TIRES</text>
-  <text x="400" y="700" font-family="Arial, sans-serif" font-size="18" fill="#e0e0e0" text-anchor="middle">ORIGIN: HUMBOLDT SEED COMPANY</text>
-  
-  
-  <text x="400" y="130" font-family="Arial, sans-serif" font-size="24" font-style="italic" fill="white" text-anchor="middle">"ROLL WITH THE BEST–YOU CAN'T SQUASH THIS VIBE."</text>
-</svg></div>
-    <div class="card-badge">EPIC</div>
-    <div class="art-score">ArtGuard 91/100</div>
-  </div>
-  <div class="card-meta">
-    <div class="card-name">JARED</div>
-    <div class="card-edition">#001</div>
-    <div class="card-origin">Humboldt Seed Company</div>
-    <div class="card-attrs">Grape Jello · Kiwi · Tires</div>
-    <div class="card-slogan">"Roll with the best — you can't squash this vibe."</div>
-    <div class="card-footer">
-      <div class="card-rarity" style="color:#a78bfa;border-color:#a78bfa40;background:#a78bfa12">EPIC</div>
-      <div class="card-floor">$840</div>
-    </div>
-    <div class="sc-badge">🌿 StrainChain Verified</div>
-  </div>
-</div>
-<div class="card" style="--accent:#90caf9;--bg:#0d1929;" data-idx="3">
-  <div class="card-art">
-    <div class="svg-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
-  
-  <defs>
-    <linearGradient id="bb-bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#213355" />
-      <stop offset="100%" stop-color="#14213d" />
-    </linearGradient>
-    
-    
-    <linearGradient id="bb-diamondGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#e0f7fa" />
-      <stop offset="20%" stop-color="#bbdefb" />
-      <stop offset="40%" stop-color="#90caf9" />
-      <stop offset="60%" stop-color="#81d4fa" />
-      <stop offset="80%" stop-color="#b3e5fc" />
-      <stop offset="100%" stop-color="#e1f5fe" />
-    </linearGradient>
-    
-    
-    <filter id="bb-smoke" x="-50%" y="-50%" width="200%" height="200%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise" />
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" xChannelSelector="R" yChannelSelector="G" />
-    </filter>
-  </defs>
-  
-  
-  <rect width="800" height="800" fill="url(#bb-bgGradient)" />
-  
-  
-  <circle cx="400" cy="400" r="300" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3" />
-  <circle cx="400" cy="400" r="250" fill="none" stroke="#FFD700" stroke-width="1" opacity="0.2" />
-  
-  
-  <path d="M0 650 L150 550 L300 620 L450 520 L600 600 L750 530 L800 550 L800 800 L0 800 Z" fill="#5D4037" opacity="0.7" />
-  
-  
-  <circle cx="200" cy="650" r="30" fill="#3F51B5" opacity="0.7" />
-  <circle cx="250" cy="670" r="25" fill="#3F51B5" opacity="0.8" />
-  <circle cx="180" cy="690" r="20" fill="#3F51B5" opacity="0.6" />
-  
-  
-  <g transform="translate(400, 350)">
-    
-    <path d="M0 -150 L120 0 L0 150 L-120 0 Z" fill="url(#bb-diamondGradient)" stroke="#FFFFFF" stroke-width="3" />
-    <path d="M0 -150 L120 0 L0 0 Z" fill="#FFFFFF" opacity="0.6" />
-    <path d="M0 0 L-120 0 L0 150 Z" fill="#FFFFFF" opacity="0.3" />
-    <path d="M0 0 L120 0 L0 150 Z" fill="#90CAF9" opacity="0.5" />
-    
-    
-    <circle cx="-40" cy="-20" r="15" fill="#000000" />
-    <circle cx="40" cy="-20" r="15" fill="#000000" />
-    <circle cx="-40" cy="-20" r="5" fill="#FFFFFF" />
-    <circle cx="40" cy="-20" r="5" fill="#FFFFFF" />
-    
-    
-    <path d="M-50 30 Q0 80 50 30" fill="none" stroke="#000000" stroke-width="8" stroke-linecap="round" />
-  </g>
-  
-  
-  <g filter="url(#bb-smoke)" opacity="0.3">
-    <path d="M300 300 Q400 200 500 300 T700 300" fill="none" stroke="#FFFFFF" stroke-width="10" />
-    <path d="M300 320 Q400 220 500 320 T700 320" fill="none" stroke="#FFFFFF" stroke-width="8" />
-    <path d="M300 340 Q400 240 500 340 T700 340" fill="none" stroke="#FFFFFF" stroke-width="6" />
-  </g>
-  
-  
-  <circle cx="600" cy="650" r="20" fill="#F06292" />
-  <circle cx="650" cy="670" r="15" fill="#BA68C8" />
-  <circle cx="630" cy="620" r="18" fill="#4CAF50" />
-  
-  
-  <text x="400" y="550" font-family="Arial, sans-serif" font-weight="bold" font-size="40" fill="#FFFFFF" text-anchor="middle">BLING BLAOW</text>
-  
-  
-  <text x="400" y="600" font-family="Arial, sans-serif" font-size="20" fill="#FFD700" text-anchor="middle">DIESEL · BLUEBERRIES · CANDY</text>
-  
-  
-  <text x="400" y="650" font-family="Arial, sans-serif" font-style="italic" font-size="24" fill="#FFFFFF" text-anchor="middle">"PUFF, PUFF, FACET"</text>
-  
-  
-  <text x="400" y="720" font-family="Arial, sans-serif" font-size="16" fill="#CCCCCC" text-anchor="middle">ORIGIN: COMPOUND GENETICS</text>
-  <text x="400" y="750" font-family="Arial, sans-serif" font-size="16" fill="#CCCCCC" text-anchor="middle">A VOYAGE BLOOM EXCLUSIVE</text>
-</svg></div>
-    <div class="card-badge">EPIC</div>
-    <div class="art-score">ArtGuard 89/100</div>
-  </div>
-  <div class="card-meta">
-    <div class="card-name">BLING BLAOW</div>
-    <div class="card-edition">Voyage Bloom Exclusive</div>
-    <div class="card-origin">Compound Genetics</div>
-    <div class="card-attrs">Diesel · Blueberries · Candy</div>
-    <div class="card-slogan">"Puff, puff, facet."</div>
-    <div class="card-footer">
-      <div class="card-rarity" style="color:#a78bfa;border-color:#a78bfa40;background:#a78bfa12">EPIC</div>
-      <div class="card-floor">$720</div>
-    </div>
-    <div class="sc-badge">🌿 StrainChain Verified</div>
-  </div>
-</div>
-<div class="card" style="--accent:#84ffff;--bg:#1a1a1a;" data-idx="4">
-  <div class="card-art">
+<div class="card" style="--accent:#84ffff;--rc:#22c55e;">
+  <div class="art">
     <div class="svg-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
   
   <rect width="800" height="800" fill="#2d2d2d"/>
@@ -618,26 +645,34 @@ body{background:var(--dark);color:#e5e5e5;font-family:system-ui,sans-serif;min-h
   
   <text x="400" y="100" font-family="Arial, sans-serif" font-size="24" font-style="italic" fill="white" text-anchor="middle">"PREZZURE MAKES DIAMONDS"</text>
 </svg></div>
-    <div class="card-badge">RARE</div>
+    <div class="rar-badge" style="border-color:#22c55e40;color:#22c55e;background:#22c55e14">RARE</div>
     <div class="art-score">ArtGuard 85/100</div>
   </div>
-  <div class="card-meta">
-    <div class="card-name">MYLES HIGH</div>
-    <div class="card-edition">#001</div>
-    <div class="card-origin">Fiya Farmer</div>
-    <div class="card-attrs">Skittles · Gas</div>
-    <div class="card-slogan">"Prezzure makes diamonds."</div>
-    <div class="card-footer">
-      <div class="card-rarity" style="color:#22c55e;border-color:#22c55e40;background:#22c55e12">RARE</div>
-      <div class="card-floor">$480</div>
+  <div class="info">
+    <div class="nft-name">MYLES HIGH</div>
+    <div class="nft-sub">#001</div>
+    <div class="nft-origin">Fiya Farmer</div>
+    <div class="nft-attrs">Skittles · Gas</div>
+    <div class="nft-slogan">"Prezzure makes diamonds."</div>
+    <div class="justify">RARE. Hot air balloon aviator with animated sparkle diamond — a visually distinct silhouette unlike anything else in the collection. Fiya Farmer origin. Great entry point for new collectors. Strong floor appreciation potential.</div>
+    <div class="price-row">
+      <div class="price-block">
+        <div class="price-label">Floor Price</div>
+        <div class="price-val">$480</div>
+      </div>
+      <a href="https://buy.stripe.com/dRmcN53R7e3I4e67nm1Nu1y" class="buy-btn" target="_blank" rel="noreferrer">
+        Buy Now — $480
+      </a>
     </div>
-    <div class="sc-badge">🌿 StrainChain Verified</div>
+    <div class="sc-verify">🌿 StrainChain Verified · Polygon Mainnet · BTC Ordinal Anchored</div>
   </div>
-</div></div>
-<div class="footer">
-  <a href="https://strainchain.io">strainchain.io</a> · <a href="https://authichain.com">authichain.com</a> · <a href="https://qron.space">qron.space</a><br>
-  All pieces authenticated by StrainChain TRUmark · ArtGuard validated · BTC Ordinal anchored
 </div>
+</div>
+
+<footer>
+  All pieces deliver: original SVG file · Polygon ERC-721 certificate · BTC Ordinal inscription · StrainChain TRUmark · StoryMode origin narrative<br>
+  <a href="https://strainchain.io">strainchain.io</a> · <a href="https://authichain.com">authichain.com</a> · <a href="https://qron.space">qron.space</a> · Powered by Stripe
+</footer>
 </body></html>` }}/>
   );
 }
