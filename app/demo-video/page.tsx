@@ -47,7 +47,7 @@ Immutable. Permanent. Unforgeable.`,
     duration: 22,
     bg: "#0a0a0a",
     accent: "#84cc16",
-    visual: "SCAN",
+    visual: "QR_TRANSFORM",
     headline: "2.1 seconds",
     sub: "Any smartphone. No app.",
     body: `Consumer scans the QR code.
