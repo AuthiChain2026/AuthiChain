@@ -1,4 +1,3 @@
-"use client";
 export const metadata = { title:"Y Combinator S26 — AuthiChain Application", description:"AuthiChain Y Combinator S26 application. Blockchain product authentication — the truth layer for every physical product." }
 export default function YCPage() {
   const deadline = new Date("2026-04-11")
