@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     description: "Scan any QR code. Know it's real in 2.1 seconds. No app. No hardware. $0.004/seal.",
     creator: "@authichain",
   },
-  robots: { index: true, follow: true },
+  robots: "index, follow",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
