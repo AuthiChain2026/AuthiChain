@@ -1,295 +1,143 @@
-"use client"
-
-import Image from "next/image"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Shield, Scan, Lock, TrendingUp, CheckCircle, Sparkles, Globe, Mail, ArrowRight, Zap, Award } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { LeadCapturePopup } from "@/components/LeadCapturePopup"
-import { DemoBooker } from "@/components/DemoBooker"
 
-export default function Home() {
+export const metadata = {
+  title: "AuthiChain — Blockchain Product Authentication",
+  description: "Cryptographic provenance for every physical product. ERC-721 NFT + QR code + 2.1 second verification. The truth layer for the physical world.",
+}
+
+const STATS = [
+  {v:"2.1s",l:"Verification time"},
+  {v:"$0.004",l:"Per seal"},
+  {v:"1,023+",l:"Certs issued"},
+  {v:"Polygon",l:"Blockchain"},
+]
+
+const PLATFORMS = [
+  {name:"AuthiChain",sub:"Enterprise blockchain authentication",url:"https://authichain.com/portal",color:"#c9a227",icon:"◆"},
+  {name:"QRON",sub:"AI-generated QR art",url:"https://qron.space/order",color:"#84cc16",icon:"⬡"},
+  {name:"StrainChain",sub:"Cannabis supply chain compliance",url:"https://strainchain.io",color:"#22c55e",icon:"🌿"},
+]
+
+export default function HomePage() {
   return (
-    <div className="min-h-screen protocol-bg">
-      {/* Navigation */}
-      <nav className="border-b border-[rgba(201,162,39,0.15)] sticky top-0 z-50 backdrop-blur-md bg-background/80">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#C9A227] to-[#A07D10] flex items-center justify-center glow-gold-sm">
-              <Shield className="h-4 w-4 text-black" />
-            </div>
-            <span className="text-2xl font-bold gradient-text">AuthiChain</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <ThemeToggle />
-            <Link href="/demos" className="hidden sm:block text-sm text-muted-foreground hover:text-[#e8c547] transition-colors">Demos</Link>
-            <Link href="/pricing" className="hidden sm:block text-sm text-muted-foreground hover:text-[#e8c547] transition-colors">Pricing</Link>
-            <Link href="/solutions/eu-digital-product-passport" className="hidden md:flex items-center gap-1 text-xs font-bold text-[#C9A227] border border-[rgba(201,162,39,0.35)] rounded-lg px-2.5 py-1 hover:bg-[rgba(201,162,39,0.08)]">EU DPP ⚡</Link>
-            <Link href="/login"><Button variant="ghost" className="hover:text-[#e8c547]">Login</Button></Link>
-            <Link href="/signup"><Button className="btn-gold rounded-lg px-5">Get Started</Button></Link>
-          </div>
-        </div>
+    <main style={{background:"#080808",color:"#e5e5e5",minHeight:"100vh",fontFamily:"system-ui,sans-serif"}}>
+
+      {/* NAV */}
+      <nav style={{padding:"16px 32px",display:"flex",alignItems:"center",gap:16,borderBottom:"0.5px solid rgba(255,255,255,.07)",position:"sticky",top:0,background:"rgba(8,8,8,.95)",backdropFilter:"blur(12px)",zIndex:50}}>
+        <span style={{color:"#c9a227",fontWeight:900,fontSize:"1rem",letterSpacing:".12em"}}>◆ AUTHICHAIN</span>
+        <div style={{flex:1}}/>
+        {[["Collection","/collection"],["Demo","/demo-video"],["Verify","/verify/AC-1829577CED8F6BFBB0BC667CDE33DF0E"],["Portal","/portal"],["EU DPP","/compliance"]].map(([label,href])=>(
+          <Link key={label} href={href} style={{color:"rgba(255,255,255,.5)",textDecoration:"none",fontSize:13,transition:"color .2s"}}
+            onMouseEnter={e=>(e.currentTarget.style.color="#e5e5e5")} onMouseLeave={e=>(e.currentTarget.style.color="rgba(255,255,255,.5)")}>{label}</Link>
+        ))}
+        <Link href="/portal" style={{background:"#c9a227",color:"#000",padding:"7px 18px",borderRadius:8,textDecoration:"none",fontWeight:700,fontSize:13}}>Get Started</Link>
       </nav>
 
-      {/* EU DPP Urgency Banner */}
-      <div style={{background:"rgba(201,162,39,0.05)",borderBottom:"1px solid rgba(201,162,39,0.2)",padding:"8px 16px",textAlign:"center"}}>
-        <span style={{fontSize:13,color:"#C9A227",fontWeight:500}}>
-          ⚡ EU DPP registry launches July 19, 2026 · Battery mandate Feb 2027 · {""}
-        </span>
-        <Link href="/solutions/eu-digital-product-passport" style={{color:"#C9A227",fontWeight:700,fontSize:13}}>
-          Get compliant from 9 →
-        </Link>
-      </div>
-
-      {/* Hero */}
-      <section className="container mx-auto px-4 py-16 md:py-28">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-          <div className="space-y-8">
-            <div className="protocol-badge">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>AI AutoFlow™ — Instant Product Classification</span>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-              <span className="gradient-text">AI AutoFlow™</span>{" "}
-              <span className="text-foreground">Authentication for Any Product</span>
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              Automatically classifies products across 10 industries and generates blockchain-backed
-              authentication workflows in under 3 seconds.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/onboarding">
-                <Button size="lg" className="btn-gold w-full sm:w-auto rounded-xl px-8 font-bold">
-                  Start Certification <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/demos">
-                <Button size="lg" className="btn-outline-gold w-full sm:w-auto rounded-xl px-8">See Use Case Demos</Button>
-              </Link>
-            </div>
-            <div className="grid grid-cols-4 gap-3 pt-2">
-              {[
-                { stat: "10",   label: "Industries" },
-                { stat: "$14T+",label: "Market" },
-                { stat: "98%",  label: "AI Accuracy" },
-                { stat: "<3s",  label: "Speed" },
-              ].map(({ stat, label }) => (
-                <div key={label} className="gold-card p-3 text-center">
-                  <div className="text-xl font-bold gradient-text">{stat}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-lg">
-              <div className="absolute inset-[-20%] rounded-full glow-gold opacity-20 blur-3xl pointer-events-none" />
-              <Image
-                src="/images/hero-shield.svg"
-                alt="AuthiChain blockchain authentication shield"
-                width={800}
-                height={600}
-                className="w-full h-auto rounded-2xl relative z-10 animate-float"
-                priority
-              />
-            </div>
-          </div>
+      {/* HERO */}
+      <section style={{maxWidth:900,margin:"0 auto",padding:"96px 24px 72px",textAlign:"center",position:"relative"}}>
+        <div style={{position:"absolute",top:0,left:"50%",transform:"translateX(-50%)",width:700,height:400,background:"radial-gradient(ellipse,rgba(201,162,39,.1) 0%,transparent 70%)",pointerEvents:"none"}}/>
+        <div style={{display:"inline-block",background:"rgba(201,162,39,.1)",border:"1px solid rgba(201,162,39,.3)",color:"#c9a227",padding:"5px 16px",borderRadius:20,fontSize:11,fontWeight:600,textTransform:"uppercase",letterSpacing:".1em",marginBottom:28}}>
+          Y Combinator S26 Applicant
+        </div>
+        <h1 style={{fontSize:"clamp(32px,7vw,72px)",fontWeight:900,lineHeight:1.08,marginBottom:20,letterSpacing:"-.01em"}}>
+          The truth layer for<br/><span style={{color:"#c9a227"}}>every physical product</span>
+        </h1>
+        <p style={{color:"rgba(255,255,255,.5)",fontSize:"clamp(15px,2vw,20px)",lineHeight:1.7,maxWidth:620,margin:"0 auto 44px"}}>
+          Manufacturers register a product batch. A blockchain NFT is minted. An AI QR code goes on the label.
+          Any smartphone verifies authenticity in 2.1 seconds — no app, no hardware.
+        </p>
+        <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
+          <Link href="/verify/AC-1829577CED8F6BFBB0BC667CDE33DF0E"
+            style={{background:"#c9a227",color:"#000",padding:"14px 32px",borderRadius:12,textDecoration:"none",fontWeight:800,fontSize:15}}>
+            ▶ See Live Demo
+          </Link>
+          <Link href="/demo-video"
+            style={{background:"transparent",border:"1px solid rgba(255,255,255,.2)",color:"#e5e5e5",padding:"14px 28px",borderRadius:12,textDecoration:"none",fontSize:15}}>
+            Watch Demo Video
+          </Link>
+          <Link href="/collection"
+            style={{background:"transparent",border:"1px solid rgba(34,197,94,.3)",color:"#22c55e",padding:"14px 24px",borderRadius:12,textDecoration:"none",fontSize:15}}>
+            🌿 NFT Collection
+          </Link>
         </div>
       </section>
 
-      {/* Industries Banner */}
-      <section className="container mx-auto px-4 pb-16">
-        <div className="max-w-6xl mx-auto overflow-hidden rounded-2xl protocol-card">
-          <Image
-            src="/images/industries-banner.svg"
-            alt="10 Industries served by AuthiChain Protocol"
-            width={1200}
-            height={150}
-            className="w-full h-auto"
-          />
-        </div>
-      </section>
-
-      <div className="gold-divider mx-auto max-w-6xl px-4" />
-
-      {/* Features */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-14">
-          <div className="protocol-badge mb-4 inline-flex"><Shield className="h-3.5 w-3.5" /> Enterprise Authentication</div>
-          <h2 className="text-4xl font-bold mb-4 mt-4">Why Choose <span className="gradient-text">AuthiChain</span>?</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Enterprise-grade blockchain authentication trusted by brands across 10 industries</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {[
-            { icon: <Sparkles className="h-6 w-6 text-black" />, iconClass: "bg-gradient-to-br from-[#C9A227] to-[#A07D10] glow-gold-sm", title: "AI AutoFlow™ Engine", desc: "Automatically classifies products across 10 industries and generates custom authentication workflows in under 3 seconds." },
-            { icon: <Globe className="h-6 w-6 text-[#c9a227]" />, iconClass: "border border-[rgba(201,162,39,0.3)]", title: "Universal Platform", desc: "One platform for all industries: Cannabis, Luxury, Electronics, Pharma, Fashion, Automotive, Food, Art, Cosmetics, and Sports." },
-            { icon: <Lock className="h-6 w-6 text-[#c9a227]" />, iconClass: "border border-[rgba(201,162,39,0.3)]", title: "Blockchain Security", desc: "Immutable records on the blockchain ensure your products can't be counterfeited or tampered with." },
-            { icon: <Scan className="h-6 w-6 text-[#c9a227]" />, iconClass: "border border-[rgba(201,162,39,0.3)]", title: "TrueMark™ Technology", desc: "Unique microscopic patterns verified through our proprietary scanning technology." },
-            { icon: <Zap className="h-6 w-6 text-[#c9a227]" />, iconClass: "border border-[rgba(201,162,39,0.3)]", title: "Instant Verification", desc: "Anyone can verify product authenticity in seconds using just a TrueMark™ ID." },
-            { icon: <TrendingUp className="h-6 w-6 text-[#c9a227]" />, iconClass: "border border-[rgba(201,162,39,0.3)]", title: "Analytics Dashboard", desc: "Track verification scans, monitor your products, and gain insights into your supply chain." },
-          ].map(({ icon, iconClass, title, desc }) => (
-            <div key={title} className="protocol-card p-7 flex flex-col gap-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${iconClass}`}>{icon}</div>
-              <div>
-                <h3 className="text-lg font-bold text-foreground mb-2">{title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
-              </div>
+      {/* STATS */}
+      <section style={{borderTop:"0.5px solid rgba(255,255,255,.06)",borderBottom:"0.5px solid rgba(255,255,255,.06)"}}>
+        <div style={{maxWidth:900,margin:"0 auto",padding:"32px 24px",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:24}}>
+          {STATS.map(({v,l})=>(
+            <div key={l} style={{textAlign:"center"}}>
+              <div style={{fontSize:32,fontWeight:900,color:"#c9a227"}}>{v}</div>
+              <div style={{fontSize:12,color:"rgba(255,255,255,.35)",marginTop:6,textTransform:"uppercase",letterSpacing:".08em"}}>{l}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <div className="protocol-badge mb-4 inline-flex"><CheckCircle className="h-3.5 w-3.5" /> Simple Process</div>
-          <h2 className="text-4xl font-bold mb-4 mt-4">How It <span className="gradient-text">Works</span></h2>
-          <p className="text-xl text-muted-foreground">Three simple steps to protect your products</p>
+      {/* THREE PLATFORMS */}
+      <section style={{maxWidth:900,margin:"0 auto",padding:"72px 24px"}}>
+        <div style={{textAlign:"center",marginBottom:48}}>
+          <h2 style={{fontSize:"clamp(22px,4vw,40px)",fontWeight:900,marginBottom:12}}>The Authentic Economy</h2>
+          <p style={{color:"rgba(255,255,255,.4)",fontSize:15}}>Three platforms. One protocol. One truth layer.</p>
         </div>
-        <div className="max-w-4xl mx-auto">
-          <div className="protocol-card p-2">
-            <Image src="/images/how-it-works.svg" alt="How AuthiChain works" width={900} height={280} className="w-full h-auto rounded-xl" />
-          </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:18}}>
+          {PLATFORMS.map(({name,sub,url,color,icon})=>(
+            <a key={name} href={url} target={url.startsWith("http")?"_blank":undefined} rel="noreferrer"
+              style={{background:"rgba(255,255,255,.03)",border:`1px solid ${color}20`,borderRadius:16,padding:"28px 24px",textDecoration:"none",display:"block",transition:"all .2s",color:"inherit"}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=`${color}60`;e.currentTarget.style.background=`${color}08`;}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor=`${color}20`;e.currentTarget.style.background="rgba(255,255,255,.03)";}}>
+              <div style={{fontSize:32,marginBottom:14}}>{icon}</div>
+              <div style={{fontSize:18,fontWeight:800,color,marginBottom:8}}>{name}</div>
+              <div style={{fontSize:13,color:"rgba(255,255,255,.45)",lineHeight:1.6}}>{sub}</div>
+            </a>
+          ))}
         </div>
       </section>
 
-      <div className="gold-divider mx-auto max-w-6xl px-4" />
-
-      {/* QRON Ecosystem */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="max-w-5xl mx-auto protocol-card p-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <div>
-            <div className="protocol-badge mb-4">AuthiChain Ecosystem</div>
-            <h2 className="text-3xl font-bold mb-3 mt-4">Create Verified <span className="gradient-text">QRON Art</span></h2>
-            <p className="text-muted-foreground mb-6 leading-relaxed">QRON Space generates cryptographically signed QR art via Ed25519 — every scan verifies back to the AuthiChain Protocol.</p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <a href="https://qron.space" target="_blank" rel="noopener noreferrer">
-                <Button className="btn-gold w-full sm:w-auto rounded-xl px-6 font-bold">Generate a QRON →</Button>
-              </a>
-              <Link href="/qron"><Button className="btn-outline-gold w-full sm:w-auto rounded-xl px-6">View Gallery</Button></Link>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+      {/* HOW IT WORKS */}
+      <section style={{background:"rgba(255,255,255,.02)",borderTop:"0.5px solid rgba(255,255,255,.06)",borderBottom:"0.5px solid rgba(255,255,255,.06)"}}>
+        <div style={{maxWidth:900,margin:"0 auto",padding:"72px 24px"}}>
+          <h2 style={{fontSize:"clamp(20px,4vw,36px)",fontWeight:900,textAlign:"center",marginBottom:48}}>How it works</h2>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",flexWrap:"wrap",gap:0}}>
             {[
-              { stat: "Ed25519", label: "Cryptographic Signing" },
-              { stat: "99.7%",  label: "Verification Accuracy" },
-              { stat: "~25%",   label: "Scan Lift vs Standard QR" },
-              { stat: "Live",   label: "On-Chain Verification" },
-            ].map(({ stat, label }) => (
-              <div key={label} className="gold-card rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold gradient-text">{stat}</div>
-                <div className="text-xs text-muted-foreground mt-1">{label}</div>
+              {step:"01",title:"Register via API",sub:"Manufacturer sends batch data"},
+              {step:"02",title:"NFT minted",sub:"ERC-721 on Polygon — $0.004"},
+              {step:"03",title:"QR on label",sub:"QRON AI art — scannable"},
+              {step:"04",title:"Smartphone scans",sub:"Any camera, no app"},
+              {step:"05",title:"AUTHENTIC ✓",sub:"2.1 seconds, blockchain-certain"},
+            ].map(({step,title,sub},i,arr)=>(
+              <div key={step} style={{display:"flex",alignItems:"center"}}>
+                <div style={{textAlign:"center",minWidth:120,padding:"0 8px"}}>
+                  <div style={{fontSize:11,color:"rgba(201,162,39,.5)",fontWeight:700,letterSpacing:".1em",marginBottom:8}}>{step}</div>
+                  <div style={{fontSize:14,fontWeight:700,color:i===arr.length-1?"#22c55e":"#e5e5e5",marginBottom:4}}>{title}</div>
+                  <div style={{fontSize:11,color:"rgba(255,255,255,.35)"}}>{sub}</div>
+                </div>
+                {i<arr.length-1&&<div style={{color:"rgba(201,162,39,.3)",padding:"0 4px",fontSize:20,marginBottom:20}}>→</div>}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Lead Capture + Demo Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Inline Lead Capture */}
-          <div className="rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 p-8">
-            <div className="flex items-center gap-2 mb-4">
-              <Mail className="h-5 w-5 text-purple-500" />
-              <h3 className="text-xl font-bold">Try AuthiChain Free</h3>
-            </div>
-            <p className="text-muted-foreground mb-6">
-              Authenticate your first product with AI AutoFlow™ — no credit card required.
-            </p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                const form = e.target as HTMLFormElement
-                const formData = new FormData(form)
-                fetch('/api/leads/capture', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    email: formData.get('email'),
-                    name: formData.get('name'),
-                    company: formData.get('company'),
-                    source: 'inline',
-                    product_interest: 'authichain',
-                    page_url: '/',
-                  }),
-                }).then(() => {
-                  fetch('/api/leads/webhook', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      email: formData.get('email'),
-                      name: formData.get('name'),
-                      company: formData.get('company'),
-                      source: 'inline',
-                      product_interest: 'authichain',
-                    }),
-                  }).catch(() => {})
-                  form.reset()
-                  alert('Check your email! Your free demo access is on the way.')
-                }).catch(() => {})
-              }}
-              className="space-y-3"
-            >
-              <input name="email" type="email" required placeholder="Work email" className="w-full px-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500" />
-              <input name="name" type="text" placeholder="Full name" className="w-full px-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500" />
-              <input name="company" type="text" placeholder="Company" className="w-full px-4 py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500" />
-              <Button type="submit" variant="gradient" className="w-full">
-                Get Free Access <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </form>
-          </div>
-
-          {/* Demo Booker */}
-          <DemoBooker />
+      {/* CTA STRIP */}
+      <section style={{maxWidth:900,margin:"0 auto",padding:"72px 24px",textAlign:"center"}}>
+        <h2 style={{fontSize:"clamp(20px,4vw,36px)",fontWeight:900,marginBottom:16}}>Ready to verify?</h2>
+        <p style={{color:"rgba(255,255,255,.4)",fontSize:15,marginBottom:36}}>Live API · RapidAPI marketplace · OpenAPI 3.0 · $0.004/seal</p>
+        <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
+          <Link href="/portal" style={{background:"#c9a227",color:"#000",padding:"14px 32px",borderRadius:12,textDecoration:"none",fontWeight:800,fontSize:15}}>Start Free Trial</Link>
+          <Link href="/api/v1/health" style={{border:"1px solid rgba(255,255,255,.15)",color:"rgba(255,255,255,.6)",padding:"14px 24px",borderRadius:12,textDecoration:"none",fontSize:15}}>API Status ↗</Link>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-3xl mx-auto protocol-card p-12 relative overflow-hidden">
-          <div className="absolute inset-0 rounded-[1rem] pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(201,162,39,0.12) 0%, transparent 70%)" }} />
-          <div className="relative z-10 space-y-6">
-            <div className="protocol-badge inline-flex"><Award className="h-3.5 w-3.5" /> Enterprise Ready</div>
-            <h2 className="text-4xl font-bold mt-4">Ready to <span className="gradient-text">Protect Your Products?</span></h2>
-            <p className="text-xl text-muted-foreground leading-relaxed">Brands in luxury, pharma, cannabis, and electronics rely on AuthiChain for blockchain-grade authentication.</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
-              <Link href="/onboarding"><Button size="lg" className="btn-gold rounded-xl px-8 font-bold">Start Certification <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
-              <Link href="/signup"><Button size="lg" className="btn-outline-gold rounded-xl px-8">View Plans</Button></Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Lead Capture Popup */}
-      <LeadCapturePopup />
-
-      {/* Footer */}
-      <footer className="border-t border-[rgba(201,162,39,0.12)] mt-8">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#C9A227] to-[#A07D10] flex items-center justify-center">
-                <Shield className="h-3 w-3 text-black" />
-              </div>
-              <span className="text-lg font-bold gradient-text">AuthiChain</span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground flex-wrap justify-center">
-              {[
-                { href: "/verify",  label: "Verify Product" },
-                { href: "/demo",    label: "Live Demo" },
-                { href: "/pricing", label: "Pricing" },
-                { href: "/qron",    label: "QRON Gallery" },
-                { href: "/login",   label: "Login" },
-              ].map(({ href, label }) => (
-                <Link key={href} href={href} className="hover:text-[#e8c547] transition-colors">{label}</Link>
-              ))}
-            </div>
-            <div className="text-sm text-muted-foreground">© 2026 AuthiChain. All rights reserved.</div>
-          </div>
-        </div>
+      {/* FOOTER */}
+      <footer style={{borderTop:"0.5px solid rgba(255,255,255,.06)",padding:"28px 32px",display:"flex",alignItems:"center",flexWrap:"wrap",gap:16}}>
+        <span style={{color:"#c9a227",fontWeight:900,fontSize:".85rem",letterSpacing:".1em"}}>◆ AUTHICHAIN</span>
+        <div style={{flex:1}}/>
+        {[["qron.space","https://qron.space"],["strainchain.io","https://strainchain.io"],["z@authichain.com","mailto:z@authichain.com"]].map(([label,href])=>(
+          <a key={label} href={href} style={{color:"rgba(255,255,255,.3)",textDecoration:"none",fontSize:12}}>{label}</a>
+        ))}
+        <span style={{color:"rgba(255,255,255,.15)",fontSize:11}}>© 2026 AuthiChain, Inc.</span>
       </footer>
-    </div>
+    </main>
   )
 }
