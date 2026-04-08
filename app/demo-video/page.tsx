@@ -11,9 +11,7 @@ const SCENES = [
     visual: "STAT",
     headline: "$500 Billion",
     sub: "in counterfeit goods every year",
-    body: "Paper certificates are forged in minutes.
-Barcodes are trivially cloned.
-No one can prove what's real.",
+    body: `Paper certificates are forged in minutes.\nBarcodes are trivially cloned.\nNo one can prove what's real.`,
     narration: "Five hundred billion dollars. That's how much counterfeit product moves through the global economy every year. Paper certificates are forged in minutes. Barcodes are cloned. There is no way to prove what's real — until now.",
   },
   {
@@ -24,9 +22,7 @@ No one can prove what's real.",
     visual: "PRODUCT",
     headline: "Blue Dream",
     sub: "Emerald Peak Farms · Humboldt County, California",
-    body: "Planted February 3rd.
-Harvested March 15th.
-THC 22.4% · CBD 0.8%",
+    body: `Planted February 3rd.\nHarvested March 15th.\nTHC 22.4% · CBD 0.8%`,
     narration: "This is Blue Dream. Grown by Emerald Peak Farms on fog-kissed ridgelines above Garberville, California. Harvested March 15th after 42 days of flower. This batch exists. It's real. And from this moment — StrainChain can prove it.",
   },
   {
@@ -38,9 +34,7 @@ THC 22.4% · CBD 0.8%",
     url: "https://authichain.com/verify/AC-1829577CED8F6BFBB0BC667CDE33DF0E",
     headline: "Minted on the blockchain",
     sub: "The moment it's harvested",
-    body: "ERC-721 NFT · Polygon · $0.004
-COA hash · METRC · Seed-to-sale chain
-Immutable. Permanent. Unforgeable.",
+    body: `ERC-721 NFT · Polygon · $0.004\nCOA hash · METRC · Seed-to-sale chain\nImmutable. Permanent. Unforgeable.`,
     narration: "The moment this batch is harvested, StrainChain mints a blockchain certificate. Every lab result, every state transfer, every event in this plant's life — hashed, signed, and locked to the Polygon blockchain forever. No one can alter it. No one.",
   },
   {
@@ -51,9 +45,7 @@ Immutable. Permanent. Unforgeable.",
     visual: "SCAN",
     headline: "2.1 seconds",
     sub: "Any smartphone. No app.",
-    body: "Consumer scans the QR code.
-Blockchain confirms: AUTHENTIC.
-Instant. Certain. Free.",
+    body: `Consumer scans the QR code.\nBlockchain confirms: AUTHENTIC.\nInstant. Certain. Free.`,
     narration: "A consumer picks up the package. They scan the QR code with their phone. Two seconds later — the blockchain confirms it's authentic. No app to download. No reader to buy. Just a camera, and the truth.",
   },
   {
@@ -64,9 +56,7 @@ Instant. Certain. Free.",
     visual: "ART",
     headline: "The packaging is art",
     sub: "Verde Studio × Emerald Peak Farms",
-    body: "ArtGuard score: 87/100
-Edition: #23 of 50
-Collectable — long after the product is gone",
+    body: `ArtGuard score: 87/100\nEdition: #23 of 50\nCollectable — long after the product is gone`,
     narration: "The packaging was designed by Verde Studio. Authenticated by ArtGuard. Edition twenty-three of fifty. The cannabis is consumed — but the art lives on. The NFT proves ownership. The blockchain proves it's real. A new asset class, born from a plant.",
   },
   {
@@ -77,9 +67,7 @@ Collectable — long after the product is gone",
     visual: "NETWORK",
     headline: "Every scan matters",
     sub: "The Truth Network grows with every product",
-    body: "Consumer votes: AUTHENTIC
-Truth Network records the scan
-The Authentic Economy self-enforces",
+    body: `Consumer votes: AUTHENTIC\nTruth Network records the scan\nThe Authentic Economy self-enforces`,
     narration: "Every consumer who scans casts a vote. The Truth Network records it. The Authentic Economy grows stronger with every product, every scan, every proof. Objects have authenticity. AI agents enforce it.",
   },
   {
@@ -90,9 +78,7 @@ The Authentic Economy self-enforces",
     visual: "CLOSE",
     headline: "The Authentic Economy",
     sub: "Three platforms. One protocol. One truth layer.",
-    body: "StrainChain · AuthiChain · QRON
-Built solo · Zero capital · Six months
-Applying to Y Combinator S26",
+    body: `StrainChain · AuthiChain · QRON\nBuilt solo · Zero capital · Six months\nApplying to Y Combinator S26`,
     narration: "StrainChain. AuthiChain. QRON. Three platforms built by one founder in six months with zero dollars raised. The truth layer for the physical world. We are applying to Y Combinator to bring this to every product on earth.",
   },
 ];
