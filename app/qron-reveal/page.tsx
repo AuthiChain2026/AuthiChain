@@ -5,6 +5,7 @@ const QR_CLEAN = "https://qron-images.undone-k.workers.dev/qr-clean.png";
 const QR_ART   = "https://qron-images.undone-k.workers.dev/qr-art.png";
 
 export default function QRONRevealPage() {
+  const [imgError, setImgError] = useState<{clean:boolean;art:boolean}>({clean:false,art:false});
   const [phase, setPhase] = useState<"idle"|"scanning"|"transforming"|"authentic"|"done">("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -45,10 +46,10 @@ export default function QRONRevealPage() {
         <div style={{ position: "absolute", inset: -20, borderRadius: "50%", boxShadow: glow ? "0 0 80px 24px rgba(0,255,136,.3)" : "none", transition: "box-shadow .8s", pointerEvents: "none", zIndex: 0 }} />
 
         {/* Clean QR */}
-        <img src={QR_CLEAN} alt="AuthiChain QR" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", borderRadius: 12, opacity: showArt ? 0 : 1, transition: phase === "transforming" ? "opacity .7s ease-in, filter .7s" : "opacity .2s", filter: phase === "transforming" ? "blur(6px) brightness(3) saturate(5)" : "none", zIndex: 2 }} />
+        <img src={QR_CLEAN} alt="AuthiChain QR" onError={()=>setImgError(p=>({...p,clean:true}))} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", borderRadius: 12, opacity: showArt ? 0 : 1, transition: phase === "transforming" ? "opacity .7s ease-in, filter .7s" : "opacity .2s", filter: phase === "transforming" ? "blur(6px) brightness(3) saturate(5)" : "none", zIndex: 2 }} />
 
         {/* QRON cannabis art */}
-        <img src={QR_ART} alt="QRON Cannabis Art" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", borderRadius: 16, opacity: showArt ? 1 : 0, transform: showArt ? "scale(1)" : "scale(1.06)", filter: showArt ? (phase === "transforming" ? "blur(3px) brightness(1.8) saturate(2)" : "none") : "blur(12px) brightness(3)", transition: "opacity 1.2s ease-out, transform 1.2s ease-out, filter 1.2s", zIndex: 3 }} />
+        <img src={QR_ART} alt="QRON Cannabis Art" onError={()=>setImgError(p=>({...p,art:true}))} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", borderRadius: 16, opacity: showArt ? 1 : 0, transform: showArt ? "scale(1)" : "scale(1.06)", filter: showArt ? (phase === "transforming" ? "blur(3px) brightness(1.8) saturate(2)" : "none") : "blur(12px) brightness(3)", transition: "opacity 1.2s ease-out, transform 1.2s ease-out, filter 1.2s", zIndex: 3 }} />
 
         {/* Scan beam */}
         {phase === "scanning" && (
