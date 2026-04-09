@@ -30,6 +30,27 @@ marketing, sales, and engineering can see the gap at a glance.
 | Cannabis     | /app/demos/cannabis      | _not yet implemented_             | ⏳ Planned |
 | Collectibles | /app/demos/collectibles  | _not yet implemented_             | ⏳ Planned |
 
+## Verticals — persona demos
+
+Beyond the industry demos above, AuthiChain also ships **vertical**
+products that fuse AuthiChain + QRON into a single cannabis-native, art-
+native, or sector-native protocol. Each vertical has its own persona demo
+tree. The cannabis vertical is **StrainChain** at
+[strainchain.io](https://strainchain.io).
+
+| Vertical | Persona | Demo Path |
+|----------|---------|-----------|
+| StrainChain | Cultivator | /app/strainchain/demos/cultivator |
+| StrainChain | Lab        | /app/strainchain/demos/lab |
+| StrainChain | Dispensary | /app/strainchain/demos/dispensary |
+| StrainChain | Consumer   | /app/strainchain/demos/consumer |
+| StrainChain | Regulator  | /app/strainchain/demos/regulator |
+
+See [`marketing/strainchain/demo-mapping.md`](./strainchain/demo-mapping.md)
+for the full StrainChain persona table and
+[`outputs/strainchain-demo-manifest.json`](../outputs/strainchain-demo-manifest.json)
+for the canonical persona manifest with `why`/`value` metadata.
+
 ## How to add a new demo
 
 1. Create `app/demos/<industry>/page.tsx`.

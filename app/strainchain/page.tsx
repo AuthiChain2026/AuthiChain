@@ -1,3 +1,9 @@
+/**
+ * Demo: StrainChain — Cannabis Vertical Landing
+ * Problem: The legal cannabis industry has no unified authentication layer — cultivators, labs, dispensaries, consumers, and regulators each rely on paper COAs, easily altered METRC manifests, and disconnected compliance tools that leave the whole seed-to-sale chain open to diversion and fraud.
+ * Solution: AuthiChain + QRON verifies authenticity in 2.1 seconds through the StrainChain protocol.
+ * Business Value: StrainChain is the AuthiChain + QRON stack packaged as a cannabis-native vertical at strainchain.io — COA anchoring, METRC sync, seed-to-sale chain, and strain-specific QRON art that gives every licensed operator a dispensary-ready, regulator-ready, consumer-ready authentication layer in one protocol.
+ */
 import type { CSSProperties } from "react"
 export const metadata = {title:"StrainChain — Cannabis Supply Chain Authentication",description:"Blockchain seed-to-sale compliance for cannabis."}
 type Feat = {icon:string;t:string;d:string}

@@ -1,3 +1,9 @@
+/**
+ * Demo: AuthiChain × StrainChain — Cannabis Solution
+ * Problem: A $7.9B illicit cannabis market is undermining 23 states of licensed operators, and MSOs have no single authentication OS that covers seed-to-sale, lab anchoring, METRC reconciliation, and consumer-facing verification across every state they ship to.
+ * Solution: AuthiChain + QRON verifies authenticity in 2.1 seconds through the StrainChain protocol.
+ * Business Value: The AuthiChain × StrainChain cannabis solution gives MSOs and licensed cultivators a single API for every state — Polygon-anchored seed-to-sale chain, lab COA hash anchoring, METRC bridge, scan-to-earn consumer rewards, and brand-protection monitoring across every SKU in the licensed market.
+ */
 export const metadata = { title: 'AuthiChain for Cannabis — StrainChain Supply Chain Authentication', description: 'The only blockchain authentication platform built for cannabis. Seed-to-sale transparency, lab result anchoring, and consumer-facing authenticity verification.' };
 export default function CannabisPage() {
   const stats = [

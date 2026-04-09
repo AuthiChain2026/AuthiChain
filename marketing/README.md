@@ -72,6 +72,23 @@ Use the intake form when:
    fields populated.
 5. Link the new demo from the `/demos` index page.
 
+## Verticals
+
+Some industries justify a dedicated **vertical** that fuses AuthiChain and
+QRON into a single product experience. Each vertical gets its own
+sub-folder under `marketing/` with its own `README.md`, `intake.md`, and
+`demo-mapping.md`, plus its own persona demos under `app/<vertical>/demos/`
+and its own `outputs/<vertical>-demo-manifest.json`.
+
+| Vertical | Domain | Folder | Demos | Manifest |
+|----------|--------|--------|-------|----------|
+| **StrainChain** (cannabis) | [strainchain.io](https://strainchain.io) | [`marketing/strainchain/`](./strainchain/) | `app/strainchain/demos/*` | `outputs/strainchain-demo-manifest.json` |
+
+To add a new vertical, mirror the StrainChain structure: create
+`marketing/<vertical>/`, add persona demos under
+`app/<vertical>/demos/<persona>/page.tsx`, and ship a matching
+`outputs/<vertical>-demo-manifest.json`.
+
 ## File index
 
 | File | Purpose |
@@ -79,3 +96,4 @@ Use the intake form when:
 | [`README.md`](./README.md) | This file — marketing system overview |
 | [`intake.md`](./intake.md) | Inbound intake form + internal triage rules |
 | [`demo-mapping.md`](./demo-mapping.md) | Industry → demo path mapping table |
+| [`strainchain/`](./strainchain/) | StrainChain (cannabis vertical) marketing layer |

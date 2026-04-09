@@ -1,0 +1,79 @@
+{
+  "vertical": "StrainChain",
+  "domain": "strainchain.io",
+  "stack": ["AuthiChain", "QRON"],
+  "description": "StrainChain is the cannabis vertical of the Authentic Economy — AuthiChain (blockchain authentication) and QRON (identity art) combined into a single cannabis-native protocol that covers seed-to-sale, lab COA anchoring, METRC sync, dispensary verification, consumer scan-to-earn, and regulator audit trails.",
+  "personas": [
+    {
+      "persona": "Cultivator",
+      "demo_id": "strainchain-cultivator",
+      "demo_path": "/app/strainchain/demos/cultivator",
+      "demo_url": "https://strainchain.io/demos/cultivator",
+      "headline": "Clone to exit bag, signed forever",
+      "qron_theme": "Emerald canopy — living soil earth tones, trichome frost, craft grow room",
+      "why": "Licensed cultivators have no clean way to prove that a specific batch — from clone to package — was grown, cured, and handled under their licence, leaving craft flower indistinguishable from diverted product on the shelf.",
+      "value": "Every batch gets a StrainChain identity bound to the cultivator's AuthiChain licence and packaged with a strain-specific QRON, turning craft provenance into a shelf-level marketing asset and a METRC-ready audit trail."
+    },
+    {
+      "persona": "Lab",
+      "demo_id": "strainchain-lab",
+      "demo_path": "/app/strainchain/demos/lab",
+      "demo_url": "https://strainchain.io/demos/lab",
+      "headline": "One upload, forever verifiable",
+      "qron_theme": "Clinical teal — sterile precision, analytical glassware, COA seal",
+      "why": "State-licensed cannabis testing labs issue thousands of COAs each month on paper and PDF, and those certificates are routinely altered, swapped, or re-used on product that was never actually tested.",
+      "value": "Every COA is hashed and anchored to AuthiChain at upload, bound to the lab's licence, and linked to the StrainChain batch — so dispensaries, regulators, and consumers can all verify that the potency, terpenes, and pesticide screens on the label are the ones the lab actually signed."
+    },
+    {
+      "persona": "Dispensary",
+      "demo_id": "strainchain-dispensary",
+      "demo_path": "/app/strainchain/demos/dispensary",
+      "demo_url": "https://strainchain.io/demos/dispensary",
+      "headline": "Scan to stock, scan to sell",
+      "qron_theme": "Retail emerald — dispensary counter, budtender glow, gold trim",
+      "why": "Dispensaries receive product from dozens of distributors every week and have no fast way to confirm that every SKU was grown by a licensed cultivator, tested by a licensed lab, and reconciled with METRC before it hits the shelf.",
+      "value": "Budtenders scan each package on receipt and at point of sale — confirming licensed origin, COA integrity, and METRC reconciliation in one tap — and the dispensary turns verification into a loyalty loop with consumer scan-to-earn rewards."
+    },
+    {
+      "persona": "Consumer",
+      "demo_id": "strainchain-consumer",
+      "demo_path": "/app/strainchain/demos/consumer",
+      "demo_url": "https://strainchain.io/demos/consumer",
+      "headline": "Scan it. Trust it. Earn on it.",
+      "qron_theme": "Sunset green — consumer friendly, strain art, mobile-first glow",
+      "why": "Cannabis consumers have almost no way to verify what they paid for — potency, terpenes, origin, and licence status all live on fragile labels and PDFs that are routinely swapped, faked, or out of date.",
+      "value": "Any consumer, on any phone, scans the strain QRON and sees the full lab panel, cultivator story, and licensed chain of custody — and can earn QRON rewards for every authenticated scan, turning verification into a loyalty and community layer for the brand."
+    },
+    {
+      "persona": "Regulator",
+      "demo_id": "strainchain-regulator",
+      "demo_path": "/app/strainchain/demos/regulator",
+      "demo_url": "https://strainchain.io/demos/regulator",
+      "headline": "Audit the whole state in one query",
+      "qron_theme": "State seal green — authoritative, audit-grade, enforcement-ready",
+      "why": "State cannabis control boards (California BCC, Colorado MED, Michigan LARA, and 20+ others) depend on METRC data that is manually entered, easy to falsify, and disconnected from the physical packages on dispensary shelves.",
+      "value": "Regulators get a read-only audit dashboard that reconciles METRC with the AuthiChain-anchored StrainChain ledger, exposes every unlicensed or tampered SKU in the state, and lets field inspectors scan any package to confirm provenance in under 3 seconds."
+    }
+  ],
+  "products": [
+    {
+      "product_name": "Zkittlez OG — Indoor Craft Flower (3.5g)",
+      "storymode_product_id": "a1000001-0001-4000-a000-000000000020",
+      "storymode_manifest": "outputs/storymode-demo-manifest.json",
+      "why": "Cannabis consumers and dispensaries cannot easily verify seed-to-sale provenance, lab results, or licensed origin — exposing regulated markets to diversion and untested product.",
+      "value": "StrainChain links every package to its cultivator licence, lab results, and terpene profile through an AuthiChain QRON, enabling compliant dispensary scanning, brand loyalty, and regulator-ready audit trails."
+    }
+  ],
+  "related_files": [
+    "app/strainchain/page.tsx",
+    "app/strainchain/demos/page.tsx",
+    "app/solutions/cannabis/page.tsx",
+    "outputs/strainchain-economy-map.md",
+    "outputs/storymode-demo-manifest.json",
+    "supabase/migrations/20260407_strainchain_schema.sql",
+    "public/qron/strainchain-zkittlez-qr.svg",
+    "marketing/strainchain/README.md",
+    "marketing/strainchain/intake.md",
+    "marketing/strainchain/demo-mapping.md"
+  ]
+}
