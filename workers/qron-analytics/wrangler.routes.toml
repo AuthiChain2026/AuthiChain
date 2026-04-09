@@ -1,0 +1,15 @@
+name = "qron-analytics"
+main = "cloudflare-entry.js"
+compatibility_date = "2026-03-28"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = false
+
+routes = [
+  { pattern = "analytics.qron.space/*", zone_name = "qron.space" },
+  { pattern = "qron.space/api/analytics/*", zone_name = "qron.space" },
+  { pattern = "www.qron.space/api/analytics/*", zone_name = "qron.space" }
+]
+
+kv_namespaces = [
+  { binding = "QRON_KV", id = "23fbb5cfb110406f8c9ece60075626fc" }
+]

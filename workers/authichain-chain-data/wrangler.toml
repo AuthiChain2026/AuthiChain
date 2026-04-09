@@ -1,0 +1,10 @@
+name = "authichain-chain-data"
+main = "index.js"
+compatibility_date = "2024-09-23"
+
+[vars]
+CHAIN_ID = "137"
+
+# Set via: wrangler secret put ETHERSCAN_KEY_QRON
+# ETHERSCAN_KEY_QRON = "EXRH7JMZ8RV21ZQPVG9CHDR9TA4IKAGDSD"
+# ETHERSCAN_KEY_AUTHICHAIN = "ZP7IGREASZ15GCY478KDNQYKP5XHKWVPWI"

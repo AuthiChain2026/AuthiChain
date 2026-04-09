@@ -1,0 +1,8 @@
+name = "shiny-silence-7b46qron-analytics"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+account_id = "4c1869b90f13f86940aa3747839bf420"
+
+[[kv_namespaces]]
+binding = "QRON_KV"
+id = "23fbb5cfb110406f8c9ece60075626fc"
