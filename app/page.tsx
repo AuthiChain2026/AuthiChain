@@ -164,7 +164,7 @@ export default function HomePage() {
         </Link>
         <div style={{ flex:1 }}/>
         <div className="nav-links">
-          {[["Products","#products"],["How It Works","#how-it-works"],["Demo","/demo-video"],["Verify","/verify/AC-1829577CED8F6BFBB0BC667CDE33DF0E"],["EU DPP","/compliance"],["Grants","/grants"]].map(([l,h])=>(
+          {[["Products","#products"],["How It Works","#how-it-works"],["Demo","/demo-video"],["Verify","/verify?id=AC-1829577CED8F6BFBB0BC667CDE33DF0E"],["EU DPP","/compliance"],["Grants","/grants"]].map(([l,h])=>(
             <a key={l} href={h} className="nav-a">{l}</a>
           ))}
         </div>
@@ -189,7 +189,7 @@ export default function HomePage() {
           </p>
           <div className="hero-ctas" style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:36 }}>
             <a href="https://authichain.com/demo-video" className="cta-gold">Watch Demo</a>
-            <a href="https://authichain.com/verify/AC-1829577CED8F6BFBB0BC667CDE33DF0E" className="cta-out" target="_blank" rel="noopener">Live Verify →</a>
+            <a href="https://authichain.com/verify?id=AC-1829577CED8F6BFBB0BC667CDE33DF0E" className="cta-out" target="_blank" rel="noopener">Live Verify →</a>
           </div>
           <div className="hero-stats" style={{ display:"flex", gap:32, flexWrap:"wrap" }}>
             {[["$0.004","per seal"],["2.1s","verify time"],["1B","$QRON supply"],["EU DPP","compliant"]].map(([v,l])=>(
@@ -421,7 +421,7 @@ export default function HomePage() {
         </p>
         <div className="final-ctas" style={{ display:"flex", gap:14, justifyContent:"center", flexWrap:"wrap" }}>
           <a href="https://authichain.com/demo-video" className="cta-gold">Watch Full Demo</a>
-          <a href="https://authichain.com/verify/AC-1829577CED8F6BFBB0BC667CDE33DF0E" className="cta-out" target="_blank" rel="noopener">Try Live Verify</a>
+          <a href="https://authichain.com/verify?id=AC-1829577CED8F6BFBB0BC667CDE33DF0E" className="cta-out" target="_blank" rel="noopener">Try Live Verify</a>
           <button onClick={()=>{const e=['z','@','authichain','.','com'].join('');window.open('mailto:'+e);}} className="cta-out" style={{ cursor:"pointer", fontFamily:"inherit" }}>Talk to Founder</button>
         </div>
       </section>

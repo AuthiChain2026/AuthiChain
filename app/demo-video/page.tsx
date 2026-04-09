@@ -16,13 +16,14 @@ const AGENTS = [
   { name:"Arbiter",   weight:12, color:"#fb923c", desc:"Final consensus adjudication" },
 ];
 
+// Slide timings sum to 60,000ms to match the 60-second PiP presenter video
 const STEPS = [
-  { id:"landing",     title:"AuthiChain Portal",       duration:4500, clicks:[{x:62,y:78,label:"Scan Product"}] },
-  { id:"scanning",    title:"QR Code Detected",         duration:3200, clicks:[{x:50,y:50,label:"QR Captured"}] },
-  { id:"consensus",   title:"5-Agent AI Consensus",     duration:4500, clicks:[] },
-  { id:"certificate", title:"Certificate Issued",        duration:5000, clicks:[{x:50,y:86,label:"Download Certificate"}] },
-  { id:"blockchain",  title:"On-Chain Proof",            duration:3800, clicks:[{x:50,y:90,label:"View on PolygonScan"}] },
-  { id:"dpp",         title:"EU Product Passport",       duration:4000, clicks:[{x:50,y:88,label:"Export DPP PDF"}] },
+  { id:"landing",     title:"AuthiChain Portal",       duration:10800, clicks:[{x:62,y:78,label:"Scan Product"}] },
+  { id:"scanning",    title:"QR Code Detected",         duration:7680,  clicks:[{x:50,y:50,label:"QR Captured"}] },
+  { id:"consensus",   title:"5-Agent AI Consensus",     duration:10800, clicks:[] },
+  { id:"certificate", title:"Certificate Issued",        duration:12000, clicks:[{x:50,y:86,label:"Download Certificate"}] },
+  { id:"blockchain",  title:"On-Chain Proof",            duration:9120,  clicks:[{x:50,y:90,label:"View on PolygonScan"}] },
+  { id:"dpp",         title:"EU Product Passport",       duration:9600,  clicks:[{x:50,y:88,label:"Export DPP PDF"}] },
 ];
 
 const TOTAL = STEPS.reduce((s,t)=>s+t.duration, 0);
@@ -344,7 +345,7 @@ export default function DemoVideoPage() {
         <span style={{ fontSize:11, color:"rgba(255,255,255,.38)" }}>Demo</span>
         <div style={{ flex:1 }}/>
         <a
-          href="https://authichain.com/verify/AC-1829577CED8F6BFBB0BC667CDE33DF0E"
+          href="https://authichain.com/verify?id=AC-1829577CED8F6BFBB0BC667CDE33DF0E"
           target="_blank" rel="noopener noreferrer"
           className="nav-verify-btn"
           style={{ fontSize:12, color:gold, textDecoration:"none", padding:"6px 12px", border:`1px solid rgba(201,162,39,.35)`, borderRadius:8, display:"inline-flex", alignItems:"center", gap:4 }}
@@ -378,7 +379,7 @@ export default function DemoVideoPage() {
           </div>
           <div style={{ marginTop:20, padding:14, background:"rgba(255,255,255,.03)", border:`1px solid ${border}`, borderRadius:12 }}>
             <div style={{ fontSize:10, color:"rgba(255,255,255,.3)", letterSpacing:".1em", marginBottom:10 }}>DEMO SPECS</div>
-            {[["Total","~24s"],["AI Agents","5"],["Blockchain","Polygon"],["Per Seal","$0.004"],["Verify","2.1 seconds"]].map(([k,v])=>(
+            {[["Total","~60s"],["AI Agents","5"],["Blockchain","Polygon"],["Per Seal","$0.004"],["Verify","2.1 seconds"]].map(([k,v])=>(
               <div key={k} style={{ display:"flex", justifyContent:"space-between", fontSize:11, padding:"4px 0", borderBottom:`0.5px solid ${border}` }}>
                 <span style={{ color:"rgba(255,255,255,.3)" }}>{k}</span>
                 <span style={{ color:"rgba(255,255,255,.62)" }}>{v}</span>

@@ -55,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             foundingDate: "2025",
             founder: { "@type": "Person", name: "Zachary Kietzman" },
             contactPoint: { "@type": "ContactPoint", email: "z@authichain.com", contactType: "founder" },
-            sameAs: ["https://qron.space","https://strainchain.io","https://opensea.io/collection/voyage-bloom-myles-high"],
+            sameAs: ["https://qron.space","https://strainchain.io"],
             offers: {
               "@type": "Offer",
               name: "Product Authentication API",

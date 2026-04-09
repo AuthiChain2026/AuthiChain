@@ -6,21 +6,19 @@ export default function OpenSeaPage(){
     {name:"Watermelon Zmartini #000665",rarity:"RARE",score:87,floor:580,emoji:"🍉",stripe:"https://buy.stripe.com/00w5kDevL6Bgh0SdLK1Nu1x"},
     {name:"Myles High #001",rarity:"RARE",score:85,floor:480,emoji:"🎈",stripe:"https://buy.stripe.com/dRmcN53R7e3I4e67nm1Nu1y"},
   ]
-  const rc = {"LEGENDARY":"#FFD700","EPIC":"#a78bfa","RARE":"#22c55e"}
+  const rc: Record<string,string> = {"LEGENDARY":"#FFD700","EPIC":"#a78bfa","RARE":"#22c55e"}
   const CONTRACT = "0x5db511706FB6317cd23A7655F67450c5AC6e6AA2"
   return(
     <main style={{background:"#080808",color:"#e5e5e5",minHeight:"100vh",fontFamily:"system-ui,sans-serif",padding:"48px 24px",maxWidth:900,margin:"0 auto"}}>
       <style>{".os-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.5)!important;}"}</style>
       <a href="/collection" style={{color:"#22c55e",textDecoration:"none",fontSize:13,fontWeight:600}}>{"← Full Collection"}</a>
-      <h1 style={{fontSize:"clamp(24px,5vw,40px)",fontWeight:900,margin:"24px 0 8px",color:"#c9a227"}}>Marketplace Listings</h1>
-      <p style={{color:"rgba(255,255,255,.4)",marginBottom:36}}>Voyage Bloom x Myles High · StrainChain Verified · Polygon Mainnet</p>
+      <h1 style={{fontSize:"clamp(24px,5vw,40px)",fontWeight:900,margin:"24px 0 8px",color:"#22c55e"}}>Marketplace Listings</h1>
+      <p style={{color:"rgba(255,255,255,.4)",marginBottom:36}}>StrainChain Cannabis NFT Collection · StrainChain Verified · Polygon Mainnet</p>
 
-      <div style={{background:"rgba(201,162,39,.06)",border:"1px solid rgba(201,162,39,.25)",borderRadius:14,padding:"20px 24px",marginBottom:40}}>
-        <div style={{fontWeight:700,color:"#c9a227",marginBottom:8,fontSize:15}}>Contract on Polygon</div>
+      <div style={{background:"rgba(34,197,94,.06)",border:"1px solid rgba(34,197,94,.25)",borderRadius:14,padding:"20px 24px",marginBottom:40}}>
+        <div style={{fontWeight:700,color:"#22c55e",marginBottom:8,fontSize:15}}>Contract on Polygon</div>
         <div style={{fontFamily:"monospace",fontSize:12,color:"rgba(255,255,255,.6)",wordBreak:"break-all",marginBottom:14}}>{CONTRACT}</div>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-          <a href="https://opensea.io/collection/voyage-bloom-myles-high" target="_blank" rel="noreferrer"
-            style={{background:"#2081e2",color:"#fff",padding:"9px 18px",borderRadius:8,textDecoration:"none",fontWeight:700,fontSize:13}}>{"OpenSea \u2197"}</a>
           <a href={`https://rarible.com/collection/polygon/${CONTRACT}`} target="_blank" rel="noreferrer"
             style={{background:"#feda03",color:"#000",padding:"9px 18px",borderRadius:8,textDecoration:"none",fontWeight:700,fontSize:13}}>{"Rarible \u2197"}</a>
           <a href={`https://polygonscan.com/address/${CONTRACT}`} target="_blank" rel="noreferrer"
@@ -41,17 +39,11 @@ export default function OpenSeaPage(){
                 <span style={{background:`${color}15`,border:`1px solid ${color}40`,color:color,fontSize:9,fontWeight:700,padding:"2px 8px",borderRadius:4}}>{n.rarity}</span>
                 <span style={{background:"rgba(236,72,153,.1)",border:"1px solid rgba(236,72,153,.2)",color:"#ec4899",fontSize:9,fontWeight:700,padding:"2px 8px",borderRadius:4}}>ArtGuard {n.score}/100</span>
               </div>
-              <div style={{fontSize:22,fontWeight:900,color:"#FFD700",marginBottom:14}}>${n.floor.toLocaleString()}</div>
-              <div style={{display:"flex",gap:8}}>
-                <a href={n.stripe} target="_blank" rel="noreferrer"
-                  style={{flex:1,background:"#22c55e",color:"#000",padding:"9px",borderRadius:8,textDecoration:"none",fontWeight:700,fontSize:12,textAlign:"center" as const}}>
-                  Buy Now
-                </a>
-                <a href="https://opensea.io/collection/voyage-bloom-myles-high" target="_blank" rel="noreferrer"
-                  style={{background:"rgba(255,255,255,.06)",color:"rgba(255,255,255,.5)",padding:"9px 12px",borderRadius:8,textDecoration:"none",fontSize:12}}>
-                  OS
-                </a>
-              </div>
+              <div style={{fontSize:22,fontWeight:900,color:"#22c55e",marginBottom:14}}>${n.floor.toLocaleString()}</div>
+              <a href={n.stripe} target="_blank" rel="noreferrer"
+                style={{display:"block",background:"#22c55e",color:"#000",padding:"9px",borderRadius:8,textDecoration:"none",fontWeight:700,fontSize:12,textAlign:"center"}}>
+                Buy Now
+              </a>
             </div>
           )
         })}

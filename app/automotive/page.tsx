@@ -123,7 +123,7 @@ export default function AutomotivePage() {
       <div style={{display:"flex",gap:10,marginTop:18,flexWrap:"wrap",justifyContent:"center",position:"relative",zIndex:10}}>
         <a href="/demo-video" style={{fontFamily:"monospace",fontSize:10,fontWeight:700,letterSpacing:".1em",textDecoration:"none",padding:"10px 20px",borderRadius:6,background:blue,color:"#000"}}>▶ Watch Demo</a>
         <a href="https://qron.space" target="_blank" rel="noreferrer" style={{fontFamily:"monospace",fontSize:10,fontWeight:700,letterSpacing:".1em",textDecoration:"none",padding:"10px 20px",borderRadius:6,border:`1.5px solid rgba(79,195,247,.3)`,color:blue}}>QRON Space ↗</a>
-        <a href="https://authichain.com/verify/AC-1829577CED8F6BFBB0BC667CDE33DF0E" target="_blank" rel="noreferrer" style={{fontFamily:"monospace",fontSize:10,fontWeight:700,letterSpacing:".1em",textDecoration:"none",padding:"10px 20px",borderRadius:6,border:`1.5px solid rgba(79,195,247,.3)`,color:blue}}>Live Verify ↗</a>
+        <a href="https://authichain.com/verify?id=AC-1829577CED8F6BFBB0BC667CDE33DF0E" target="_blank" rel="noreferrer" style={{fontFamily:"monospace",fontSize:10,fontWeight:700,letterSpacing:".1em",textDecoration:"none",padding:"10px 20px",borderRadius:6,border:`1.5px solid rgba(79,195,247,.3)`,color:blue}}>Live Verify ↗</a>
       </div>
 
       <style>{`

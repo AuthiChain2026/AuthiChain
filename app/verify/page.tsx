@@ -136,15 +136,24 @@ function BitcoinProofPanel({ productId }: { productId: string }) {
   )
 }
 
-function SearchParamsHandler({ onIdFromParams }: { onIdFromParams: (id: string) => void }) {
+function SearchParamsHandler({
+  onIdFromParams,
+  onAutoVerify,
+}: {
+  onIdFromParams: (id: string) => void
+  onAutoVerify: (id: string) => void
+}) {
   const searchParams = useSearchParams()
   const idFromParams = searchParams.get("id") || ""
 
   useEffect(() => {
     if (idFromParams) {
+      // Pre-fill the input and trigger an automatic verify so deep links like
+      // /verify?id=AC-... perform a one-shot "Try Live Verify" experience.
       onIdFromParams(idFromParams)
+      onAutoVerify(idFromParams)
     }
-  }, [idFromParams, onIdFromParams])
+  }, [idFromParams, onIdFromParams, onAutoVerify])
 
   return null
 }
@@ -372,7 +381,7 @@ function VerifyContent() {
     <div className="min-h-screen bg-background">
       {fallbackEnabled && <Script src="/jsQR.js" strategy="afterInteractive" onLoad={() => setJsQrAvailable(typeof window !== 'undefined' && typeof window.jsQR === 'function')} />}
       <Suspense fallback={null}>
-        <SearchParamsHandler onIdFromParams={setInputValue} />
+        <SearchParamsHandler onIdFromParams={setInputValue} onAutoVerify={verifyValue} />
       </Suspense>
 
       <nav className="border-b">
