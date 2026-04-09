@@ -273,9 +273,14 @@ export default function DemoVideoPage() {
         <span style={{color:"rgba(255,255,255,.2)",fontSize:12}}>/</span>
         <span style={{fontSize:12,color:"rgba(255,255,255,.4)"}}>Product Demo</span>
         <div style={{flex:1}}/>
-        <Link href="/verify/AC-1829577CED8F6BFBB0BC667CDE33DF0E" style={{fontSize:12,color:gold,textDecoration:"none",padding:"6px 14px",border:`1px solid rgba(201,162,39,.3)`,borderRadius:8}}>
+        <a
+          href="https://authichain.com/verify/AC-1829577CED8F6BFBB0BC667CDE33DF0E"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{fontSize:12,color:gold,textDecoration:"none",padding:"6px 14px",border:`1px solid rgba(201,162,39,.35)`,borderRadius:8,transition:"all .2s",display:"inline-flex",alignItems:"center",gap:4}}
+        >
           Try Live Verify →
-        </Link>
+        </a>
       </nav>
 
       {/* BODY */}
@@ -386,8 +391,11 @@ export default function DemoVideoPage() {
           <div style={{fontSize:12,color:"rgba(255,255,255,.35)"}}>Deploy AuthiChain in 48 hours. $0.004 per product seal. No hardware required.</div>
         </div>
         <div style={{flex:1}}/>
-        <Link href="/portal" style={{background:gold,color:"#000",padding:"10px 24px",borderRadius:10,textDecoration:"none",fontWeight:700,fontSize:13}}>Get Started →</Link>
-        <a href="mailto:z@authichain.com" style={{border:`1px solid rgba(255,255,255,.18)`,color:"#e5e5e5",padding:"10px 20px",borderRadius:10,textDecoration:"none",fontSize:13}}>Talk to Founder</a>
+        <a href="https://authichain.com/portal" style={{background:gold,color:"#000",padding:"10px 24px",borderRadius:10,textDecoration:"none",fontWeight:700,fontSize:13}}>Get Started →</a>
+        <button
+          onClick={()=>{const e=['z','@','authichain','.','com'].join('');window.open('mailto:'+e);}}
+          style={{border:`1px solid rgba(255,255,255,.18)`,color:"#e5e5e5",padding:"10px 20px",borderRadius:10,fontSize:13,background:"transparent",cursor:"pointer",fontFamily:"'DM Mono','Courier New',monospace"}}
+        >Talk to Founder</button>
       </div>
     </main>
   );
