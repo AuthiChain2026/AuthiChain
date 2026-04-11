@@ -19,14 +19,14 @@ import { createClient as createServerClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-export const QRON_STAKE_BUNDLES = {
+const QRON_STAKE_BUNDLES = {
   bronze:   { qron_amount: 1_000,       price_usd_cents: 4900,   label: '1,000 QRON — Bronze Tier' },
   silver:   { qron_amount: 10_000,      price_usd_cents: 34900,  label: '10,000 QRON — Silver Tier' },
   gold:     { qron_amount: 100_000,     price_usd_cents: 249900, label: '100,000 QRON — Gold Tier' },
   platinum: { qron_amount: 1_000_000,   price_usd_cents: 1499900, label: '1,000,000 QRON — Platinum Tier' },
 } as const
 
-export type StakingBundle = keyof typeof QRON_STAKE_BUNDLES
+type StakingBundle = keyof typeof QRON_STAKE_BUNDLES
 
 export async function POST(req: NextRequest) {
   const stripeKey = process.env.STRIPE_SECRET_KEY

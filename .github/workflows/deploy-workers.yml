@@ -105,3 +105,20 @@ jobs:
       - name: Deploy
         run: npx wrangler deploy --compatibility-date 2024-01-01
         continue-on-error: true
+
+  deploy-authichain-automation:
+    name: Deploy authichain-automation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/authichain-automation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Wrangler
+        run: npm install --no-save wrangler || npm install -g wrangler
+      - name: Deploy
+        run: npx wrangler deploy
+        continue-on-error: true

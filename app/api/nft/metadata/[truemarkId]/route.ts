@@ -10,9 +10,9 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { truemarkId: string } }
+  { params }: { params: Promise<{ truemarkId: string }> }
 ) {
-  const { truemarkId } = params
+  const { truemarkId } = await params
 
   const supabase = createServiceClient()
   const { data: product } = await supabase

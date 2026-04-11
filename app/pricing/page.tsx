@@ -72,7 +72,7 @@ function PricingContent() {
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const router = useRouter()
   const params = useSearchParams()
-  const cancelled = params.get('checkout') === 'cancelled'
+  const cancelled = params?.get('checkout') === 'cancelled'
 
   async function handleCheckout(plan: typeof PLANS[0]) {
     setCheckoutError(null)

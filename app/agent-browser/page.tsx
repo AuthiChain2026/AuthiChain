@@ -39,7 +39,7 @@ function AgentBrowserInner() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
   useEffect(() => {
-    const planParam = searchParams.get('plan')
+    const planParam = searchParams?.get('plan')
     if (planParam === 'pro' || planParam === 'enterprise') {
       setPlan(planParam)
     }
