@@ -248,8 +248,9 @@ export function generateStaticParams() {
   return Object.keys(industries).map(industry => ({ industry }))
 }
 
-export function generateMetadata({ params }: { params: { industry: string } }): Metadata {
-  const data = industries[params.industry]
+export async function generateMetadata({ params }: { params: Promise<{ industry: string }> }): Promise<Metadata> {
+  const { industry } = await params
+  const data = industries[industry]
   if (!data) return {}
   return {
     title: `${data.name} Authentication | AuthiChain`,
@@ -257,14 +258,15 @@ export function generateMetadata({ params }: { params: { industry: string } }): 
     openGraph: {
       title: `${data.name} Product Authentication | AuthiChain`,
       description: data.description,
-      url: `https://authichain.com/solutions/${params.industry}`,
+      url: `https://authichain.com/solutions/${industry}`,
     },
-    alternates: { canonical: `https://authichain.com/solutions/${params.industry}` },
+    alternates: { canonical: `https://authichain.com/solutions/${industry}` },
   }
 }
 
-export default function IndustryPage({ params }: { params: { industry: string } }) {
-  const data = industries[params.industry]
+export default async function IndustryPage({ params }: { params: Promise<{ industry: string }> }) {
+  const { industry } = await params
+  const data = industries[industry]
   if (!data) notFound()
 
   return (
@@ -392,7 +394,7 @@ export default function IndustryPage({ params }: { params: { industry: string } 
             "@type": "WebPage",
             name: `${data.name} Product Authentication | AuthiChain`,
             description: data.description,
-            url: `https://authichain.com/solutions/${params.industry}`,
+            url: `https://authichain.com/solutions/${industry}`,
             mainEntity: {
               "@type": "Product",
               name: `AuthiChain for ${data.name}`,

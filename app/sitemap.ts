@@ -1,4 +1,4 @@
-import { MetadataRoute } from "next/dist/lib/metadata/types/metadata-types";
+import type { MetadataRoute } from 'next'
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://authichain.com";
   const now = new Date();
@@ -25,5 +25,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/verify`,                                         lastModified: now, changeFrequency: "weekly",  priority: 0.7 },
     { url: `${base}/pricing`,                                        lastModified: now, changeFrequency: "monthly", priority: 0.65 },
     { url: `${base}/eu-dpp`,                                         lastModified: now, changeFrequency: "monthly", priority: 0.65 },
+    { url: `${base}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${base}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${base}/demo-video`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
   ];
 }

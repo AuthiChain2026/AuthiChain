@@ -144,7 +144,7 @@ function SearchParamsHandler({
   onAutoVerify: (id: string) => void
 }) {
   const searchParams = useSearchParams()
-  const idFromParams = searchParams.get("id") || ""
+  const idFromParams = searchParams?.get("id") || ""
 
   useEffect(() => {
     if (idFromParams) {

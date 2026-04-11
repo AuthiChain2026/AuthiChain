@@ -27,7 +27,7 @@ export default function SignupPage() {
   const [refCode, setRefCode] = useState("")
 
   useEffect(() => {
-    const ref = searchParams.get("ref")
+    const ref = searchParams?.get("ref")
     if (ref) setRefCode(ref.toUpperCase())
   }, [])
 

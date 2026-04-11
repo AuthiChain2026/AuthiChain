@@ -23,9 +23,9 @@ function LoginContent() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const error = searchParams.get('error')
+    const error = searchParams?.get('error')
     if (error) {
-      const message = searchParams.get('message') || 'Authentication failed. Please try again.'
+      const message = searchParams?.get('message') || 'Authentication failed. Please try again.'
       toast({ title: 'Sign-in Error', description: message, variant: 'destructive' })
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
