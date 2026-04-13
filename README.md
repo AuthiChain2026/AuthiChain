@@ -1,3 +1,17 @@
+# AuthiChain — The Trust Protocol
+
+> **Every product on Earth gets a beautiful, AI-generated, cryptographically unforgeable QR code — and when anyone scans it with their phone, the blockchain instantly proves it's real.**
+
+```
+PRODUCT → QRON Cryptographic Art → Phone Scan → Blockchain Verified → Storymode → $QRON Reward
+```
+
+📖 **[Read the full Vision →](VISION.md)** · 🏗️ **[System Architecture →](AUTHENTIC_ECONOMY.md)**
+
+**AuthiChain.com** (Protocol) · **QRON.space** (Interface) · **StrainChain.io** (Cannabis Vertical)
+
+---
+
 [![Next.js CI](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/nextjs.yml/badge.svg)](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/nextjs.yml)
 [![CI](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/ci.yml/badge.svg)](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/ci.yml)
 [![Deploy Workers](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/deploy-workers.yml/badge.svg)](https://github.com/AuthiChain2026/AuthiChain/actions/workflows/deploy-workers.yml)
