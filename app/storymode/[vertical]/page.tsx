@@ -172,7 +172,7 @@ export default function StorymodePlayer() {
           }} />
           <p className="text-white/30 text-sm">Generating cinematic narration...</p>
           <p className="text-white/15 text-xs mt-2 font-mono">AuthiChain Truth Network × Claude</p>
-          <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </section>
       )}
 
