@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * QRON.space Industry Showcase
  * 10 FLUX.1 AI-generated QR Art pieces — one per industry vertical
