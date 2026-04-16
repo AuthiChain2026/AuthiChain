@@ -16,8 +16,16 @@ export async function POST(req: NextRequest) {
   })
 
   try {
-    const formData = await req.formData()
-    const priceId = formData.get('priceId') as string
+    // Accept both JSON body and form-encoded body
+    let priceId: string | null = null
+    const contentType = req.headers.get('content-type') ?? ''
+    if (contentType.includes('application/json')) {
+      const body = await req.json().catch(() => ({}))
+      priceId = body.priceId ?? null
+    } else {
+      const formData = await req.formData().catch(() => new FormData())
+      priceId = formData.get('priceId') as string | null
+    }
 
     if (!priceId) {
       return NextResponse.json({ error: 'Missing priceId' }, { status: 400 })
