@@ -1,17 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useConnect, useAccount, useDisconnect } from 'wagmi'
+import { useWallet } from '@/lib/web3/wallet-context'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const gold = '#c9a227'
 const bg = '#0a0b0f'
-
-const WALLET_META: Record<string, { icon: string; label: string }> = {
-  injected:        { icon: '🦊', label: 'MetaMask' },
-  walletConnect:   { icon: '🔗', label: 'WalletConnect' },
-  coinbaseWallet:  { icon: '🔵', label: 'Coinbase Wallet' },
-}
 
 export function WalletConnectModal({
   open,
@@ -20,9 +14,8 @@ export function WalletConnectModal({
   open: boolean
   onClose: () => void
 }) {
-  const { connectors, connect, isPending } = useConnect()
-  const { isConnected, address } = useAccount()
-  const { disconnect } = useDisconnect()
+  const { isConnected, address, connect, disconnect } = useWallet()
+  const [isPending, setIsPending] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => setMounted(true), [])
@@ -78,31 +71,32 @@ export function WalletConnectModal({
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {connectors.map((connector) => {
-                  const meta = WALLET_META[connector.id] || { icon: '◆', label: connector.name }
-                  return (
-                    <button
-                      key={connector.uid}
-                      onClick={() => connect({ connector })}
-                      disabled={isPending}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '14px 16px', borderRadius: 12,
-                        background: 'rgba(255,255,255,.03)',
-                        border: '1px solid rgba(255,255,255,.08)',
-                        color: '#e5e5e5', fontSize: 14, cursor: 'pointer',
-                        transition: 'all .2s',
-                        opacity: isPending ? 0.5 : 1,
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(201,162,39,.35)'; e.currentTarget.style.background = 'rgba(201,162,39,.06)' }}
-                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.08)'; e.currentTarget.style.background = 'rgba(255,255,255,.03)' }}
-                    >
-                      <span style={{ fontSize: 22 }}>{meta.icon}</span>
-                      <span style={{ flex: 1, textAlign: 'left' }}>{meta.label}</span>
-                      <span style={{ color: 'rgba(255,255,255,.2)', fontSize: 12 }}>→</span>
-                    </button>
-                  )
-                })}
+                {[
+                  { icon: '🦊', label: 'MetaMask', id: 'metamask' },
+                  { icon: '🔗', label: 'WalletConnect', id: 'walletconnect' },
+                  { icon: '🔵', label: 'Coinbase Wallet', id: 'coinbase' },
+                ].map((w) => (
+                  <button
+                    key={w.id}
+                    onClick={async () => { setIsPending(true); await connect(w.id as any); setIsPending(false) }}
+                    disabled={isPending}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '14px 16px', borderRadius: 12,
+                      background: 'rgba(255,255,255,.03)',
+                      border: '1px solid rgba(255,255,255,.08)',
+                      color: '#e5e5e5', fontSize: 14, cursor: 'pointer',
+                      transition: 'all .2s',
+                      opacity: isPending ? 0.5 : 1,
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(201,162,39,.35)'; e.currentTarget.style.background = 'rgba(201,162,39,.06)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.08)'; e.currentTarget.style.background = 'rgba(255,255,255,.03)' }}
+                  >
+                    <span style={{ fontSize: 22 }}>{w.icon}</span>
+                    <span style={{ flex: 1, textAlign: 'left' }}>{w.label}</span>
+                    <span style={{ color: 'rgba(255,255,255,.2)', fontSize: 12 }}>→</span>
+                  </button>
+                ))}
                 <div style={{ marginTop: 8, fontSize: 11, color: 'rgba(255,255,255,.25)', textAlign: 'center', lineHeight: 1.6 }}>
                   Polygon Mainnet · Earn $QRON for every scan
                 </div>

@@ -2,7 +2,7 @@ import { createPublicClient, createWalletClient, http, parseUnits, formatUnits }
 import { polygon } from 'viem/chains'
 import { privateKeyToAccount } from 'viem/accounts'
 import { QRON_TOKEN_ABI } from './qron-token-abi'
-import { QRON_TOKEN_ADDRESS } from './config'
+import { QRON_TOKEN_ADDRESS } from './constants'
 
 const transport = http(process.env.POLYGON_RPC || 'https://polygon-rpc.com')
 

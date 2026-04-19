@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useWallet } from "@/lib/web3/wallet-context";
 import { WalletConnectModal } from "@/components/wallet-connect-modal";
 import { TruthMiningSimulator } from "@/components/truth-mining-simulator";
 import { AutoFlowDemo } from "@/components/autoflow-demo";
@@ -50,7 +50,7 @@ export default function HomePage() {
   const [verifyStep, setVerifyStep] = useState(0);
   const [scanActive, setScanActive] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWallet();
 
   useEffect(() => {
     const t = setInterval(() => setTick(n => n + 1), 55);
@@ -170,7 +170,7 @@ export default function HomePage() {
         </Link>
         <div style={{ flex:1 }}/>
         <div className="nav-links">
-          {[["Products","#products"],["How It Works","#how-it-works"],["Demo","/demo-video"],["Verify","/verify?id=AC-1829577CED8F6BFBB0BC667CDE33DF0E"],["EU DPP","/compliance"],["Grants","/grants"]].map(([l,h])=>(
+          {[["Products","#products"],["How It Works","#how-it-works"],["Pricing","/pricing"],["Demo","/demo-video"],["Verify","/verify?id=AC-1829577CED8F6BFBB0BC667CDE33DF0E"],["Profile","/profile"]].map(([l,h])=>(
             <a key={l} href={h} className="nav-a">{l}</a>
           ))}
         </div>

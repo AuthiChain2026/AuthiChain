@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { useAccount } from 'wagmi'
+import { useWallet } from '@/lib/web3/wallet-context'
 
 const gold = '#c9a227'
 const green = '#22c55e'
@@ -43,7 +43,7 @@ interface SimResult {
 }
 
 export function TruthMiningSimulator({ brandSlug }: { brandSlug?: string }) {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected } = useWallet()
   const reducedMotion = useReducedMotion()
 
   const [phase, setPhase] = useState(-1) // -1=idle, 0-5=running, 6=complete

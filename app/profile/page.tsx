@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAccount } from 'wagmi'
+import { useWallet } from '@/lib/web3/wallet-context'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { WalletConnectModal } from '@/components/wallet-connect-modal'
@@ -17,7 +17,7 @@ interface Soul { id: string; story_text: string; story_metadata: any; created_at
 interface Drop { id: string; drop_type: string; trigger_event: string; status: string; created_at: string }
 
 export default function ProfilePage() {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected } = useWallet()
   const [walletOpen, setWalletOpen] = useState(false)
   const [balance, setBalance] = useState('0')
   const [rewards, setRewards] = useState<Reward[]>([])

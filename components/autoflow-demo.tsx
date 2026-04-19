@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { useAccount } from 'wagmi'
+import { useWallet } from '@/lib/web3/wallet-context'
 
 const gold = '#c9a227'
 const green = '#22c55e'
@@ -45,7 +45,7 @@ const EDGES: FlowEdge[] = [
 type FlowPhase = 'idle' | 'scanning' | 'verifying' | 'mining' | 'rewarding' | 'complete'
 
 export function AutoFlowDemo({ brandSlug }: { brandSlug?: string }) {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected } = useWallet()
   const reducedMotion = useReducedMotion()
 
   const [phase, setPhase] = useState<FlowPhase>('idle')

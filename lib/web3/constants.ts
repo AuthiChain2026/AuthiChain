@@ -1,21 +1,5 @@
-import { http, createConfig } from 'wagmi'
-import { polygon } from 'wagmi/chains'
-import { injected, walletConnect, coinbaseWallet } from 'wagmi/connectors'
-
-export const QRON_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000' as const // deploy then replace
+export const QRON_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000' as const
 export const POLYGON_CHAIN_ID = 137
-
-export const wagmiConfig = createConfig({
-  chains: [polygon],
-  connectors: [
-    injected(),
-    walletConnect({ projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID || 'demo' }),
-    coinbaseWallet({ appName: 'AuthiChain' }),
-  ],
-  transports: {
-    [polygon.id]: http(process.env.NEXT_PUBLIC_POLYGON_RPC || 'https://polygon-rpc.com'),
-  },
-})
 
 export const SUBSCRIPTION_TIERS = {
   starter: {
