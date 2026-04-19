@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Web3Provider } from "@/components/providers/web3-provider";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://authichain.com"),
@@ -66,7 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }) }}
         />
       </head>
-      <body>{children}</body>
+      <body><Web3Provider>{children}</Web3Provider></body>
     </html>
   );
 }
