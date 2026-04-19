@@ -1,6 +1,10 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
+import { WalletConnectModal } from "@/components/wallet-connect-modal";
+import { TruthMiningSimulator } from "@/components/truth-mining-simulator";
+import { AutoFlowDemo } from "@/components/autoflow-demo";
 
 const gold = "#c9a227";
 const goldDim = "rgba(201,162,39,0.12)";
@@ -45,6 +49,8 @@ export default function HomePage() {
   const [tick, setTick] = useState(0);
   const [verifyStep, setVerifyStep] = useState(0);
   const [scanActive, setScanActive] = useState(false);
+  const [walletOpen, setWalletOpen] = useState(false);
+  const { address, isConnected } = useAccount();
 
   useEffect(() => {
     const t = setInterval(() => setTick(n => n + 1), 55);
@@ -168,7 +174,16 @@ export default function HomePage() {
             <a key={l} href={h} className="nav-a">{l}</a>
           ))}
         </div>
-        <a href="https://authichain.com/portal" className="cta-gold" style={{ padding:"7px 16px", fontSize:12 }}>Get Started →</a>
+        {isConnected ? (
+          <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+            <Link href="/profile" style={{ textDecoration:"none", fontSize:11, color:gold, padding:"5px 12px", background:"rgba(201,162,39,.08)", border:"1px solid rgba(201,162,39,.18)", borderRadius:100 }}>
+              {address?.slice(0,6)}...{address?.slice(-4)}
+            </Link>
+            <Link href="/dashboard" className="cta-gold" style={{ padding:"7px 16px", fontSize:12 }}>Dashboard →</Link>
+          </div>
+        ) : (
+          <button onClick={()=>setWalletOpen(true)} className="cta-gold" style={{ padding:"7px 16px", fontSize:12, border:"none", cursor:"pointer", fontFamily:"inherit" }}>Connect Wallet →</button>
+        )}
       </nav>
 
       {/* ── HERO ── */}
@@ -393,6 +408,30 @@ export default function HomePage() {
 
       <div className="divider"/>
 
+      {/* ── TRUTH MINING SIMULATOR ── */}
+      <section className="section">
+        <div style={{ fontSize:11, color:"rgba(255,255,255,.3)", letterSpacing:".18em", marginBottom:12 }}>LIVE DEMO</div>
+        <h2 className="syne" style={{ fontWeight:800, fontSize:"2rem", marginBottom:12 }}>Experience <span className="gt-gold">Truth Mining</span></h2>
+        <p style={{ fontSize:14, color:"rgba(255,255,255,.4)", maxWidth:600, marginBottom:32, lineHeight:1.8 }}>
+          Watch the 5-agent consensus engine verify a product in real time. Connect your wallet to trigger a live Snap Effect — earning $QRON while generating a verified lead for the brand.
+        </p>
+        <TruthMiningSimulator brandSlug="authichain" />
+      </section>
+
+      <div className="divider"/>
+
+      {/* ── AUTOFLOW DEMO ── */}
+      <section className="section">
+        <div style={{ fontSize:11, color:"rgba(255,255,255,.3)", letterSpacing:".18em", marginBottom:12 }}>THE SNAP EFFECT</div>
+        <h2 className="syne" style={{ fontWeight:800, fontSize:"2rem", marginBottom:12 }}>One scan. <span className="gt-purple">Bidirectional value.</span></h2>
+        <p style={{ fontSize:14, color:"rgba(255,255,255,.4)", maxWidth:600, marginBottom:32, lineHeight:1.8 }}>
+          Every scan simultaneously mines a high-intent lead for the brand (inbound) and delivers an AI-generated Digital Soul + $QRON reward to the scanner (outbound). The first autonomous marketplace where every interaction creates value in both directions.
+        </p>
+        <AutoFlowDemo brandSlug="authichain" />
+      </section>
+
+      <div className="divider"/>
+
       {/* ── MARKETS ── */}
       <section className="section">
         <div style={{ fontSize:11, color:"rgba(255,255,255,.3)", letterSpacing:".18em", marginBottom:12 }}>TARGET MARKETS</div>
@@ -444,6 +483,8 @@ export default function HomePage() {
           © 2026 AuthiChain · $QRON: 0xAebfA6b08fb25b59748c93273aB8880e20FfE437 · Built on Polygon · z@authichain.com
         </div>
       </footer>
+
+      <WalletConnectModal open={walletOpen} onClose={()=>setWalletOpen(false)} />
     </main>
   );
 }

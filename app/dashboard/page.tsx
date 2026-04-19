@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp, Zap, X, Coins, ArrowUpRight, Lock, Share2, Copy, Check } from "lucide-react"
+import { Shield, Plus, Package, CheckCircle, Loader2, LogOut, Sparkles, TrendingUp, Zap, X, Coins, ArrowUpRight, Lock, Share2, Copy, Check, BarChart3 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { productsResponseSchema, type Product } from "@/lib/contracts/products"
 
@@ -262,6 +262,25 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Snap Analytics CTA */}
+        <Card className="mb-8 border-amber-500/20 bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-950/10 dark:to-orange-950/10">
+          <CardContent className="flex items-center justify-between py-5 px-6">
+            <div className="flex items-center gap-3">
+              <BarChart3 className="h-5 w-5 text-amber-500" />
+              <div>
+                <p className="font-semibold text-sm">Snap Effect Analytics</p>
+                <p className="text-xs text-muted-foreground">Truth Mining leads, $QRON rewards, geo breakdown, scan timeline</p>
+              </div>
+            </div>
+            <Link href="/dashboard/analytics">
+              <Button size="sm" variant="outline" className="border-amber-400 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30">
+                <BarChart3 className="h-3 w-3 mr-1.5" />
+                View Analytics
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
 
         {/* QRON Staking Widget */}
         {brand && (
