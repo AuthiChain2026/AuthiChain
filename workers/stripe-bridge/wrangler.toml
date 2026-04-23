@@ -1,0 +1,19 @@
+name = "ae-stripe-bridge"
+main = "src/index.js"
+# Ed25519 in WebCrypto requires compatibility_date >= 2024-02-01.
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Secrets (set via `wrangler secret put <NAME>`):
+#   STRIPE_WEBHOOK_SECRET            whsec_... from the Stripe dashboard
+#   AE_STRIPE_BRIDGE_PRIVATE_KEY     base64-encoded 32-byte Ed25519 seed
+#   AE_EDGE_URL                      https://ae-edge-gateway.<sub>.workers.dev/
+
+[build]
+command = "npm install"
+
+[env.production]
+name = "ae-stripe-bridge"
+
+[env.staging]
+name = "ae-stripe-bridge-staging"

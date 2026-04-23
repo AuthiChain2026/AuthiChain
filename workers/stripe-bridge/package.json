@@ -1,5 +1,5 @@
 {
-  "name": "authichain-edge-gateway",
+  "name": "authichain-stripe-bridge",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -9,13 +9,7 @@
     "deploy": "wrangler deploy",
     "deploy:staging": "wrangler deploy --env staging",
     "deploy:production": "wrangler deploy --env production",
-    "tail": "wrangler tail",
-    "keygen": "node scripts/keygen.mjs",
-    "sign-example": "node scripts/sign-example.mjs",
-    "smoke": "node scripts/smoke.mjs"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "2.47.10"
+    "tail": "wrangler tail"
   },
   "devDependencies": {
     "wrangler": "^3.80.0"

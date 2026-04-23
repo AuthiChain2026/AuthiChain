@@ -175,11 +175,17 @@ export default {
         auth: { persistSession: false },
       });
 
+      // key_id and body_sha256 live as first-class columns after migration
+      // 20260423_promote_signature_metadata.sql. transaction_data.meta keeps
+      // signed_at and redundant copies so historical rows remain queryable
+      // without joins.
       const { data, error } = await supabase
         .from('edge_transactions')
         .insert([
           {
             source_system: payload.source || source,
+            key_id: keyId,
+            body_sha256: bodyHash,
             transaction_data: {
               payload: payload.data ?? payload,
               meta: {
@@ -194,6 +200,16 @@ export default {
         .select();
 
       if (error) throw error;
+
+      console.log(
+        JSON.stringify({
+          event: 'auth.verified',
+          keyId,
+          bodyHash,
+          source: payload.source || source,
+          recordId: data[0]?.id,
+        })
+      );
 
       return jsonResponse({ status: 'success', record: data[0] }, 200);
     } catch (err) {

@@ -49,3 +49,6 @@ workers/license-issuer/package-lock.json
 workers/edge-gateway/node_modules/
 workers/edge-gateway/package-lock.json
 workers/edge-gateway/dist/
+workers/stripe-bridge/node_modules/
+workers/stripe-bridge/package-lock.json
+workers/stripe-bridge/dist/
