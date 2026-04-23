@@ -46,3 +46,6 @@ build.log
 final-build.log
 workers/license-issuer/node_modules/
 workers/license-issuer/package-lock.json
+workers/edge-gateway/node_modules/
+workers/edge-gateway/package-lock.json
+workers/edge-gateway/dist/
