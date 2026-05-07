@@ -15,7 +15,7 @@ export async function middleware(req: NextRequest) {
   const { pathname, headers } = req
   
   // 1. Google Search Console verification (PRESERVED)
-  const m = pathname.match(/^\\/google([a-zA-Z0-9_-]+)\\.html$/)
+    const m = pathname.match(new RegExp('^/google([a-zA-Z0-9_-]+)\\.html$'))
   if (m) {
     return new NextResponse(`google-site-verification: google${m[1]}.html`, {
       headers: { 'Content-Type': 'text/html' },
