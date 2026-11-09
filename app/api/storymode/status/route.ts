@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getVideoStatus } from '@/lib/heygen'
 
+
+export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   const videoId = req.nextUrl.searchParams.get('videoId')
   if (!videoId?.trim()) return NextResponse.json({ error: 'videoId required' }, { status: 400 })

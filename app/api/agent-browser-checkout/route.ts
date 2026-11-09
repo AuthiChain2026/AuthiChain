@@ -45,9 +45,15 @@ export async function POST(req: NextRequest) {
     metadata: { tier, product: 'agent-browser' },
     subscription_data: {
       metadata: { tier, product: 'agent-browser' },
-      trial_period_days: 14,
-    },
-  })
-
-  return NextResponse.redirect(session.url!, 303)
+      subscription_data: {
+        metadata: { tier, product: 'agent-browser' },
+        trial_period_days: 14,
+      },
+    })
+  
+    return NextResponse.redirect(session.url!, 303)
+  } catch (err: any) {
+    console.error('[POST] unhandled error:', err);
+    return NextResponse.json({ error: err?.message || 'Internal server error' }, { status: 500 });
+  }
 }

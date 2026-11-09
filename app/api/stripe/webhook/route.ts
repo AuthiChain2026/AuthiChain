@@ -74,7 +74,7 @@ async function upsertAccount(customerId: string, fields: object): Promise<string
     'Accounts',
     'GET',
     undefined,
-    `?filterByFormula={Stripe Customer ID}="${escapeAirtableValue(customerId)}")`
+    `?filterByFormula={Stripe Customer ID}="${escapeAirtableValue(customerId)}"`
   );
   if (existing.records?.length > 0) {
     const recordId = existing.records[0].id;
@@ -224,7 +224,7 @@ async function handleQronCreditPurchase(session: Stripe.Checkout.Session) {
 }
 
 async function fireWelcomeEmail(email: string, name: string, plan: string) {
-  const webhookUrl = process.env.MAKE_WELCOME_WEBHOOK_URL;
+  const webhookUrl = process.env.MAKE_WELCOME_WEBHOOK_URL ?? '';
   if (!webhookUrl) return;
   try {
     await fetch(webhookUrl, {

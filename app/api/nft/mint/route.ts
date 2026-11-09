@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { mintCertificateNFT, lookupByTruemark } from '@/lib/nft-service'
 import { NFT_CONTRACT_ADDRESS } from '@/lib/contract'
 
+
+export const dynamic = 'force-dynamic'
 async function getSession() {
   const supabase = await createClient()
   const { data: { session } } = await supabase.auth.getSession()

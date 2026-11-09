@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { writeActivityEvent } from '@/lib/activity-store'
 
+
+export const dynamic = 'force-dynamic'
 // Domains that may POST analytics events from the browser
 const CORS_ORIGINS = new Set([
   'https://authichain.com',
@@ -48,12 +50,15 @@ function sanitizeDetails(details: unknown): Record<string, unknown> | undefined 
     return undefined
   }
 
-  const serialized = JSON.stringify(details)
+  const safeDetails = Object.fromEntries(
+    Object.entries(details).filter(([key]) => !['input', 'raw', 'value'].includes(key.toLowerCase())),
+  )
+  const serialized = JSON.stringify(safeDetails)
   if (!serialized || serialized.length > MAX_DETAILS_BYTES) {
     return undefined
   }
 
-  return details as Record<string, unknown>
+  return safeDetails
 }
 
 export async function POST(request: NextRequest) {

@@ -10,7 +10,10 @@
 1. In your Supabase dashboard, go to the SQL Editor
 2. Run the SQL script from `supabase/schema.sql`
 3. Run the migration from `supabase/migrations/add_ai_autoflow_fields.sql`
-3. This will create:
+4. Run `supabase/migrations/20261004000000_activity_events.sql` to enable durable
+   activity history. The activity API requires `SUPABASE_SERVICE_ROLE_KEY` on the
+   server; do not expose this key to the browser.
+5. This will create:
    - `products` table
    - `scans` table
    - Indexes for performance

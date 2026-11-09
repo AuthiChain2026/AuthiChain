@@ -120,5 +120,5 @@ jobs:
       - name: Install Wrangler
         run: npm install --no-save wrangler || npm install -g wrangler
       - name: Deploy
-        run: npx wrangler deploy
+        run: npx wrangler deploy --config wrangler.toml
         continue-on-error: true

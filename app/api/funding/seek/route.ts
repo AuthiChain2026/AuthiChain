@@ -246,3 +246,8 @@ export async function POST(req: NextRequest) {
     timestamp: new Date().toISOString(),
   })
 }
+
+// Vercel Cron calls via GET — alias to POST handler
+export async function GET(req: NextRequest) {
+  return POST(req)
+}

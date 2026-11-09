@@ -1,5 +1,4 @@
-import { mkdir, readFile, appendFile } from 'fs/promises'
-import path from 'path'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 export type ActivityEvent = {
   type: string
@@ -7,40 +6,59 @@ export type ActivityEvent = {
   details?: Record<string, unknown>
 }
 
-// Use /tmp in serverless environments (Vercel/AWS Lambda) where cwd() is read-only.
-// Fall back to cwd()/.data in local development.
-const DATA_DIR = process.env.VERCEL
-  ? '/tmp/authichain-data'
-  : path.join(process.cwd(), '.data')
-const EVENTS_FILE = path.join(DATA_DIR, 'activity-events.jsonl')
+type ActivityEventRow = {
+  event_type: string
+  occurred_at: string
+  details: Record<string, unknown> | null
+}
 
-export async function writeActivityEvent(event: ActivityEvent) {
-  try {
-    await mkdir(DATA_DIR, { recursive: true })
-    await appendFile(EVENTS_FILE, `${JSON.stringify(event)}\n`, 'utf8')
-  } catch (err) {
-    // Log but do not throw - event logging should never break the request path
-    console.warn('Failed to write activity event:', err)
+let serviceClient: SupabaseClient | null = null
+
+function getServiceClient(): SupabaseClient {
+  if (serviceClient) return serviceClient
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) {
+    throw new Error('Activity history requires Supabase URL and service-role credentials')
+  }
+
+  serviceClient = createClient(url, key, {
+    auth: { persistSession: false },
+  })
+  return serviceClient
+}
+
+export async function writeActivityEvent(event: ActivityEvent): Promise<void> {
+  const { error } = await getServiceClient().from('activity_events').insert({
+    event_type: event.type,
+    occurred_at: event.timestamp,
+    details: event.details ?? null,
+  })
+
+  if (error) {
+    throw new Error(`Failed to persist activity event: ${error.message}`)
   }
 }
 
 export async function readRecentActivityEvents(limit = 100): Promise<ActivityEvent[]> {
-  try {
-    const raw = await readFile(EVENTS_FILE, 'utf8')
-    return raw
-      .split('\n')
-      .filter(Boolean)
-      .map((line) => {
-        try {
-          return JSON.parse(line) as ActivityEvent
-        } catch {
-          return null
-        }
-      })
-      .filter((e): e is ActivityEvent => e !== null)
-      .slice(-limit)
-      .reverse()
-  } catch {
-    return []
+  if (!Number.isInteger(limit) || limit < 1) {
+    throw new Error('Activity history limit must be a positive integer')
   }
+
+  const { data, error } = await getServiceClient()
+    .from('activity_events')
+    .select('event_type, occurred_at, details')
+    .order('occurred_at', { ascending: false })
+    .limit(Math.min(limit, 500))
+
+  if (error) {
+    throw new Error(`Failed to read activity history: ${error.message}`)
+  }
+
+  return ((data ?? []) as ActivityEventRow[]).map((row) => ({
+    type: row.event_type,
+    timestamp: row.occurred_at,
+    ...(row.details ? { details: row.details } : {}),
+  }))
 }

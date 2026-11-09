@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 type ActivityEvent = {
   type: string
   timestamp: string
-  details?: Record<string, unknown>
 }
 
 async function fetchEvents(): Promise<ActivityEvent[]> {
@@ -58,9 +57,6 @@ export default function ActivityPage() {
           <li key={`${event.timestamp}-${idx}`} className="border rounded-md p-3">
             <p className="font-medium">{event.type}</p>
             <p className="text-sm text-muted-foreground">{new Date(event.timestamp).toLocaleString()}</p>
-            {event.details && (
-              <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-x-auto">{JSON.stringify(event.details, null, 2)}</pre>
-            )}
           </li>
         ))}
       </ul>
