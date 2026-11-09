@@ -46,3 +46,7 @@ build.log
 final-build.log
 workers/license-issuer/node_modules/
 workers/license-issuer/package-lock.json
+
+.wrangler/
+worker-configuration.d.ts
+
